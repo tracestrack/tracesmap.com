@@ -5,9 +5,25 @@ import './App.css';
 
 function App() {
 
-  const handleClick = () => {
+  const handleSearch = () => {
     window.addLayer("fr-name");
   };
+
+  const handleLanguage = (e) => {
+    let t = e.target.text;
+    let v = langs.filter(v => v[0] == t)[0][1]
+    window.setLanguageLayer(v);
+  };
+
+  const langs = [["Local", "_-name"],
+                 ["Arabian", "ar-name"],
+                 ["Dutch", "nl-name"],
+                 ["English", "en-name"],
+                 ["French", "fr-name"],
+                 ["German", "de-name"],
+                 ["Russian", "ru-name"],
+                 ["Simplified Chinese", "zh-hans-name"],
+                 ["Traditional Chinese", "zh-hant-name"]];
 
   return (
     <div>
@@ -19,20 +35,16 @@ function App() {
 
         <ButtonGroup className="mr-2" aria-label="First group">
 
-          <Button variant="outline-secondary" onClick={handleClick}>Search</Button>
+          <Button variant="outline-secondary" onClick={handleSearch}>Search</Button>
 
           <DropdownButton
             as={ButtonGroup}
             key={1}
             title="Language"
           >
-            <Dropdown.Item eventKey="1">Action</Dropdown.Item>
-            <Dropdown.Item eventKey="2">Another action</Dropdown.Item>
-            <Dropdown.Item eventKey="3" active>
-              Active Item
-            </Dropdown.Item>
-            <Dropdown.Divider />
-            <Dropdown.Item eventKey="4">Separated link</Dropdown.Item>
+
+            {langs.map(k => <Dropdown.Item eventKey={k[1]} onClick={handleLanguage}>{k[0]}</Dropdown.Item>)}
+
           </DropdownButton>
 
           <Button variant="outline-secondary">About</Button>
