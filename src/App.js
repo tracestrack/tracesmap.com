@@ -10,6 +10,7 @@ const langs = [["Local", "_-name"],
                ["English", "en-name"],
                ["French", "fr-name"],
                ["German", "de-name"],
+               ["Japanese", "ja-name"],
                ["Russian", "ru-name"],
                ["Simplified Chinese", "zh-hans-name"],
                ["Traditional Chinese", "zh-hant-name"]];
