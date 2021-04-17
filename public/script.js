@@ -1,11 +1,19 @@
 var button = document.createElement('button');
-button.innerHTML = '●';
+button.innerHTML = 'O';
 
-var handleRotateNorth = function(e) {
+var goToCurrentLocation = function(e) {
   geolocation.setTracking(true);
+  if (lastCoordinate) {
+    let view = map.getView();
+    view.setCenter(lastCoordinate);
+    view.setZoom(18);
+  }
+  else {
+    needsSetCenter = true;
+  }
 };
 
-button.addEventListener('click', handleRotateNorth, false);
+button.addEventListener('click', goToCurrentLocation, false);
 
 var element = document.createElement('div');
 element.className = 'current_loc ol-control';
@@ -67,10 +75,10 @@ var map = new ol.Map({
       source: new ol.source.XYZ({
         attributions: [
           '© OpenStreetMap contributors'],
-        opaque: false,
+        opaque: true,
         url: 'https://tiles.tracestrack.com/base/{z}/{x}/{y}.png',
         crossOrigin: null,
-        tilePixelRatio: 2,
+        tilePixelRatio: 1,
       }),
     }),
   ],
@@ -115,12 +123,6 @@ function setLanguageLayer(label_name) {
 
 setLanguageLayer("en-name");
 
-
-function wrapLon(value) {
-  var worlds = Math.floor((value + 180) / 360);
-  return value - worlds * 360;
-}
-
 function setURL(lonlat, zoom) {
   let qstr = zoom.toFixed(0) + "/" + lonlat[1].toFixed(4) + "/" + lonlat[0].toFixed(4)
   window.location.href = "#" + qstr;
@@ -131,20 +133,9 @@ function setURL(lonlat, zoom) {
 function onMoveEnd(evt) {
   var map = evt.map;
   setURL(ol.proj.toLonLat(map.getView().getCenter()), map.getView().getZoom());
-
-  /*
-  var extent = map.getView().calculateExtent(map.getSize());
-  var bottomLeft = ol.proj.toLonLat(ol.extent.getBottomLeft(extent));
-  var topRight = ol.proj.toLonLat(ol.extent.getTopRight(extent));
-  console.log(wrapLon(bottomLeft[0]));
-  console.log(bottomLeft[1]);
-  console.log( wrapLon(topRight[0]));
-  console.log(topRight[1]);*/
 }
 
 map.on('moveend', onMoveEnd);
-
-
 
 var accuracyFeature = new ol.Feature();
 geolocation.on('change:accuracyGeometry', function () {
@@ -167,9 +158,20 @@ positionFeature.setStyle(
   })
 );
 
+var lastCoordinate;
+var needsSetCenter = false;
 geolocation.on('change:position', function () {
-  var coordinates = geolocation.getPosition();
+  let coordinates = geolocation.getPosition();
   positionFeature.setGeometry(coordinates ? new ol.geom.Point(coordinates) : null);
+
+  if (needsSetCenter) {
+    let view = map.getView();
+    view.setCenter(coordinates);
+    view.setZoom(18);
+    needsSetCenter = false;
+  }
+
+  lastCoordinate = coordinates;
 });
 
 new ol.layer.Vector({
