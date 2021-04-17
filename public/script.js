@@ -117,9 +117,15 @@ function setLanguageLayer(label_name) {
     }),
   });
   map.addLayer(languageLayer);
+
+  setCookie("lang", label_name, 1000);
 }
 
-setLanguageLayer("en-name");
+if (getCookie("lang") === "") {
+  setCookie("lang", "en-name", 1000);
+}
+
+setLanguageLayer(getCookie("lang"));
 
 function setURL(lonlat, zoom) {
   let qstr = zoom.toFixed(0) + "/" + lonlat[1].toFixed(4) + "/" + lonlat[0].toFixed(4)
