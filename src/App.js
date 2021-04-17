@@ -66,7 +66,7 @@ class App extends Component {
           </ButtonGroup>
         </InputGroup>
 
-        {this.state.showAbout && <AboutPage/>}
+        <AboutPage show={this.state.showAbout} hide={this.handleShowAbout}/>
 
       </div>
     )};

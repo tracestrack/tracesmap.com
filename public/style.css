@@ -1,0 +1,22 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    background: white;
+}
+
+.map {
+    height: calc(100% - 38px);
+    width: 100%;
+}
+
+.top_bar {
+    background: red;
+    z-index: 200;
+    width: 80%;
+}
+
+.current_loc {
+    position: absolute;
+    right: 8px;
+    bottom: 40px;
+}

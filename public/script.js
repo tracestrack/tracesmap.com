@@ -1,3 +1,21 @@
+var button = document.createElement('button');
+button.innerHTML = '●';
+
+var handleRotateNorth = function(e) {
+  geolocation.setTracking(true);
+};
+
+button.addEventListener('click', handleRotateNorth, false);
+
+var element = document.createElement('div');
+element.className = 'current_loc ol-control';
+element.appendChild(button);
+
+var RotateNorthControl = new ol.control.Control({
+    element: element
+});
+
+
 function setCookie(cname, cvalue, exdays) {
   var d = new Date();
   d.setTime(d.getTime() + (exdays*24*60*60*1000));
@@ -21,7 +39,6 @@ function getCookie(cname) {
   return "";
 }
 
-console.log();
 
 var lonlat = [0, 0];
 var zoom = 5;
@@ -64,6 +81,17 @@ var map = new ol.Map({
     constrainResolution: true,
   })
 });
+
+map.addControl(RotateNorthControl);
+
+
+var geolocation = new ol.Geolocation({
+  trackingOptions: {
+    enableHighAccuracy: true,
+  },
+  projection: map.getView().getProjection(),
+});
+
 
 var languageLayer;
 
@@ -115,3 +143,38 @@ function onMoveEnd(evt) {
 }
 
 map.on('moveend', onMoveEnd);
+
+
+
+var accuracyFeature = new ol.Feature();
+geolocation.on('change:accuracyGeometry', function () {
+  accuracyFeature.setGeometry(geolocation.getAccuracyGeometry());
+});
+
+var positionFeature = new ol.Feature();
+positionFeature.setStyle(
+  new ol.style.Style({
+    image: new ol.style.Circle({
+      radius: 6,
+      fill: new ol.style.Fill({
+        color: '#3399CC',
+      }),
+      stroke: new ol.style.Stroke({
+        color: '#fff',
+        width: 2,
+      }),
+    }),
+  })
+);
+
+geolocation.on('change:position', function () {
+  var coordinates = geolocation.getPosition();
+  positionFeature.setGeometry(coordinates ? new ol.geom.Point(coordinates) : null);
+});
+
+new ol.layer.Vector({
+  map: map,
+  source: new ol.source.Vector({
+    features: [accuracyFeature, positionFeature],
+  }),
+});
