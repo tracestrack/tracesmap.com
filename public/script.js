@@ -73,15 +73,15 @@ var map = new ol.Map({
   layers: [
     new ol.layer.Tile({
       source: new ol.source.XYZ({
-        attributions: [
-          '© OpenStreetMap contributors'],
-        opaque: true,
+        attributions: [ol.source.OSM.ATTRIBUTION],
+        opaque: false,
         url: 'https://tiles.tracestrack.com/base/{z}/{x}/{y}.png',
         crossOrigin: null,
-        tilePixelRatio: 1,
+        tilePixelRatio: 2,
       }),
     }),
   ],
+  controls: ol.control.defaults({attribution: false}).extend([new ol.control.Attribution({collapsible: false})]),
   view: new ol.View({
     center: ol.proj.fromLonLat(lonlat),
     zoom: zoom,
@@ -110,8 +110,6 @@ function setLanguageLayer(label_name) {
 
   languageLayer = new ol.layer.Tile({
     source: new ol.source.XYZ({
-      attributions: [
-          '© OpenStreetMap contributors'],
       opaque: false,
       url: 'https://tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png',
       crossOrigin: null,
@@ -174,9 +172,44 @@ geolocation.on('change:position', function () {
   lastCoordinate = coordinates;
 });
 
+
+function transform(extent) {
+  return ol.proj.transformExtent(extent, 'EPSG:4326', 'EPSG:3857');
+}
+
+
+var searchFeature = new ol.Feature();
+searchFeature.setStyle(
+  new ol.style.Style({
+    image: new ol.style.Circle({
+      radius: 10,
+      fill: new ol.style.Fill({
+        color: '#FFFF0099',
+      }),
+      stroke: new ol.style.Stroke({
+        color: '#ff6600cc',
+        width: 4,
+      }),
+    }),
+  })
+);
+
+function showSearchResult(e) {
+
+  let extent = transform([e.boundingbox[2], e.boundingbox[0],
+                          e.boundingbox[3], e.boundingbox[1]]);
+
+  let view = map.getView();
+  view.fit(extent);
+
+
+  searchFeature.setGeometry(new ol.geom.Point(ol.proj.fromLonLat([e.lon, e.lat])));
+}
+
+
 new ol.layer.Vector({
   map: map,
   source: new ol.source.Vector({
-    features: [accuracyFeature, positionFeature],
+    features: [accuracyFeature, positionFeature, searchFeature],
   }),
 });

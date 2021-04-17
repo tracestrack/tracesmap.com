@@ -18,11 +18,11 @@ function AboutPage({show, hide}) {
               <p>
                 Map data: © OpenStreetMap contributors <br />
 
-                Map style: Carto (https://github.com/gravitystorm/openstreetmap-carto) <br />
+                Map style: <a href="https://github.com/gravitystorm/openstreetmap-carto">OpenStreetMap Carto</a><br />
 
-                Brought to you with ❤️ by Qing Cai <br />
+                Search is powered by <a href="https://nominatim.org/">Nominatim</a> <br />
 
-                Map refresh period: 3 to 7 days
+                Map refresh period: 3 to 7 days <br />
 
               </p>
             </Modal.Body>
