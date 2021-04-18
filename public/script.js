@@ -67,18 +67,22 @@ if (qstr !== "") {
 
 var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false});
 
-var map = new ol.Map({
-  target: 'map',
-  interactions: interactions,
-  layers: [
-    new ol.layer.Tile({
-      source: new ol.source.XYZ({
+let base_source = new ol.source.XYZ({
         attributions: [ol.source.OSM.ATTRIBUTION],
         opaque: false,
         url: 'https://tiles.tracestrack.com/base/{z}/{x}/{y}.png',
         crossOrigin: null,
         tilePixelRatio: 2,
-      }),
+});
+
+base_source.on('tileloaderror', function(event) { event.tile.load(); });
+
+var map = new ol.Map({
+  target: 'map',
+  interactions: interactions,
+  layers: [
+    new ol.layer.Tile({
+      source: base_source,
     }),
   ],
   controls: ol.control.defaults({attribution: false}).extend([new ol.control.Attribution({collapsible: false})]),
