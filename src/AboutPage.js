@@ -1,4 +1,5 @@
 import { Modal, Card } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './AboutPage.css';
 
 function AboutPage({show, hide}) {
@@ -15,6 +16,7 @@ function AboutPage({show, hide}) {
               </Modal.Title>
             </Modal.Header>
             <Modal.Body>
+              <h3>Credits</h3>
               <p>
                 Map data: © OpenStreetMap contributors <br />
 
@@ -22,8 +24,21 @@ function AboutPage({show, hide}) {
 
                 Search is powered by <a href="https://nominatim.org/">Nominatim</a> <br />
 
-                Map refresh period: 3 to 7 days <br />
+                Map is powered by <a href="http://openlayers.org">OpenLayers</a> <br/>
 
+                Curated by Qing Cai<br />
+
+              </p>
+
+              <h3>Privacy</h3>
+              <p>
+                We do not harvest or analyze user data in any way. Cookies is used only to save user preferences locally.
+              </p>
+
+
+              <h3>Other information</h3>
+              <p>
+                Map refresh period: 3 to 7 days <br />
               </p>
             </Modal.Body>
           </Modal>);

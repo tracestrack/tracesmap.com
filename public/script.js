@@ -75,7 +75,12 @@ let base_source = new ol.source.XYZ({
         tilePixelRatio: 2,
 });
 
-base_source.on('tileloaderror', function(event) { event.tile.load(); });
+base_source.on('tileloaderror', function(event) {
+  setTimeout(function(){
+    console.log(event);
+    event.tile.load()
+  }, 10000 * Math.random());
+});
 
 var map = new ol.Map({
   target: 'map',

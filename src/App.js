@@ -1,4 +1,4 @@
-import { Button, Dropdown, DropdownButton, ButtonGroup, FormControl, InputGroup } from 'react-bootstrap';
+import { Button, Dropdown, DropdownButton, ButtonGroup, FormControl, InputGroup, Row, Container, Col } from 'react-bootstrap';
 
 import './App.css';
 import AboutPage from './AboutPage.js';
@@ -52,6 +52,13 @@ class App extends Component {
 
   };
 
+  onKeyUp = this.onKeyUp.bind(this);
+  onKeyUp(e) {
+    if (e.charCode === 13) {
+      this.handleSearch();
+    }
+  };
+
   handleLanguage = this.handleLanguage.bind(this);
   handleLanguage(e) {
     let t = e.target.text;
@@ -67,32 +74,49 @@ class App extends Component {
   render() {
     return (
       <div>
-        <InputGroup>
-          <FormControl
-            placeholder="Search a place"
-            aria-describedby="basic-addon2"
-            value={this.state.searchText}
-            onChange={e => this.setState({ searchText: e.target.value })}
-          />
+        <Container>
+          <Row>
+            <Col sm={8}>
 
-          <ButtonGroup className="mr-2" aria-label="First group">
 
-            <Button variant="outline-secondary" onClick={this.handleSearch}>Search</Button>
 
-            <DropdownButton
-              as={ButtonGroup}
-              key={1}
-              title="Language"
-            >
-              {langs.map(k => <Dropdown.Item eventKey={k[1]} onClick={this.handleLanguage}>{k[0]}</Dropdown.Item>)}
-            </DropdownButton>
+              <InputGroup className="search">
+                <FormControl
+                  placeholder="Search a place"
+                  aria-describedby="basic-addon2"
+                  value={this.state.searchText}
+                  onChange={e => this.setState({ searchText: e.target.value }) }
+                  onKeyPress={this.onKeyUp}
+                />
 
-            <Button variant="outline-secondary" onClick={this.handleShowAbout}>About</Button>
-          </ButtonGroup>
-        </InputGroup>
+                <Button variant="outline-secondary" onClick={this.handleSearch}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 18 18">
+   <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+ </svg></Button>
 
-        <AboutPage show={this.state.showAbout} hide={this.handleShowAbout}/>
+              </InputGroup>
 
+            </Col>
+            <Col sm={4}>
+
+              <InputGroup className="top_right">
+                <ButtonGroup className="mr-2" aria-label="First group">
+                  <DropdownButton
+                    as={ButtonGroup}
+                    key={1}
+                    title="Language"
+                  >
+                    {langs.map(k => <Dropdown.Item eventKey={k[1]} onClick={this.handleLanguage}>{k[0]}</Dropdown.Item>)}
+                  </DropdownButton>
+
+                  <Button variant="outline-secondary" onClick={this.handleShowAbout}>About</Button>
+                </ButtonGroup>
+              </InputGroup>
+
+              <AboutPage show={this.state.showAbout} hide={this.handleShowAbout}/>
+            </Col>
+          </Row>
+
+        </Container>
       </div>
     )};
 }
