@@ -20,7 +20,7 @@ element.className = 'current_loc ol-control';
 element.appendChild(button);
 
 var RotateNorthControl = new ol.control.Control({
-    element: element
+  element: element
 });
 
 
@@ -65,19 +65,23 @@ if (qstr !== "") {
   zoom = maploc[0]
 }
 
+function isRetina() {
+  return getCookie("retina") == "true";
+}
+
 var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false});
 
 let base_source = new ol.source.XYZ({
-        attributions: [ol.source.OSM.ATTRIBUTION],
-        opaque: false,
-        url: 'https://tiles.tracestrack.com/base/{z}/{x}/{y}.png',
-        crossOrigin: null,
-        tilePixelRatio: 2,
+  attributions: [ol.source.OSM.ATTRIBUTION],
+  opaque: false,
+  url: 'https://tiles.tracestrack.com/base/{z}/{x}/{y}.png',
+  crossOrigin: null,
+  tilePixelRatio: isRetina() ? 2 : 1
 });
 
 base_source.on('tileloaderror', function(event) {
   setTimeout(function(){
-    console.log(event);
+    console.log("tile error")
     event.tile.load()
   }, 10000 * Math.random());
 });
@@ -87,6 +91,7 @@ var map = new ol.Map({
   interactions: interactions,
   layers: [
     new ol.layer.Tile({
+      preload: Infinity,
       source: base_source,
     }),
   ],
@@ -118,11 +123,12 @@ function setLanguageLayer(label_name) {
   }
 
   languageLayer = new ol.layer.Tile({
+    preload: Infinity,
     source: new ol.source.XYZ({
       opaque: false,
       url: 'https://tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png',
       crossOrigin: null,
-      tilePixelRatio: 2,
+      tilePixelRatio: isRetina() ? 2 : 1
     }),
   });
   map.addLayer(languageLayer);
@@ -135,6 +141,14 @@ if (getCookie("lang") === "") {
 }
 
 setLanguageLayer(getCookie("lang"));
+
+function setRetinaEnabled(ena) {
+  setCookie("retina", ena, 1000);
+
+  if (confirm("It's need to reload the map to take effect. Reload now?")) {
+    location.reload();
+  }
+}
 
 function setURL(lonlat, zoom) {
   let qstr = zoom.toFixed(0) + "/" + lonlat[1].toFixed(4) + "/" + lonlat[0].toFixed(4)
@@ -192,39 +206,62 @@ function transform(extent) {
   return ol.proj.transformExtent(extent, 'EPSG:4326', 'EPSG:3857');
 }
 
+function createSearchFeature(geo) {
+  var searchFeature = new ol.Feature();
+  searchFeature.setStyle(
+    new ol.style.Style({
+      image: new ol.style.Circle({
+        radius: 10,
+        fill: new ol.style.Fill({
+          color: '#FFFF0099',
+        }),
+        stroke: new ol.style.Stroke({
+          color: '#ff6600cc',
+          width: 4,
+        }),
+      }),
+    })
+  );
+  searchFeature.setGeometry(geo);
+  return searchFeature;
+};
 
-var searchFeature = new ol.Feature();
-searchFeature.setStyle(
-  new ol.style.Style({
-    image: new ol.style.Circle({
-      radius: 10,
-      fill: new ol.style.Fill({
-        color: '#FFFF0099',
-      }),
-      stroke: new ol.style.Stroke({
-        color: '#ff6600cc',
-        width: 4,
-      }),
+var searchLayer;
+
+function updateSearchFeatureLayer(features) {
+
+  if (searchLayer) {
+    map.removeLayer(searchLayer);
+  }
+
+  searchLayer = new ol.layer.Vector({
+    source: new ol.source.Vector({
+      features: features,
     }),
-  })
-);
+  });
 
-function showSearchResult(e) {
+  map.addLayer(searchLayer);
 
+}
+
+function showSearchResult(res) {
+
+  let e = res[0];
   let extent = transform([e.boundingbox[2], e.boundingbox[0],
                           e.boundingbox[3], e.boundingbox[1]]);
 
   let view = map.getView();
   view.fit(extent);
 
+  var features = res.map(x => createSearchFeature(new ol.geom.Point(ol.proj.fromLonLat([x.lon, x.lat]))));
 
-  searchFeature.setGeometry(new ol.geom.Point(ol.proj.fromLonLat([e.lon, e.lat])));
+  updateSearchFeatureLayer(features);
 }
 
 
 new ol.layer.Vector({
   map: map,
   source: new ol.source.Vector({
-    features: [accuracyFeature, positionFeature, searchFeature],
+    features: [accuracyFeature, positionFeature],
   }),
 });

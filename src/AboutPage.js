@@ -26,7 +26,7 @@ function AboutPage({show, hide}) {
 
                 Map is powered by <a href="http://openlayers.org">OpenLayers</a> <br/>
 
-                Curated by Qing Cai<br />
+                Curated by Qing Cai (hello (at) tracestrack.com)<br />
 
               </p>
 
