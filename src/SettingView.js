@@ -1,6 +1,9 @@
-import { Modal, Tabs, Tab, ListGroup, Form } from 'react-bootstrap';
+import { Container, Row, Col, Modal, Tabs, Tab, ListGroup, Form, ToggleButton, ToggleButtonGroup } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {useState, useEffect} from "react";
+
+const server = [["Berlin", "a"],
+               ["Los Angeles", "b"]];
 
 const langs = [["Local", "_-name"],
                ["Arabic", "ar-name"],
@@ -30,6 +33,18 @@ function SettingView({show, hide}) {
     setRetinaEnabled(v => !v);
   }
 
+  const handleServerChange = function(e) {
+    window.setServer(e);
+  }
+
+  const getServer = function() {
+    let c = window.getCookie("server");
+    if (c == "a" || c == "b") {
+      return c;
+    }
+    return "a";
+  }
+
   return (<Modal
             show={show}
             onHide={hide}
@@ -52,14 +67,31 @@ function SettingView({show, hide}) {
                   </ListGroup>
                 </Tab>
                 <Tab eventKey="profile" title="Maps">
-                  <h2></h2>
-                  <Form.Check
-                    type="switch"
-                    id="custom-switch"
-                    label="Enable retina (4k) tiles (needs more graphic power)"
-                    checked={retinaEnabled}
-                    onChange={handleRetinaEnabled}
-                  />
+                  <br />
+
+                  <Container>
+                    <Row>
+                      <Col sm={10}>Enable retina (4k) tiles <br /> (needs more graphic power)</Col>
+                      <Col>                  <Form.Check
+                                               type="switch"
+                                               id="custom-switch"
+                                               label=""
+                                               checked={retinaEnabled}
+                                               onChange={handleRetinaEnabled}
+                                             /></Col>
+                    </Row>
+                    <Row>
+                      <Col sm={7}>Tile Server</Col>
+                      <Col>
+                        <ToggleButtonGroup name="radio" defaultValue={getServer()} type="radio" className="mb-2" onChange={handleServerChange}>
+
+                          {server.map(k => <ToggleButton key={k[1]} size="sm" type="radio" variant="light" value={k[1]}>{k[0]}</ToggleButton>)}
+
+                        </ToggleButtonGroup>
+                      </Col>
+
+                    </Row>
+                  </Container>
 
                 </Tab>
               </Tabs>
