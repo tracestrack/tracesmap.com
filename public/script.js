@@ -173,7 +173,32 @@ function setURL(lonlat, zoom) {
 
 function onMoveEnd(evt) {
   var map = evt.map;
-  setURL(ol.proj.toLonLat(map.getView().getCenter()), map.getView().getZoom());
+  let z = map.getView().getZoom();
+  let center = ol.proj.toLonLat(map.getView().getCenter());
+
+  setURL(center, z);
+
+  if (poiLayer) {
+    if (z >= 18) {
+      poiLayer.setVisible(true);
+    }
+    else {
+      poiLayer.setVisible(false);
+    }
+  }
+
+  if (z >= 19) {
+    if (!lastPoiQueryCenter) {
+      postOverpass(center[0], center[1]);
+      return;
+    }
+
+    let dis = calcDis(center[1], center[0], lastPoiQueryCenter[1], lastPoiQueryCenter[0]);
+    console.log(dis);
+    if (dis > 300) {
+      postOverpass(center[0], center[1]);
+    }
+  }
 }
 
 map.on('moveend', onMoveEnd);
@@ -240,6 +265,26 @@ function createSearchFeature(geo) {
   return searchFeature;
 };
 
+function createPoiFeature(geo) {
+  var feature = new ol.Feature();
+  feature.setStyle(
+    new ol.style.Style({
+      image: new ol.style.Circle({
+        radius: 10,
+/*        fill: new ol.style.Fill({
+          color: '#FFFF0099',
+        }),*/
+        stroke: new ol.style.Stroke({
+          color: '#ff6600cc',
+          width: 1,
+        }),
+      }),
+    })
+  );
+  feature.setGeometry(geo);
+  return feature;
+};
+
 var searchLayer;
 
 function updateSearchFeatureLayer(features) {
@@ -273,9 +318,147 @@ function showSearchResult(res) {
 }
 
 
+var poiLayer;
+function updatePoiLayer(features) {
+
+  if (poiLayer) {
+    map.removeLayer(poiLayer);
+  }
+
+  poiLayer = new ol.layer.Vector({
+    source: new ol.source.Vector({
+      features: features,
+    }),
+  });
+
+  map.addLayer(poiLayer);
+}
+
+
+function toRad(Value)
+{
+  return Value * Math.PI / 180;
+}
+
+function calcDis(lat1, lon1, lat2, lon2)
+{
+  var R = 6371; // km
+  var dLat = toRad(lat2-lat1);
+  var dLon = toRad(lon2-lon1);
+  var lat1 = toRad(lat1);
+  var lat2 = toRad(lat2);
+
+  var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  var d = R * c;
+  return d * 1000; // m
+}
+
+var lastPoiQueryCenter;
+
+function postOverpass(lon, lat) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      let json = JSON.parse(this.responseText);
+      console.log(json);
+      showPois(json);
+      lastPoiQueryCenter = [lon, lat];
+    }
+  };
+  xhttp.open("POST", "https://lz4.overpass-api.de/api/interpreter", true);
+  let str = `[out:json][timeout:25];
+(
+  node["tourism"](around: 300, ${lat}, ${lon});
+  node["amenity"="restaurant"](around: 300, ${lat}, ${lon});
+  node["amenity"="pub"](around: 300, ${lat}, ${lon});
+  node["amenity"="bar"](around: 300, ${lat}, ${lon});
+  node["amenity"="cafe"](around: 300, ${lat}, ${lon});
+  node["amenity"="fast_food"](around: 300, ${lat}, ${lon});
+  node["office"](around: 300, ${lat}, ${lon});
+  node["shop"](around: 300, ${lat}, ${lon});
+);
+out center;
+>;`;
+
+  xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded; charset=UTF-8');
+  let data = 'data=' + encodeURIComponent(str);
+  xhttp.send(data);
+}
+
+var poi_map;
+function showPois(res) {
+
+  poi_map = res.elements.map(x => [x.lon, x.lat, x.tags]);
+
+  let features = res.elements.map(x => createPoiFeature(new ol.geom.Point(ol.proj.fromLonLat([x.lon, x.lat]))));
+
+  updatePoiLayer(features);
+}
+
 new ol.layer.Vector({
   map: map,
   source: new ol.source.Vector({
     features: [accuracyFeature, positionFeature],
   }),
+});
+
+
+function closePoi() {
+  document.getElementById("poi").style.display = "none";
+}
+
+map.on("click", function(evt) {
+    var coord = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
+    var lon = coord[0];
+    var lat = coord[1];
+
+  var min_dis = 9999;
+  var res_index;
+  for (i in poi_map) {
+    let k = poi_map[i];
+    var a = k[0] - lon;
+    var b = k[1] - lat;
+    var c = Math.sqrt( a*a + b*b );
+    if (c < min_dis) {
+      min_dis = c;
+      res_index = i
+    }
+  }
+
+
+  function addLine(t, d) {
+    return `<dt class="col-sm-3">${t}</dt>
+  <dd class="col-sm-9 poi_value">${d}</dd>`;
+  }
+
+  const coalesce = (...args) => args.find(_ => ![undefined, null].includes(_));
+
+  if (min_dis < 0.00004) {
+    let tags = poi_map[res_index][2];
+    let name = coalesce(tags.name, "Unnamed");
+    let cat = coalesce(tags['shop'], tags['office'], tags['amenity'], tags['tourism']);
+
+    let latlon = poi_map[res_index][1] + ", " + poi_map[res_index][0];
+
+    var str = `<div class="close"><button type="button" class="btn-close" aria-label="Close" onclick="closePoi()"></button></div>`;
+    str += `<h2>${name}</h2><h4>${cat}</h4><hr /><dl class="row">`
+    if (tags['addr:street']) str += addLine("Address", `${tags['addr:street']}, ${tags['addr:housenumber']}, ${tags['addr:postcode']}`);
+
+    str += addLine("Coordinates", latlon);
+    if (tags['opening_hours']) str += addLine("Opening hours", `${tags.opening_hours.replace(",", "<br />").replace(";", "<br />")}`);
+    if (tags['brand']) str += addLine("Brand", `${tags.brand}`);
+    if (tags['website']) str += addLine("Website", `<a href='${tags.website}'>${tags.website}</a>`);
+    if (tags['email']) str += addLine("Email", `${tags.email}`);
+    if (tags['phone']) str += addLine("Phone", `${tags.phone}`);
+    if (tags['wheelchair']) str += addLine("Wheelchair", `${tags.wheelchair}`);
+
+    str += addLine("Directions", `<a href="https://www.google.com/maps/dir/?api=1&destination=${latlon}">Google Maps</a>`);
+
+    str += `</dl>`;
+
+    document.getElementById("poi").innerHTML = str;
+    document.getElementById("poi").style.display = "block";
+  }
 });

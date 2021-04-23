@@ -20,3 +20,25 @@ html, body {
     right: 8px;
     bottom: 40px;
 }
+
+
+#poi {
+    display: none;
+    position: absolute;
+    left: 0px;
+    top: 110px;
+    width: 400px;
+    background: white;
+    border: 1px solid gray;
+    padding: 10px;
+}
+
+#poi close{
+    float: right;
+    width: 20px;
+    height: 20px;
+}
+
+.poi_value {
+    word-wrap: break-word; /* Internet Explorer 5.5+ */
+}

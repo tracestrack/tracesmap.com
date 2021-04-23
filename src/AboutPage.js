@@ -38,7 +38,7 @@ function AboutPage({show, hide}) {
 
               <h3>Other information</h3>
               <p>
-                Map refresh period: 3 to 7 days <br />
+                Map refresh period: 1 to 7 days <br />
               </p>
             </Modal.Body>
           </Modal>);

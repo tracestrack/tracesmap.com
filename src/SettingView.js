@@ -62,7 +62,7 @@ function SettingView({show, hide}) {
                 <Tab eventKey="home" title="Language">
                   <ListGroup>
 
-                    {langs.map(k => <ListGroup.Item action key={k[1]} eventKey={k[1]} onClick={handleLanguage} active={k[1] == lang} >{k[0]}</ListGroup.Item>)}
+                    {langs.map(k => <ListGroup.Item size="sm" action key={k[1]} eventKey={k[1]} onClick={handleLanguage} active={k[1] == lang} >{k[0]}</ListGroup.Item>)}
 
                   </ListGroup>
                 </Tab>
