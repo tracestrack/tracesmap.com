@@ -1,3 +1,5 @@
+const coalesce = (...args) => args.find(_ => ![undefined, null].includes(_));
+
 var button = document.createElement('button');
 button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-fill" viewBox="0 0 16 16">  <path fill-rule="evenodd" d="M4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999zm2.493 8.574a.5.5 0 0 1-.411.575c-.712.118-1.28.295-1.655.493a1.319 1.319 0 0 0-.37.265.301.301 0 0 0-.057.09V14l.002.008a.147.147 0 0 0 .016.033.617.617 0 0 0 .145.15c.165.13.435.27.813.395.751.25 1.82.414 3.024.414s2.273-.163 3.024-.414c.378-.126.648-.265.813-.395a.619.619 0 0 0 .146-.15.148.148 0 0 0 .015-.033L12 14v-.004a.301.301 0 0 0-.057-.09 1.318 1.318 0 0 0-.37-.264c-.376-.198-.943-.375-1.655-.493a.5.5 0 1 1 .164-.986c.77.127 1.452.328 1.957.594C12.5 13 13 13.4 13 14c0 .426-.26.752-.544.977-.29.228-.68.413-1.116.558-.878.293-2.059.465-3.34.465-1.281 0-2.462-.172-3.34-.465-.436-.145-.826-.33-1.116-.558C3.26 14.752 3 14.426 3 14c0-.599.5-1 .961-1.243.505-.266 1.187-.467 1.957-.594a.5.5 0 0 1 .575.411z"/></svg>';
 
@@ -187,7 +189,7 @@ function onMoveEnd(evt) {
     }
   }
 
-  if (z >= 19) {
+  if (z == 19) {
     if (!lastPoiQueryCenter) {
       postOverpass(center[0], center[1]);
       return;
@@ -359,25 +361,26 @@ var lastPoiQueryCenter;
 
 function postOverpass(lon, lat) {
   var xhttp = new XMLHttpRequest();
+
+  lastPoiQueryCenter = [lon, lat];
   xhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      let json = JSON.parse(this.responseText);
-      console.log(json);
-      showPois(json);
-      lastPoiQueryCenter = [lon, lat];
+    if (this.readyState == 4) {
+      if (this.status == 200) {
+        let json = JSON.parse(this.responseText);
+        showPois(json);
+      }
+      else {
+        lastPoiQueryCenter = null;
+      }
     }
   };
   xhttp.open("POST", "https://lz4.overpass-api.de/api/interpreter", true);
-  let str = `[out:json][timeout:25];
+  let str = `[out:json][timeout:5];
 (
-  node["tourism"](around: 300, ${lat}, ${lon});
-  node["amenity"="restaurant"](around: 300, ${lat}, ${lon});
-  node["amenity"="pub"](around: 300, ${lat}, ${lon});
-  node["amenity"="bar"](around: 300, ${lat}, ${lon});
-  node["amenity"="cafe"](around: 300, ${lat}, ${lon});
-  node["amenity"="fast_food"](around: 300, ${lat}, ${lon});
-  node["office"](around: 300, ${lat}, ${lon});
-  node["shop"](around: 300, ${lat}, ${lon});
+  nw["tourism"](around: 300, ${lat}, ${lon});
+  nw["amenity"](around: 300, ${lat}, ${lon});
+  nw["office"](around: 300, ${lat}, ${lon});
+  nw["shop"](around: 300, ${lat}, ${lon});
 );
 out center;
 >;`;
@@ -390,9 +393,11 @@ out center;
 var poi_map;
 function showPois(res) {
 
-  poi_map = res.elements.map(x => [x.lon, x.lat, x.tags]);
+  console.log(res);
 
-  let features = res.elements.map(x => createPoiFeature(new ol.geom.Point(ol.proj.fromLonLat([x.lon, x.lat]))));
+  poi_map = res.elements.map(x => [x["center"] ? x["center"]["lon"] : x.lon, x["center"] ? x["center"]["lat"] : x.lat, x.tags]);
+
+  let features = poi_map.map(x => createPoiFeature(new ol.geom.Point(ol.proj.fromLonLat([x[0], x[1]]))));
 
   updatePoiLayer(features);
 }
@@ -433,26 +438,25 @@ map.on("click", function(evt) {
   <dd class="col-sm-9 poi_value">${d}</dd>`;
   }
 
-  const coalesce = (...args) => args.find(_ => ![undefined, null].includes(_));
-
   if (min_dis < 0.00004) {
     let tags = poi_map[res_index][2];
     let name = coalesce(tags.name, "Unnamed");
-    let cat = coalesce(tags['shop'], tags['office'], tags['amenity'], tags['tourism']);
+    let cat = coalesce(tags['shop'], tags['office'], tags['amenity'], tags['tourism']).replace("_", " ");
 
     let latlon = poi_map[res_index][1] + ", " + poi_map[res_index][0];
 
     var str = `<div class="close"><button type="button" class="btn-close" aria-label="Close" onclick="closePoi()"></button></div>`;
     str += `<h2>${name}</h2><h4>${cat}</h4><hr /><dl class="row">`
-    if (tags['addr:street']) str += addLine("Address", `${tags['addr:street']}, ${tags['addr:housenumber']}, ${tags['addr:postcode']}`);
+    if (tags['addr:street']) str += addLine("Address", (tags['addr:street'] ?? '') +" "+ (tags['addr:housenumber'] ?? '') +" "+ (tags['addr:postcode'] ?? ""));
 
     str += addLine("Coordinates", latlon);
-    if (tags['opening_hours']) str += addLine("Opening hours", `${tags.opening_hours.replace(",", "<br />").replace(";", "<br />")}`);
+    if (tags['opening_hours']) str += addLine("Opening hours", `${tags.opening_hours.replace(/,|;/gi, "<br />")}`);
     if (tags['brand']) str += addLine("Brand", `${tags.brand}`);
     if (tags['website']) str += addLine("Website", `<a href='${tags.website}'>${tags.website}</a>`);
     if (tags['email']) str += addLine("Email", `${tags.email}`);
     if (tags['phone']) str += addLine("Phone", `${tags.phone}`);
     if (tags['wheelchair']) str += addLine("Wheelchair", `${tags.wheelchair}`);
+    if (tags['description']) str += addLine("Description", `${tags.description}`);
 
     str += addLine("Directions", `<a href="https://www.google.com/maps/dir/?api=1&destination=${latlon}">Google Maps</a>`);
 
