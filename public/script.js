@@ -82,7 +82,10 @@ subserver = '';
 
 let base_source = new ol.source.XYZ({
   attributions: [ol.source.OSM.ATTRIBUTION],
-  opaque: false,
+  opaque: true,
+  imageSmoothing: false,
+  cacheSize: 1000,
+  transition: 0,
   url: 'https://' + subserver + 'tiles.tracestrack.com/base/{z}/{x}/{y}.png',
   crossOrigin: null,
   tilePixelRatio: isRetina() ? 2 : 1
@@ -98,6 +101,7 @@ base_source.on('tileloaderror', function(event) {
 var map = new ol.Map({
   target: 'map',
   interactions: interactions,
+  maxTilesLoading: 8,
   layers: [
     new ol.layer.Tile({
       preload: Infinity,
@@ -134,6 +138,9 @@ function setLanguageLayer(label_name) {
     preload: Infinity,
     source: new ol.source.XYZ({
       opaque: false,
+      imageSmoothing: false,
+      cacheSize: 1000,
+      transition: 0,
       url: 'https://' + subserver  + 'tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png',
       crossOrigin: null,
       tilePixelRatio: isRetina() ? 2 : 1
@@ -458,7 +465,18 @@ map.on("click", function(evt) {
     if (tags['wheelchair']) str += addLine("Wheelchair", `${tags.wheelchair}`);
     if (tags['description']) str += addLine("Description", `${tags.description}`);
 
-    str += addLine("Directions", `<a href="https://www.google.com/maps/dir/?api=1&destination=${latlon}">Google Maps</a>`);
+    function createNavigationLink(name, url, latlon) {
+      let u = url.replace("LATLON", latlon);
+      return `<li><a href="${u}">${name}</a></li>`;
+    }
+
+    let navlinks = [
+      "<ul class='list-unstyled'>",
+      createNavigationLink("Google Maps", "https://www.google.com/maps/dir/?api=1&destination=LATLON", latlon),
+      createNavigationLink("Waze", "https://www.waze.com/ul?ll=LATLON&navigate=yes", latlon),
+      "</ul>"
+    ];
+    str += addLine("Directions", navlinks.join(""));
 
     str += `</dl>`;
 

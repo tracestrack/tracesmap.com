@@ -33,6 +33,10 @@ html, body {
     padding: 10px;
 }
 
+@media screen and (max-width: 760px){
+    #poi { width: 100vw;}
+}
+
 #poi close{
     float: right;
     width: 20px;
