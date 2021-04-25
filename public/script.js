@@ -117,16 +117,16 @@ base_source.on('tileloaderror', function(event) {
   }, 10000 * Math.random());
 });
 
+let base_layer = new ol.layer.Tile({
+      preload: Infinity,
+      source: base_source,
+    })
+
 var map = new ol.Map({
   target: 'map',
   interactions: interactions,
   maxTilesLoading: 8,
-  layers: [
-    new ol.layer.Tile({
-      preload: Infinity,
-      source: base_source,
-    }),
-  ],
+  layers: [base_layer],
   controls: [new ol.control.Attribution({collapsible: true})],
   view: new ol.View({
     center: ol.proj.fromLonLat(lonlat),
@@ -221,7 +221,7 @@ function onMoveEnd(evt) {
     }
   }
 
-  if (z == 19) {
+  if (z >= 18) {
     if (!lastPoiQueryCenter) {
       postOverpass(center[0], center[1]);
       return;
@@ -510,7 +510,7 @@ function showPoi(e) {
   let name = coalesce(tags.name, "Unnamed");
   let cat = coalesce(tags['shop'], tags['office'], tags['amenity'], tags['tourism']).replace(/_/g, " ");
 
-  let latlon = [lon, lat].join(", ");
+  let latlon = [lat, lon].join(", ");
 
   var str = `<div class="close"><button type="button" class="btn-close" aria-label="Close" onclick="closePoi()"></button></div>`;
   str += `<h2>${name}</h2><h4>${cat}</h4><hr /><dl class="row">`
@@ -581,5 +581,5 @@ function copyPermURL() {
   document.execCommand("copy");
 
   /* Alert the copied text */
-  alert("Copied the text: " + copyText.value);
+  alert("URL copied");
 }
