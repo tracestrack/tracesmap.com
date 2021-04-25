@@ -470,6 +470,14 @@ function updateURLPoiId(id) {
 }
 
 map.on("click", function(evt) {
+  var hit = this.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+    return true;
+  });
+  if (!hit) {
+    closePoi();
+    return;
+  }
+
   var coord = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
   var lon = coord[0];
   var lat = coord[1];
@@ -487,14 +495,11 @@ map.on("click", function(evt) {
     }
   }
 
+  let id = poi_map[res_index][3];
 
-  if (min_dis < 0.00004) {
-    let tags = poi_map[res_index][2];
-    let id = poi_map[res_index][3];
+  updateURLPoiId(id);
+  showPoi(poi_map[res_index]);
 
-    updateURLPoiId(id);
-    showPoi(poi_map[res_index]);
-  }
 });
 
 function showPoi(e) {
