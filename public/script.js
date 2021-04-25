@@ -218,6 +218,17 @@ function onMoveStart(evt) {
 
 map.on('movestart', onMoveStart);
 
+map.on("pointermove", function (evt) {
+    var hit = this.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+        return true;
+    });
+    if (hit) {
+        this.getTargetElement().style.cursor = 'pointer';
+    } else {
+        this.getTargetElement().style.cursor = '';
+    }
+});
+
 var accuracyFeature = new ol.Feature();
 geolocation.on('change:accuracyGeometry', function () {
   accuracyFeature.setGeometry(geolocation.getAccuracyGeometry());
@@ -286,9 +297,9 @@ function createPoiFeature(geo) {
     new ol.style.Style({
       image: new ol.style.Circle({
         radius: 10,
-/*        fill: new ol.style.Fill({
-          color: '#FFFF0099',
-        }),*/
+        fill: new ol.style.Fill({
+          color: '#FFFF0011',
+        }),
         stroke: new ol.style.Stroke({
           color: '#ff6600cc',
           width: 1,
@@ -464,7 +475,7 @@ map.on("click", function(evt) {
     if (tags['opening_hours']) str += addLine("Opening hours", `${tags.opening_hours.replace(/,|;/gi, "<br />")}`);
     if (tags['cuisine']) str += addLine("Cuisine", `${tags.cuisine}`);
     if (tags['brand']) str += addLine("Brand", `${tags.brand}`);
-    if (tags['operator']) str += addLine("Phone", `${tags.operator}`);
+    if (tags['operator']) str += addLine("Operator", `${tags.operator}`);
     if (tags['website']) str += addLine("Website", `<a href='${tags.website}'>${tags.website}</a>`);
     if (tags['email']) str += addLine("Email", `${tags.email}`);
     if (tags['phone']) str += addLine("Phone", `${tags.phone}`);
