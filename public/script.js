@@ -550,16 +550,36 @@ function showPoi(e) {
     navlinks.splice(3, 0, createNavigationLink2("Magic Earth", "magicearth://?drive_to&lat=LAT&lon=LON", lat, lon));
     navlinks.splice(3, 0, createNavigationLink("Baidu Maps", "baidumap://map/direction?destination=LATLON&coord_type=wgs84&mode=driving", latlon));
     navlinks.splice(3, 0, createNavigationLink("TomTom Go", "tomtomgo://x-callback-url/navigate?destination=LATLON", latlon));
-
-
-
   }
 
 
   str += addLine("Directions", navlinks.join(""));
 
+  let permURL = window.location.href;
+  str += `<div class="input-group input-group-sm mb-3">
+
+  <input type="text" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled value="${permURL}" id="permanentURL">
+  <div class="input-group-append">
+    <button class="btn btn-outline-secondary" type="button" onclick="copyPermURL()">Copy Link</button>
+  </div>
+</div>`;
+
   str += `</dl>`;
 
   document.getElementById("poi").innerHTML = str;
   document.getElementById("poi").style.display = "block";
+}
+
+function copyPermURL() {
+
+  var copyText = document.getElementById("permanentURL");
+  /* Select the text field */
+  copyText.select();
+  copyText.setSelectionRange(0, 99999); /* For mobile devices */
+
+  /* Copy the text inside the text field */
+  document.execCommand("copy");
+
+  /* Alert the copied text */
+  alert("Copied the text: " + copyText.value);
 }
