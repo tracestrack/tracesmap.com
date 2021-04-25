@@ -83,9 +83,9 @@ subserver = '';
 let base_source = new ol.source.XYZ({
   attributions: [ol.source.OSM.ATTRIBUTION],
   opaque: true,
-  imageSmoothing: false,
-  cacheSize: 1000,
-  transition: 0,
+  imageSmoothing: true,
+  cacheSize: 100,
+  transition: 10,
   url: 'https://' + subserver + 'tiles.tracestrack.com/base/{z}/{x}/{y}.png',
   crossOrigin: null,
   tilePixelRatio: isRetina() ? 2 : 1
@@ -108,7 +108,7 @@ var map = new ol.Map({
       source: base_source,
     }),
   ],
-  controls: ol.control.defaults({attribution: false}).extend([new ol.control.Attribution({collapsible: false})]),
+  controls: [new ol.control.Attribution({collapsible: true})],
   view: new ol.View({
     center: ol.proj.fromLonLat(lonlat),
     zoom: zoom,
@@ -138,8 +138,8 @@ function setLanguageLayer(label_name) {
     preload: Infinity,
     source: new ol.source.XYZ({
       opaque: false,
-      imageSmoothing: false,
-      cacheSize: 1000,
+      imageSmoothing: true,
+      cacheSize: 100,
       transition: 0,
       url: 'https://' + subserver  + 'tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png',
       crossOrigin: null,
@@ -211,6 +211,12 @@ function onMoveEnd(evt) {
 }
 
 map.on('moveend', onMoveEnd);
+
+function onMoveStart(evt) {
+  document.getElementById("poi").style.display = "none";
+}
+
+map.on('movestart', onMoveStart);
 
 var accuracyFeature = new ol.Feature();
 geolocation.on('change:accuracyGeometry', function () {
@@ -343,7 +349,6 @@ function updatePoiLayer(features) {
   map.addLayer(poiLayer);
 }
 
-
 function toRad(Value)
 {
   return Value * Math.PI / 180;
@@ -439,7 +444,6 @@ map.on("click", function(evt) {
     }
   }
 
-
   function addLine(t, d) {
     return `<dt class="col-sm-3">${t}</dt>
   <dd class="col-sm-9 poi_value">${d}</dd>`;
@@ -448,7 +452,7 @@ map.on("click", function(evt) {
   if (min_dis < 0.00004) {
     let tags = poi_map[res_index][2];
     let name = coalesce(tags.name, "Unnamed");
-    let cat = coalesce(tags['shop'], tags['office'], tags['amenity'], tags['tourism']).replace("_", " ");
+    let cat = coalesce(tags['shop'], tags['office'], tags['amenity'], tags['tourism']).replace(/_/g, " ");
 
     let latlon = poi_map[res_index][1] + ", " + poi_map[res_index][0];
 
@@ -458,10 +462,14 @@ map.on("click", function(evt) {
 
     str += addLine("Coordinates", latlon);
     if (tags['opening_hours']) str += addLine("Opening hours", `${tags.opening_hours.replace(/,|;/gi, "<br />")}`);
+    if (tags['cuisine']) str += addLine("Cuisine", `${tags.cuisine}`);
     if (tags['brand']) str += addLine("Brand", `${tags.brand}`);
+    if (tags['operator']) str += addLine("Phone", `${tags.operator}`);
     if (tags['website']) str += addLine("Website", `<a href='${tags.website}'>${tags.website}</a>`);
     if (tags['email']) str += addLine("Email", `${tags.email}`);
     if (tags['phone']) str += addLine("Phone", `${tags.phone}`);
+
+
     if (tags['wheelchair']) str += addLine("Wheelchair", `${tags.wheelchair}`);
     if (tags['description']) str += addLine("Description", `${tags.description}`);
 

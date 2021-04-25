@@ -16,7 +16,7 @@ function AboutPage({show, hide}) {
               </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              <h3>Credits</h3>
+              <h3>Acknowledgement</h3>
               <p>
                 Map data: © OpenStreetMap contributors <br />
 
@@ -24,9 +24,11 @@ function AboutPage({show, hide}) {
 
                 Search is powered by <a href="https://nominatim.org/">Nominatim</a> <br />
 
-                Map is powered by <a href="http://openlayers.org">OpenLayers</a> <br/>
+                Map framework is powered by <a href="http://openlayers.org">OpenLayers</a> <br/>
 
-                Curated by Qing Cai (hello (at) tracestrack.com)<br />
+                Dynamic data is powered by <a href="http://overpass-api.de">Overpass API</a> <br/>
+
+                Maintainer: Qing Cai [hello (at) tracestrack.com]<br />
 
               </p>
 
