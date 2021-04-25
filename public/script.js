@@ -1,3 +1,16 @@
+function iOS() {
+  return [
+    'iPad Simulator',
+    'iPhone Simulator',
+    'iPod Simulator',
+    'iPad',
+    'iPhone',
+    'iPod'
+  ].includes(navigator.platform)
+  // iPad on iOS 13 detection
+    || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+}
+
 const coalesce = (...args) => args.find(_ => ![undefined, null].includes(_));
 
 var button = document.createElement('button');
@@ -57,12 +70,18 @@ if (getCookie("server")) {
 var lonlat = [0, 0];
 var zoom = 5;
 var qstr = "";
-
-if (window.location.href.indexOf("#") > 0) {
+var selectedPoiId;
+if (window.location.href.indexOf("#") > -1) {
   qstr = window.location.href.split("#")[1];
 }
 else {
   qstr = getCookie("qstr");
+}
+
+if (qstr.indexOf("!") > -1) {
+  let arr = qstr.split("!");
+  qstr = arr[0];
+  selectedPoiId = arr[1];
 }
 
 if (qstr !== "") {
@@ -175,7 +194,13 @@ function setServer(s) {
 
 function setURL(lonlat, zoom) {
   let qstr = zoom.toFixed(0) + "/" + lonlat[1].toFixed(4) + "/" + lonlat[0].toFixed(4)
-  window.location.href = "#" + qstr;
+
+  var appending = "";
+  if (selectedPoiId) {
+    appending = "!" + selectedPoiId;
+  }
+
+  window.location.href = "#" + qstr + appending;
 
   setCookie("qstr", qstr, 1000);
 }
@@ -212,21 +237,15 @@ function onMoveEnd(evt) {
 
 map.on('moveend', onMoveEnd);
 
-function onMoveStart(evt) {
-  document.getElementById("poi").style.display = "none";
-}
-
-map.on('movestart', onMoveStart);
-
 map.on("pointermove", function (evt) {
-    var hit = this.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
-        return true;
-    });
-    if (hit) {
-        this.getTargetElement().style.cursor = 'pointer';
-    } else {
-        this.getTargetElement().style.cursor = '';
-    }
+  var hit = this.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+    return true;
+  });
+  if (hit) {
+    this.getTargetElement().style.cursor = 'pointer';
+  } else {
+    this.getTargetElement().style.cursor = '';
+  }
 });
 
 var accuracyFeature = new ol.Feature();
@@ -400,7 +419,7 @@ function postOverpass(lon, lat) {
   xhttp.open("POST", "https://lz4.overpass-api.de/api/interpreter", true);
   let str = `[out:json][timeout:5];
 (
-  nw["tourism"](around: 300, ${lat}, ${lon});
+  nwr["tourism"](around: 300, ${lat}, ${lon});
   nw["amenity"](around: 300, ${lat}, ${lon});
   nw["office"](around: 300, ${lat}, ${lon});
   nw["shop"](around: 300, ${lat}, ${lon});
@@ -418,11 +437,17 @@ function showPois(res) {
 
   console.log(res);
 
-  poi_map = res.elements.map(x => [x["center"] ? x["center"]["lon"] : x.lon, x["center"] ? x["center"]["lat"] : x.lat, x.tags]);
+  poi_map = res.elements.map(x => [x["center"] ? x["center"]["lon"] : x.lon, x["center"] ? x["center"]["lat"] : x.lat, x.tags, x.id]);
 
   let features = poi_map.map(x => createPoiFeature(new ol.geom.Point(ol.proj.fromLonLat([x[0], x[1]]))));
 
   updatePoiLayer(features);
+
+  if (selectedPoiId) {
+    let found = poi_map.filter(x => x[3] == selectedPoiId);
+    showPoi(found[0]);
+    selectedPoiId = null;
+  }
 }
 
 new ol.layer.Vector({
@@ -435,12 +460,19 @@ new ol.layer.Vector({
 
 function closePoi() {
   document.getElementById("poi").style.display = "none";
+  let qstr = getCookie("qstr");
+  window.location.href = "#" + qstr;
+}
+
+function updateURLPoiId(id) {
+  let qstr = getCookie("qstr");
+  window.location.href = "#" + qstr + "!" + id;
 }
 
 map.on("click", function(evt) {
-    var coord = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
-    var lon = coord[0];
-    var lat = coord[1];
+  var coord = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
+  var lon = coord[0];
+  var lat = coord[1];
 
   var min_dis = 9999;
   var res_index;
@@ -455,51 +487,79 @@ map.on("click", function(evt) {
     }
   }
 
+
+  if (min_dis < 0.00004) {
+    let tags = poi_map[res_index][2];
+    let id = poi_map[res_index][3];
+
+    updateURLPoiId(id);
+    showPoi(poi_map[res_index]);
+  }
+});
+
+function showPoi(e) {
+
+  console.log(e);
+  let [lon, lat, tags, id] = e;
+
   function addLine(t, d) {
     return `<dt class="col-sm-3">${t}</dt>
   <dd class="col-sm-9 poi_value">${d}</dd>`;
   }
 
-  if (min_dis < 0.00004) {
-    let tags = poi_map[res_index][2];
-    let name = coalesce(tags.name, "Unnamed");
-    let cat = coalesce(tags['shop'], tags['office'], tags['amenity'], tags['tourism']).replace(/_/g, " ");
+  let name = coalesce(tags.name, "Unnamed");
+  let cat = coalesce(tags['shop'], tags['office'], tags['amenity'], tags['tourism']).replace(/_/g, " ");
 
-    let latlon = poi_map[res_index][1] + ", " + poi_map[res_index][0];
+  let latlon = [lon, lat].join(", ");
 
-    var str = `<div class="close"><button type="button" class="btn-close" aria-label="Close" onclick="closePoi()"></button></div>`;
-    str += `<h2>${name}</h2><h4>${cat}</h4><hr /><dl class="row">`
-    if (tags['addr:street']) str += addLine("Address", (tags['addr:street'] ?? '') +" "+ (tags['addr:housenumber'] ?? '') +" "+ (tags['addr:postcode'] ?? ""));
+  var str = `<div class="close"><button type="button" class="btn-close" aria-label="Close" onclick="closePoi()"></button></div>`;
+  str += `<h2>${name}</h2><h4>${cat}</h4><hr /><dl class="row">`
+  if (tags['addr:street']) str += addLine("Address", (tags['addr:street'] ?? '') +" "+ (tags['addr:housenumber'] ?? '') +" "+ (tags['addr:postcode'] ?? ""));
 
-    str += addLine("Coordinates", latlon);
-    if (tags['opening_hours']) str += addLine("Opening hours", `${tags.opening_hours.replace(/,|;/gi, "<br />")}`);
-    if (tags['cuisine']) str += addLine("Cuisine", `${tags.cuisine}`);
-    if (tags['brand']) str += addLine("Brand", `${tags.brand}`);
-    if (tags['operator']) str += addLine("Operator", `${tags.operator}`);
-    if (tags['website']) str += addLine("Website", `<a href='${tags.website}'>${tags.website}</a>`);
-    if (tags['email']) str += addLine("Email", `${tags.email}`);
-    if (tags['phone']) str += addLine("Phone", `${tags.phone}`);
+  str += addLine("Coordinates", latlon);
+  if (tags['opening_hours']) str += addLine("Opening hours", `${tags.opening_hours.replace(/,|;/gi, "<br />")}`);
+  if (tags['cuisine']) str += addLine("Cuisine", `${tags.cuisine}`);
+  if (tags['brand']) str += addLine("Brand", `${tags.brand}`);
+  if (tags['operator']) str += addLine("Operator", `${tags.operator}`);
+  if (tags['website']) str += addLine("Website", `<a href='${tags.website}'>${tags.website}</a>`);
+  if (tags['email']) str += addLine("Email", `${tags.email}`);
+  if (tags['phone']) str += addLine("Phone", `${tags.phone}`);
 
 
-    if (tags['wheelchair']) str += addLine("Wheelchair", `${tags.wheelchair}`);
-    if (tags['description']) str += addLine("Description", `${tags.description}`);
+  if (tags['wheelchair']) str += addLine("Wheelchair", `${tags.wheelchair}`);
+  if (tags['description']) str += addLine("Description", `${tags.description}`);
 
-    function createNavigationLink(name, url, latlon) {
-      let u = url.replace("LATLON", latlon);
-      return `<li><a href="${u}">${name}</a></li>`;
-    }
-
-    let navlinks = [
-      "<ul class='list-unstyled'>",
-      createNavigationLink("Google Maps", "https://www.google.com/maps/dir/?api=1&destination=LATLON", latlon),
-      createNavigationLink("Waze", "https://www.waze.com/ul?ll=LATLON&navigate=yes", latlon),
-      "</ul>"
-    ];
-    str += addLine("Directions", navlinks.join(""));
-
-    str += `</dl>`;
-
-    document.getElementById("poi").innerHTML = str;
-    document.getElementById("poi").style.display = "block";
+  function createNavigationLink(name, url, latlon) {
+    let u = url.replace("LATLON", latlon);
+    return `<li><a href="${u}">${name}</a></li>`;
   }
-});
+  function createNavigationLink2(name, url, lat, lon) {
+    let u = url.replace("LAT", lat).replace("LON", lon);
+    return `<li><a href="${u}">${name}</a></li>`;
+  }
+
+  let navlinks = [
+    "<ul class='list-unstyled'>",
+    createNavigationLink("Google Maps", "https://www.google.com/maps/dir/?api=1&destination=LATLON", latlon),
+    createNavigationLink("Waze", "https://www.waze.com/ul?ll=LATLON&navigate=yes", latlon),
+    "</ul>"
+  ];
+
+  if (iOS()) {
+    navlinks.splice(3, 0, createNavigationLink2("OsmAnd", "osmandmaps://navigate?lat=LAT&lon=LON", lat, lon));
+    navlinks.splice(3, 0, createNavigationLink2("Magic Earth", "magicearth://?drive_to&lat=LAT&lon=LON", lat, lon));
+    navlinks.splice(3, 0, createNavigationLink("Baidu Maps", "baidumap://map/direction?destination=LATLON&coord_type=wgs84&mode=driving", latlon));
+    navlinks.splice(3, 0, createNavigationLink("TomTom Go", "tomtomgo://x-callback-url/navigate?destination=LATLON", latlon));
+
+
+
+  }
+
+
+  str += addLine("Directions", navlinks.join(""));
+
+  str += `</dl>`;
+
+  document.getElementById("poi").innerHTML = str;
+  document.getElementById("poi").style.display = "block";
+}

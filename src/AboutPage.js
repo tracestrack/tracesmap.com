@@ -1,4 +1,4 @@
-import { Modal, Card } from 'react-bootstrap';
+import { Modal } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './AboutPage.css';
 
