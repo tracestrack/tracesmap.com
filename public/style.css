@@ -33,8 +33,14 @@ html, body {
     padding: 10px;
 }
 
-@media screen and (max-width: 760px){
-    #poi { width: 100vw;}
+@media screen and (max-width: 500px){
+    #poi {
+        top: auto;
+        width: 100vw;
+        bottom: 0px;
+        height: 400px;
+        overflow: scroll;
+    }
 }
 
 #poi close{
