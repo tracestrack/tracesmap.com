@@ -4,15 +4,21 @@ html, body {
     background: white;
 }
 
-.map {
-    height: calc(100% - 38px);
-    width: 100%;
+.top {
+    position: absolute;
+    width: calc(100% - 60px);
+    max-width: 600px;
+    margin: 30px;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 5px;
+    border-radius: 10px;
 }
 
-.top_bar {
-    background: red;
-    z-index: 200;
-    width: 80%;
+.map {
+    height: 100%;
+    width: 100%;
+    filter: saturate(130%);
 }
 
 .current_loc {
@@ -21,25 +27,31 @@ html, body {
     bottom: 40px;
 }
 
-
 #poi {
     display: none;
     position: absolute;
     left: 0px;
     top: 110px;
     width: 400px;
-    background: white;
-    border: 1px solid gray;
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(255, 255, 255, 0.5);
     padding: 10px;
+    border-radius: 6px;
 }
 
 @media screen and (max-width: 500px){
     #poi {
         top: auto;
-        width: 100vw;
+        width: 100%;
         bottom: 0px;
-        height: 400px;
+        height: 450px;
         overflow: scroll;
+        overflow-x: hidden;
+    }
+
+    .top {
+        width: calc(100% - 60px);
+        max-width: none;
     }
 }
 

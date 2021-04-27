@@ -437,12 +437,26 @@ out ids tags center;
   xhttp.send(data);
 }
 
-var poi_map;
+var poi_map = [];
+var poi_ids = new Set();
+
 function showPois(res) {
 
   console.log(res);
 
-  poi_map = res.elements.map(x => [x["center"] ? x["center"]["lon"] : x.lon, x["center"] ? x["center"]["lat"] : x.lat, x.tags, x.id, x.type]);
+  let tmp = res.elements.map(x => [x["center"] ? x["center"]["lon"] : x.lon, x["center"] ? x["center"]["lat"] : x.lat, x.tags, x.id, x.type]);
+
+  for (i in tmp) {
+    let id = tmp[i][3];
+    if (!poi_ids.has(id)) {
+      poi_map.push(tmp[i]);
+      poi_ids.add(id);
+    }
+  }
+
+  if (map.getView().getZoom() < 18) {
+    return;
+  }
 
   let features = poi_map.map(x => createPoiFeature(new ol.geom.Point(ol.proj.fromLonLat([x[0], x[1]]))));
 
