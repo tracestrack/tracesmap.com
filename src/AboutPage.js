@@ -16,29 +16,31 @@ function AboutPage({show, hide}) {
               </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              <h3>Acknowledgement</h3>
-              <p>
-                Map data: © OpenStreetMap contributors <br />
+              <h4>Acknowledgement</h4>
+              <p><small>
+                   Map data: © OpenStreetMap contributors <br />
 
-                Map style: <a href="https://github.com/gravitystorm/openstreetmap-carto">OpenStreetMap Carto</a><br />
+                   Map style: <a href="https://github.com/gravitystorm/openstreetmap-carto">OpenStreetMap Carto</a><br />
 
-                Search is powered by <a href="https://nominatim.org/">Nominatim</a> <br />
+                   Search is powered by <a href="https://nominatim.org/">Nominatim</a> <br />
 
-                Map framework is powered by <a href="http://openlayers.org">OpenLayers</a> <br/>
+                   Map framework is powered by <a href="http://openlayers.org">OpenLayers</a> <br/>
 
-                Dynamic data is powered by <a href="http://overpass-api.de">Overpass API</a> <br/>
+                   Dynamic data is powered by <a href="http://overpass-api.de">Overpass API</a> <br/>
 
-                Maintainer: Qing Cai [hello (at) tracestrack.com]<br />
+                   Maintainer: Qing Cai <br />
 
-              </p>
+                   If you would like to use the map tiles, or have other questions, you are very welcome to contact me at  <b>[hello (at) tracestrack.com]</b>
 
-              <h3>Privacy</h3>
+                 </small>              </p>
+
+              <h4>Privacy</h4>
               <p>
                 We do not harvest or analyze user data in any way. Cookies is used only to save user preferences locally.
               </p>
 
 
-              <h3>Other information</h3>
+              <h4>Other information</h4>
               <p>
                 Map refresh period: 1 to 7 days <br />
               </p>
