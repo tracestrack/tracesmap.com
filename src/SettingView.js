@@ -19,7 +19,7 @@ const langs = [["Local", "_-name"],
 function SettingView({show, hide}) {
 
   const [lang, setLang] = useState(window.getCookie('lang'));
-  const [retinaEnabled, setRetinaEnabled] = useState(window.getCookie('retina') == "true");
+  const [retinaEnabled, setRetinaEnabled] = useState(window.getCookie('retina') !== "false");
 
   const handleLanguage = function (e) {
     let t = e.target.textContent;
@@ -71,7 +71,7 @@ function SettingView({show, hide}) {
 
                   <Container>
                     <Row>
-                      <Col sm={10}>Enable retina (4k) tiles <br /> (needs more graphic power)</Col>
+                      <Col sm={10}>Enable High Resolution Tiles</Col>
                       <Col>                  <Form.Check
                                                type="switch"
                                                id="custom-switch"

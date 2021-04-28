@@ -91,7 +91,7 @@ if (qstr !== "") {
 }
 
 function isRetina() {
-  return getCookie("retina") == "true";
+  return getCookie("retina") !== "false";
 }
 
 var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false});
@@ -104,7 +104,7 @@ let base_source = new ol.source.XYZ({
   opaque: true,
   imageSmoothing: true,
   cacheSize: 100,
-  transition: 10,
+  transition: 200,
   url: 'https://' + subserver + 'tiles.tracestrack.com/base/{z}/{x}/{y}.png',
   crossOrigin: null,
   tilePixelRatio: isRetina() ? 2 : 1
@@ -118,9 +118,9 @@ base_source.on('tileloaderror', function(event) {
 });
 
 let base_layer = new ol.layer.Tile({
-      preload: Infinity,
-      source: base_source,
-    })
+  preload: Infinity,
+  source: base_source,
+})
 
 var map = new ol.Map({
   target: 'map',
@@ -159,7 +159,7 @@ function setLanguageLayer(label_name) {
       opaque: false,
       imageSmoothing: true,
       cacheSize: 100,
-      transition: 0,
+      transition: 100,
       url: 'https://' + subserver  + 'tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png',
       crossOrigin: null,
       tilePixelRatio: isRetina() ? 2 : 1
@@ -228,7 +228,6 @@ function onMoveEnd(evt) {
     }
 
     let dis = calcDis(center[1], center[0], lastPoiQueryCenter[1], lastPoiQueryCenter[0]);
-    console.log(dis);
     if (dis > 300) {
       postOverpass(center[0], center[1]);
     }
@@ -237,14 +236,28 @@ function onMoveEnd(evt) {
 
 map.on('moveend', onMoveEnd);
 
+var prevFeature;
 map.on("pointermove", function (evt) {
   var hit = this.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+    console.log(feature.getProperties());
+    if (feature.getProperties().name == "poi") {
+      if (prevFeature) {
+        prevFeature.setStyle(POI_NORMAL_STYLE);
+      }
+
+      feature.setStyle(POI_HOVER_STYLE);
+      prevFeature = feature;
+    }
     return true;
   });
   if (hit) {
     this.getTargetElement().style.cursor = 'pointer';
   } else {
     this.getTargetElement().style.cursor = '';
+    if (prevFeature) {
+      prevFeature.setStyle(POI_NORMAL_STYLE);
+      prevFeature = null;
+    }
   }
 });
 
@@ -291,7 +304,7 @@ function transform(extent) {
 }
 
 function createSearchFeature(geo) {
-  var searchFeature = new ol.Feature();
+  var searchFeature = new ol.Feature({name: "search"});
   searchFeature.setStyle(
     new ol.style.Style({
       image: new ol.style.Circle({
@@ -310,30 +323,42 @@ function createSearchFeature(geo) {
   return searchFeature;
 };
 
-function createPoiFeature(geo) {
-  var feature = new ol.Feature();
-  feature.setStyle(
-    new ol.style.Style({
-      image: new ol.style.Circle({
-        radius: 10,
-        fill: new ol.style.Fill({
-          color: '#FFFF0011',
-        }),
-        stroke: new ol.style.Stroke({
-          color: '#ff6600cc',
-          width: 1,
-        }),
-      }),
-    })
-  );
+let POI_HOVER_STYLE = new ol.style.Style({
+  image: new ol.style.Circle({
+    radius: 11,
+    fill: new ol.style.Fill({
+      color: '#FFFFee11',
+    }),
+    stroke: new ol.style.Stroke({
+      color: '#ffffffcc',
+      width: 4,
+    }),
+  }),
+});
+let POI_NORMAL_STYLE = new ol.style.Style({
+  image: new ol.style.Circle({
+    radius: 11,
+    fill: new ol.style.Fill({
+      color: '#FFFF0011',
+    }),
+    stroke: new ol.style.Stroke({
+      color: '#ffffffcc',
+      width: 2,
+    }),
+  }),
+});
+
+function createPoiFeature(geo, id) {
+  var feature = new ol.Feature({name: "poi", id: id});
+  feature.setStyle(POI_NORMAL_STYLE);
   feature.setGeometry(geo);
+
   return feature;
 };
 
 var searchLayer;
 
 function updateSearchFeatureLayer(features) {
-
   if (searchLayer) {
     map.removeLayer(searchLayer);
   }
@@ -345,7 +370,6 @@ function updateSearchFeatureLayer(features) {
   });
 
   map.addLayer(searchLayer);
-
 }
 
 function showSearchResult(res) {
@@ -358,14 +382,11 @@ function showSearchResult(res) {
   view.fit(extent);
 
   var features = res.map(x => createSearchFeature(new ol.geom.Point(ol.proj.fromLonLat([x.lon, x.lat]))));
-
   updateSearchFeatureLayer(features);
 }
 
-
 var poiLayer;
 function updatePoiLayer(features) {
-
   if (poiLayer) {
     map.removeLayer(poiLayer);
   }
@@ -373,7 +394,7 @@ function updatePoiLayer(features) {
   poiLayer = new ol.layer.Vector({
     source: new ol.source.Vector({
       features: features,
-    }),
+    })
   });
 
   map.addLayer(poiLayer);
@@ -423,11 +444,11 @@ function postOverpass(lon, lat) {
   xhttp.open("POST", url, true);
   let str = `[out:json][timeout:5];
 (
-  nwr["tourism"](around: 300, ${lat}, ${lon});
-  nw["leisure"](around: 300, ${lat}, ${lon});
-  nwr["amenity"]["amenity"!~"bench|waste_basket"](around: 300, ${lat}, ${lon});
-  nw["office"](around: 300, ${lat}, ${lon});
-  nw["shop"](around: 300, ${lat}, ${lon});
+  nwr["tourism"]["name"](around: 300, ${lat}, ${lon});
+  nw["leisure"]["name"](around: 300, ${lat}, ${lon});
+  nwr["amenity"]["name"](around: 300, ${lat}, ${lon});
+  nw["office"]["name"](around: 300, ${lat}, ${lon});
+  nw["shop"]["name"](around: 300, ${lat}, ${lon});
 );
 out ids tags center;
 >;`;
@@ -438,7 +459,7 @@ out ids tags center;
 }
 
 var poi_map = [];
-var poi_ids = new Set();
+var poi_ids = new Map();
 
 function showPois(res) {
 
@@ -450,7 +471,7 @@ function showPois(res) {
     let id = tmp[i][3];
     if (!poi_ids.has(id)) {
       poi_map.push(tmp[i]);
-      poi_ids.add(id);
+      poi_ids.set(id, tmp[i]);
     }
   }
 
@@ -458,7 +479,7 @@ function showPois(res) {
     return;
   }
 
-  let features = poi_map.map(x => createPoiFeature(new ol.geom.Point(ol.proj.fromLonLat([x[0], x[1]]))));
+  let features = poi_map.map(x => createPoiFeature(new ol.geom.Point(ol.proj.fromLonLat([x[0], x[1]])), x[3]));
 
   updatePoiLayer(features);
 
@@ -489,41 +510,27 @@ function updateURLPoiId(id) {
 }
 
 map.on("click", function(evt) {
-  var hit = this.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
-    return true;
-  });
-  if (!hit) {
-    closePoi();
-    return;
-  }
-
-  var coord = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
-  var lon = coord[0];
-  var lat = coord[1];
-
-  var min_dis = 9999;
-  var res_index;
-  for (i in poi_map) {
-    let k = poi_map[i];
-    var a = k[0] - lon;
-    var b = k[1] - lat;
-    var c = Math.sqrt( a*a + b*b );
-    if (c < min_dis) {
-      min_dis = c;
-      res_index = i
+  var found = false
+  this.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+    if (feature.getProperties().name != "poi") {
+      closePoi();
+      return;
     }
+
+    let id = feature.getProperties().id;
+    updateURLPoiId(id);
+
+    let r = poi_map.filter(x => x[3] == id);
+    showPoi(r[0]);
+    found = true;
+  });
+  if (!found) {
+    closePoi();
   }
-
-  let id = poi_map[res_index][3];
-
-  updateURLPoiId(id);
-  showPoi(poi_map[res_index]);
-
 });
 
 function showPoi(e) {
 
-  console.log(e);
   let [lon, lat, tags, id, type] = e;
 
   function addLine(t, d) {

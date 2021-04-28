@@ -30,7 +30,7 @@ html, body {
 #poi {
     display: none;
     position: absolute;
-    left: 0px;
+    left: 30px;
     top: 110px;
     width: 400px;
     background: rgba(255, 255, 255, 0.9);
@@ -52,6 +52,7 @@ html, body {
     .top {
         width: calc(100% - 60px);
         max-width: none;
+        margin: 20px;
     }
 }
 
