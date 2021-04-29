@@ -308,13 +308,13 @@ function createSearchFeature(geo) {
   searchFeature.setStyle(
     new ol.style.Style({
       image: new ol.style.Circle({
-        radius: 10,
+        radius: 20,
         fill: new ol.style.Fill({
           color: '#FFFF0099',
         }),
         stroke: new ol.style.Stroke({
           color: '#ff6600cc',
-          width: 4,
+          width: 2,
         }),
       }),
     })
@@ -374,15 +374,16 @@ function updateSearchFeatureLayer(features) {
 
 function showSearchResult(res) {
 
-  let e = res[0];
+  let e = res;
   let extent = transform([e.boundingbox[2], e.boundingbox[0],
                           e.boundingbox[3], e.boundingbox[1]]);
 
   let view = map.getView();
   view.fit(extent);
 
-  var features = res.map(x => createSearchFeature(new ol.geom.Point(ol.proj.fromLonLat([x.lon, x.lat]))));
-  updateSearchFeatureLayer(features);
+  let p = ol.proj.fromLonLat([e.lon, e.lat]);
+  var features = createSearchFeature(new ol.geom.Point(p));
+  updateSearchFeatureLayer([features]);
 }
 
 var poiLayer;
@@ -497,6 +498,9 @@ new ol.layer.Vector({
   }),
 });
 
+function removeSearchResult() {
+  map.removeLayer(searchLayer);
+}
 
 function closePoi() {
   document.getElementById("poi").style.display = "none";
@@ -513,7 +517,6 @@ map.on("click", function(evt) {
   var found = false
   this.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
     if (feature.getProperties().name != "poi") {
-      closePoi();
       return;
     }
 
@@ -526,6 +529,7 @@ map.on("click", function(evt) {
   });
   if (!found) {
     closePoi();
+    removeSearchResult();
   }
 });
 
