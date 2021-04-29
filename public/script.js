@@ -91,6 +91,9 @@ if (qstr !== "") {
 }
 
 function isRetina() {
+  if (window.devicePixelRatio == 1) {
+    return false
+  }
   return getCookie("retina") !== "false";
 }
 
