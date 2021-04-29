@@ -599,7 +599,7 @@ function showPoi(e) {
 
   <input type="text" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled value="${permURL}" id="permanentURL">
   <div class="input-group-append">
-    <button class="btn btn-outline-secondary" type="button" onclick="copyPermURL()">Copy Link</button>
+    <button id="btnCopyLink" class="btn btn-outline-secondary" type="button" onclick="copyPermURL()">Copy Link</button>
   </div>
 </div>
 <small><a target=_blank href=${edit_link}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
@@ -614,15 +614,9 @@ function showPoi(e) {
 }
 
 function copyPermURL() {
-
   var copyText = document.getElementById("permanentURL");
-  /* Select the text field */
   copyText.select();
   copyText.setSelectionRange(0, 99999); /* For mobile devices */
-
-  /* Copy the text inside the text field */
   document.execCommand("copy");
-
-  /* Alert the copied text */
-  alert("URL copied");
+  document.getElementById("btnCopyLink").innerHTML = "Copied!";
 }
