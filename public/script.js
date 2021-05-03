@@ -97,7 +97,7 @@ function isRetina() {
   return getCookie("retina") !== "false";
 }
 
-var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false});
+var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false, doubleClickZoom: true, keyboard: true, shiftDragZoom: true, dragPan: true});
 
 var subserver = server + '.';
 subserver = '';
@@ -130,7 +130,7 @@ var map = new ol.Map({
   interactions: interactions,
   maxTilesLoading: 8,
   layers: [base_layer],
-  controls: [new ol.control.Attribution({collapsible: true})],
+  controls: [new ol.control.Attribution({collapsible: true}), new ol.control.Zoom({className: "zoomControl"})],
   view: new ol.View({
     center: ol.proj.fromLonLat(lonlat),
     zoom: zoom,
@@ -216,7 +216,7 @@ function onMoveEnd(evt) {
   setURL(center, z);
 
   if (poiLayer) {
-    if (z >= 18) {
+    if (z >= 19) {
       poiLayer.setVisible(true);
     }
     else {
@@ -224,14 +224,14 @@ function onMoveEnd(evt) {
     }
   }
 
-  if (z >= 18) {
+  if (z >= 19) {
     if (!lastPoiQueryCenter) {
       postOverpass(center[0], center[1]);
       return;
     }
 
     let dis = calcDis(center[1], center[0], lastPoiQueryCenter[1], lastPoiQueryCenter[0]);
-    if (dis > 300) {
+    if (dis > 800) {
       postOverpass(center[0], center[1]);
     }
   }
@@ -442,17 +442,20 @@ function postOverpass(lon, lat) {
     }
   };
 
-  let url = "https://overpass.kumi.systems/api/interpreter";
-  //let url = "https://lz4.overpass-api.de/api/interpreter"
+  //let url = "http://10.1.0.43/api/interpreter";
+  let url = "https://lz4.overpass-api.de/api/interpreter";
 
   xhttp.open("POST", url, true);
+  let dis = 1000;
   let str = `[out:json][timeout:5];
 (
-  nwr["tourism"]["name"](around: 300, ${lat}, ${lon});
-  nw["leisure"]["name"](around: 300, ${lat}, ${lon});
-  nwr["amenity"]["name"](around: 300, ${lat}, ${lon});
-  nw["office"]["name"](around: 300, ${lat}, ${lon});
-  nw["shop"]["name"](around: 300, ${lat}, ${lon});
+  node["tourism"](around: ${dis}, ${lat}, ${lon});
+  way["tourism"](around: ${dis}, ${lat}, ${lon});
+  node["leisure"]["name"](around: ${dis}, ${lat}, ${lon});
+  node["amenity"](around: ${dis}, ${lat}, ${lon});
+  node["office"](around: ${dis}, ${lat}, ${lon});
+  way["office"](around: ${dis}, ${lat}, ${lon});
+  node["shop"](around: ${dis}, ${lat}, ${lon});
 );
 out ids tags center;
 >;`;
@@ -479,7 +482,7 @@ function showPois(res) {
     }
   }
 
-  if (map.getView().getZoom() < 18) {
+  if (map.getView().getZoom() <= 18) {
     return;
   }
 

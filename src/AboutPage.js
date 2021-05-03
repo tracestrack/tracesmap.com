@@ -41,8 +41,11 @@ function AboutPage({show, hide}) {
 
 
               <h4>Other information</h4>
-              <p>
+              <p><small>
                 Map refresh period: 1 to 7 days <br />
+                Please use a modern browser like Chrome, Safari, Firefox, Opera <br />
+                   Some tiles are generated on the fly, which could be slow <br />
+                 </small>
               </p>
             </Modal.Body>
           </Modal>);

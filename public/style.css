@@ -19,13 +19,13 @@ html, body {
 .map {
     height: 100%;
     width: 100%;
-    filter: saturate(130%);
+    filter: saturate(150%);
 }
 
 .current_loc {
     position: absolute;
     right: 8px;
-    bottom: 40px;
+    bottom: 62px;
 }
 
 #poi {
@@ -34,6 +34,9 @@ html, body {
     left: 30px;
     top: 110px;
     width: 400px;
+    max-height: 80%;
+    overflow: scroll;
+    overflow-x: hidden;
     background: rgba(255, 255, 255, 0.9);
     border: 2px solid rgba(255, 255, 255, 0.5);
     padding: 10px;
@@ -46,6 +49,7 @@ html, body {
         width: 100%;
         bottom: 0px;
         height: 450px;
+        max-height: 80%;
         left: 0px;
         overflow: scroll;
         overflow-x: hidden;
@@ -66,4 +70,9 @@ html, body {
 
 .poi_value {
     word-wrap: break-word; /* Internet Explorer 5.5+ */
+}
+
+.zoomControl {
+    left: 8px;
+    bottom: 19px;
 }
