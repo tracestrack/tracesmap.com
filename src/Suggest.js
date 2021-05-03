@@ -13,6 +13,7 @@ const geocoder = new Nominatim({
 var searchValue = "";
 var dataResult;
 var searchDelayTimer;
+var enterPressed = true;
 
 // When suggestion is clicked, Autosuggest needs to populate the input
 // based on the clicked suggestion. Teach Autosuggest how to calculate the
@@ -49,6 +50,15 @@ class Example extends React.Component {
     });
   };
 
+  onKeyPress = (e) => {
+    if (e.keyCode == 13) {
+      enterPressed = true;
+    }
+    else {
+      enterPressed = false;
+    }
+  }
+
   // Autosuggest will call this function every time you need to update suggestions.
   // You already implemented this logic above, so just use it.
   onSuggestionsFetchRequested = ({ value }) => {
@@ -68,6 +78,13 @@ class Example extends React.Component {
               suggestions: response
             });
             dataResult = response;
+
+
+            if (enterPressed && dataResult.length > 0) {
+              let d = dataResult[0];
+              window.showSearchResult(d);
+            }
+
           })
           .catch((error) => {
             console.log(error)
@@ -77,7 +94,6 @@ class Example extends React.Component {
   };
   onSuggestionSelected = (event, { suggestion, suggestionValue, suggestionIndex, sectionIndex, method }) => {
     let d = dataResult[suggestionIndex];
-    //console.log(d);
     window.showSearchResult(d);
   }
 
@@ -95,7 +111,10 @@ class Example extends React.Component {
     const inputProps = {
       placeholder: 'Search a place',
       value,
-      onChange: this.onChange
+      onChange: this.onChange,
+      onKeyDown: this.onKeyPress,
+      autocorrect: "off",
+      autocomplete: "off"
     };
 
     // Finally, render it!
