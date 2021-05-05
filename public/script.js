@@ -442,7 +442,6 @@ function postOverpass(lon, lat) {
     }
   };
 
-  //let url = "http://10.1.0.43/api/interpreter";
   let url = "https://lz4.overpass-api.de/api/interpreter";
 
   xhttp.open("POST", url, true);

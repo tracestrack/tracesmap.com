@@ -25,7 +25,7 @@ html, body {
 .current_loc {
     position: absolute;
     right: 8px;
-    bottom: 62px;
+    bottom: 42px;
 }
 
 #poi {
@@ -35,12 +35,17 @@ html, body {
     top: 110px;
     width: 400px;
     max-height: 80%;
-    overflow: scroll;
-    overflow-x: hidden;
-    background: rgba(255, 255, 255, 0.9);
+    overflow: hidden;
     border: 2px solid rgba(255, 255, 255, 0.5);
     padding: 10px;
     border-radius: 6px;
+    background-color: hsla(0,0%,100%,.9);
+}
+
+_::-webkit-full-page-media, _:future, #poi, .top {
+    -webkit-backdrop-filter: blur(6px);
+    border: 0px solid rgba(255, 255, 255, 0.9);
+    background-color: hsla(0,0%,100%,.4);
 }
 
 @media screen and (max-width: 500px){
@@ -73,6 +78,17 @@ html, body {
 }
 
 .zoomControl {
-    left: 8px;
-    bottom: 19px;
+    right: 8px;
+    bottom: 86px;
+}
+
+.ol-control button {
+    background: #ffffffcc;
+    color: black;
+    border-radius: 10px;
+}
+
+
+.ol-attribution ul {
+    font-size: 12px;
 }
