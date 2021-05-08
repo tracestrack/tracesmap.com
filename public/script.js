@@ -570,18 +570,25 @@ function showPoi(e) {
   if (tags['description']) str += addLine("Description", `${tags.description}`);
 
   function createNavigationLink(name, url, latlon) {
-    let u = url.replace("LATLON", latlon);
-    return `<li><a href="${u}">${name}</a></li>`;
+    let u = url.replace(/LATLON/g, latlon);
+    return `<li><a target=_blank href="${u}">${name}</a></li>`;
   }
   function createNavigationLink2(name, url, lat, lon) {
     let u = url.replace("LAT", lat).replace("LON", lon);
-    return `<li><a href="${u}">${name}</a></li>`;
+    return `<li><a target=_blank href="${u}">${name}</a></li>`;
+  }
+
+  var startCoordStr = "0,0";
+  if (lastCoordinate) {
+    let center = ol.proj.toLonLat(lastCoordinate);
+    startCoordStr = `${center[1]},${center[0]}`;
   }
 
   let navlinks = [
     "<ul class='list-unstyled'>",
     createNavigationLink("Google Maps", "https://www.google.com/maps/dir/?api=1&destination=LATLON", latlon),
     createNavigationLink("Waze", "https://www.waze.com/ul?ll=LATLON&navigate=yes", latlon),
+    createNavigationLink("TomTom MyDrive", 'https://mydrive.tomtom.com/en_gb/#mode=search+viewport=LATLON,16,0,-0+search=%7B%22input%22:%22%22,%22coords%22:%5BLATLON%5D%7D+ver=3', latlon),
     "</ul>"
   ];
 
