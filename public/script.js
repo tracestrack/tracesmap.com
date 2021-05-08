@@ -239,10 +239,22 @@ function onMoveEnd(evt) {
 
 map.on('moveend', onMoveEnd);
 
+var container = document.getElementById('popup');
+var content = document.getElementById('popup-content');
+var popupOverlay = new ol.Overlay({
+  element: container,
+  autoPan: true,
+  autoPanAnimation: {
+    duration: 250,
+  }
+});
+
+map.addOverlay(popupOverlay);
+
 var prevFeature;
 map.on("pointermove", function (evt) {
   var hit = this.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
-    console.log(feature.getProperties());
+    //console.log(feature.getProperties());
     if (feature.getProperties().name == "poi") {
       if (prevFeature) {
         prevFeature.setStyle(POI_NORMAL_STYLE);
@@ -250,12 +262,24 @@ map.on("pointermove", function (evt) {
 
       feature.setStyle(POI_HOVER_STYLE);
       prevFeature = feature;
+
+      let id = feature.getProperties().id;
+      let r = poi_map.filter(x => x[3] == id);
+
+      var coordinate = feature.getProperties().geometry.getCoordinates();
+
+      content.innerHTML = coalesce(r[0][2].name, "No name");
+
+      coordinate = [coordinate[0] - 2, coordinate[1] - 5];
+      popupOverlay.setPosition(coordinate);
+
     }
     return true;
   });
   if (hit) {
     this.getTargetElement().style.cursor = 'pointer';
   } else {
+    popupOverlay.setPosition(undefined);
     this.getTargetElement().style.cursor = '';
     if (prevFeature) {
       prevFeature.setStyle(POI_NORMAL_STYLE);
@@ -448,13 +472,11 @@ function postOverpass(lon, lat) {
   let dis = 1000;
   let str = `[out:json][timeout:5];
 (
-  node["tourism"](around: ${dis}, ${lat}, ${lon});
-  way["tourism"](around: ${dis}, ${lat}, ${lon});
-  node["leisure"]["name"](around: ${dis}, ${lat}, ${lon});
-  node["amenity"](around: ${dis}, ${lat}, ${lon});
-  node["office"](around: ${dis}, ${lat}, ${lon});
-  way["office"](around: ${dis}, ${lat}, ${lon});
-  node["shop"](around: ${dis}, ${lat}, ${lon});
+  nwr["tourism"](around: ${dis}, ${lat}, ${lon});
+  nwr["leisure"]["name"](around: ${dis}, ${lat}, ${lon});
+  nwr["amenity"](around: ${dis}, ${lat}, ${lon});
+  nwr["office"](around: ${dis}, ${lat}, ${lon});
+  nwr["shop"](around: ${dis}, ${lat}, ${lon});
 );
 out ids tags center;
 >;`;
@@ -519,6 +541,8 @@ function updateURLPoiId(id) {
 }
 
 map.on("click", function(evt) {
+  popupOverlay.setPosition(undefined);
+
   var found = false
   this.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
     if (feature.getProperties().name != "poi") {
