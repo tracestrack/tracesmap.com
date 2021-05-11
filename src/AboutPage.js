@@ -20,17 +20,17 @@ function AboutPage({show, hide}) {
               <p><small>
                    Map data: © OpenStreetMap contributors <br />
 
-                   Map style: <a href="https://github.com/gravitystorm/openstreetmap-carto">OpenStreetMap Carto</a><br />
+                   Map style: based on <a href="https://github.com/gravitystorm/openstreetmap-carto">OpenStreetMap Carto</a><br />
 
-                   Search is powered by <a href="https://nominatim.org/">Nominatim</a> <br />
+                   Search: <a href="https://nominatim.org/">Nominatim</a> <br />
 
-                   Map framework is powered by <a href="http://openlayers.org">OpenLayers</a> <br/>
+                   Map framework: <a href="http://openlayers.org">OpenLayers</a> <br/>
 
                    Dynamic data is powered by <a href="http://overpass-api.de">Overpass API</a> <br/>
 
                    Maintainer: Qing Cai <br />
 
-                   If you would like to use the map tiles, or have other questions, you are very welcome to contact me at  <b>[hello (at) tracestrack.com]</b>
+                   If you want to use the tiles on your sites, please contact me at <b>[hello (at) tracestrack.com]</b>
 
                  </small>              </p>
 
@@ -42,8 +42,8 @@ function AboutPage({show, hide}) {
 
               <h4>Other information</h4>
               <p><small>
-                Map refresh period: 1 to 7 days <br />
-                Please use a modern browser like Chrome, Safari, Firefox, Opera <br />
+                   Map refresh period: 1 to 7 days <br />
+                   Please use a modern browser such as Chrome, Safari, Firefox, Edge, Opera <br />
                    Some tiles are generated on the fly, which could be slow <br />
                  </small>
               </p>

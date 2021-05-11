@@ -1,9 +1,9 @@
-import { Container, Row, Col, Modal, Tabs, Tab, ListGroup, Form, ToggleButton, ToggleButtonGroup } from 'react-bootstrap';
+import { Container, Row, Col, Modal, ListGroup, Form, ToggleButton, ToggleButtonGroup } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {useState, useEffect} from "react";
 
 const server = [["Berlin", "a"],
-               ["Los Angeles", "b"]];
+                ["Los Angeles", "b"]];
 
 const langs = [["Local", "_-name"],
                ["Arabic", "ar-name"],
@@ -22,10 +22,9 @@ function SettingView({show, hide}) {
   const [retinaEnabled, setRetinaEnabled] = useState(window.getCookie('retina') !== "false");
 
   const handleLanguage = function (e) {
-    let t = e.target.textContent;
-    let v = langs.filter(v => v[0] == t)[0][1]
-    window.setLanguageLayer(v);
-    setLang(_ => v);
+    let t = e.target.value;
+    window.setLanguageLayer(t);
+    setLang(_ => t);
   };
 
   const handleRetinaEnabled = function(e) {
@@ -58,43 +57,42 @@ function SettingView({show, hide}) {
             </Modal.Header>
             <Modal.Body>
 
-              <Tabs defaultActiveKey="home" id="uncontrolled-tab-example">
-                <Tab eventKey="home" title="Language">
-                  <ListGroup>
+              <Container>
 
-                    {langs.map(k => <ListGroup.Item size="sm" action key={k[1]} eventKey={k[1]} onClick={handleLanguage} active={k[1] == lang} >{k[0]}</ListGroup.Item>)}
+                <Row>
+                  <Col>Language</Col>
+                  <Col>                 <Form.Group>
 
-                  </ListGroup>
-                </Tab>
-                <Tab eventKey="profile" title="Maps">
-                  <br />
+                                           <Form.Control as="select" onChange={handleLanguage} >
+                                             {langs.map(k => <option action key={k[1]} value={k[1]} selected={k[1] == lang} >{k[0]}</option>)}
+                                           </Form.Control>
 
-                  <Container>
-                    <Row>
-                      <Col sm={10}>Enable High Resolution Tiles</Col>
-                      <Col>                  <Form.Check
-                                               type="switch"
-                                               id="custom-switch"
-                                               label=""
-                                               checked={retinaEnabled}
-                                               onChange={handleRetinaEnabled}
-                                             /></Col>
-                    </Row>
-                    <Row>
-                      <Col sm={7}>Tile Server</Col>
-                      <Col>
-                        <ToggleButtonGroup name="radio" defaultValue={getServer()} type="radio" className="mb-2" onChange={handleServerChange}>
+                                         </Form.Group></Col>
+                </Row>
+                <Row>
+                  <Col sm={10}>High Resolution Tiles</Col>
+                  <Col>                  <Form.Check
+                  type="switch"
+                  id="custom-switch"
+                  label=""
+                  checked={retinaEnabled}
+                  onChange={handleRetinaEnabled}  /></Col>
+                </Row>
+                <Row>
+                  <Col sm={7}>Tile Server</Col>
+                  <Col>
+                    <ToggleButtonGroup name="radio" defaultValue={getServer()} type="radio" className="mb-2" onChange={handleServerChange}>
 
-                          {server.map(k => <ToggleButton key={k[1]} size="sm" type="radio" variant="light" value={k[1]}>{k[0]}</ToggleButton>)}
+                      {server.map(k => <ToggleButton key={k[1]} size="sm" type="radio" variant="light" value={k[1]}>{k[0]}</ToggleButton>)}
 
-                        </ToggleButtonGroup>
-                      </Col>
+                    </ToggleButtonGroup>
+                  </Col>
 
-                    </Row>
-                  </Container>
+                </Row>
+              </Container>
 
-                </Tab>
-              </Tabs>
+
+
             </Modal.Body>
           </Modal>);
 };

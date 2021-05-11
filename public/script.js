@@ -181,18 +181,12 @@ setLanguageLayer(getCookie("lang"));
 
 function setRetinaEnabled(ena) {
   setCookie("retina", ena, 1000);
-
-  if (confirm("It's need to reload the map to take effect. Reload now?")) {
-    location.reload();
-  }
+  location.reload();
 }
 
 function setServer(s) {
   setCookie("server", s, 1000);
-
-  if (confirm("It's need to reload the map to take effect. Reload now?")) {
-    location.reload();
-  }
+  location.reload();
 }
 
 function setURL(lonlat, zoom) {
