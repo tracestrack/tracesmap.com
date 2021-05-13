@@ -532,7 +532,6 @@ var isLoadingExtent = false;
 function fetchPlaces() {
 
   if (isLoadingExtent) return;
-  isLoadingExtent = true
 
   let currentExtent = map.getView().calculateExtent();
 
@@ -547,6 +546,8 @@ function fetchPlaces() {
 
   var xhttp = new XMLHttpRequest();
   console.log(extent);
+  isLoadingExtent = true
+
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4) {
       isLoadingExtent = false;
@@ -568,6 +569,7 @@ function fetchPlaces() {
 (
   node["place"="city"](${br[1]},${tl[0]},${tl[1]},${br[0]});
   node["place"="town"](${br[1]},${tl[0]},${tl[1]},${br[0]});
+  nwr["aeroway"="aerodrome"](${br[1]},${tl[0]},${tl[1]},${br[0]});
 );
 out ids tags center;
 >;`;
@@ -617,7 +619,7 @@ var places_map = [];
 function showPlaces(res) {
   console.log(res);
 
-  places_map = res.elements.map(x => [x.lon, x.lat, x.tags, x.id, x.type]);
+  places_map = res.elements.map(x => [x["center"] ? x["center"]["lon"] : x.lon, x["center"] ? x["center"]["lat"] : x.lat, x.tags, x.id, x.type]);
 
   let features = places_map.map(x => createPlacesFeature(new ol.geom.Point(ol.proj.fromLonLat([x[0], x[1]])), x[3]));
 
@@ -716,7 +718,7 @@ function showPoi(e) {
   }
 
   let name = coalesce(tags.name, "Unnamed");
-  let cat = coalesce(tags['shop'], tags['office'], tags['amenity'], tags['tourism'], tags['leisure'], tags['place']).replace(/_/g, " ");
+  let cat = coalesce(tags['shop'], tags['office'], tags['amenity'], tags['tourism'], tags['leisure'], tags['place'], tags['aeroway']).replace(/_/g, " ");
 
   let latlon = [lat, lon].join(", ");
 
