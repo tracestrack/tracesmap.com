@@ -218,6 +218,19 @@ function onMoveEnd(evt) {
     }
   }
 
+  if (placesLayer) {
+    if (z >= 12 && z <= 14) {
+      placesLayer.setVisible(true);
+    }
+    else {
+      placesLayer.setVisible(false);
+    }
+  }
+
+  if (z >= 12 && z <= 14) {
+    fetchPlaces();
+  }
+
   if (z >= 19) {
     if (!lastPoiQueryCenter) {
       postOverpass(center[0], center[1]);
@@ -248,7 +261,6 @@ map.addOverlay(popupOverlay);
 var prevFeature;
 map.on("pointermove", function (evt) {
   var hit = this.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
-    //console.log(feature.getProperties());
     if (feature.getProperties().name == "poi") {
       if (prevFeature) {
         prevFeature.setStyle(POI_NORMAL_STYLE);
@@ -266,7 +278,18 @@ map.on("pointermove", function (evt) {
 
       coordinate = [coordinate[0] - 2, coordinate[1] - 5];
       popupOverlay.setPosition(coordinate);
+    }
+    else if (feature.getProperties().name == "place") {
 
+      let id = feature.getProperties().id;
+      let r = places_map.filter(x => x[3] == id);
+
+      var coordinate = feature.getProperties().geometry.getCoordinates();
+
+      content.innerHTML = coalesce(r[0][2].name, "No name");
+
+      coordinate = [coordinate[0] - 2, coordinate[1] - 5];
+      popupOverlay.setPosition(coordinate);
     }
     return true;
   });
@@ -369,11 +392,40 @@ let POI_NORMAL_STYLE = new ol.style.Style({
   }),
 });
 
+
+let PLACE_NORMAL_STYLE = new ol.style.Style({
+  image: new ol.style.RegularShape({
+    fill: new ol.style.Fill({color: '#ffffff22'}),
+    //stroke: new ol.style.Stroke({color: '#ffffffff', width: 5}),
+    points: 4,
+    radius: 80 / Math.SQRT2,
+    radius2: 80,
+    scale: [1, 0.5]
+  })
+});
+
+let PLACE_HOVER_STYLE = new ol.style.Style({
+  image: new ol.style.RegularShape({
+    fill: new ol.style.Fill({color: '#ffffff66'}),
+    stroke: new ol.style.Stroke({color: 'white', width: 3}),
+    points: 4,
+    radius: 80 / Math.SQRT2,
+    radius2: 80,
+    scale: [1, 0.5]
+  })
+});
+
 function createPoiFeature(geo, id) {
   var feature = new ol.Feature({name: "poi", id: id});
   feature.setStyle(POI_NORMAL_STYLE);
   feature.setGeometry(geo);
+  return feature;
+};
 
+function createPlacesFeature(geo, id) {
+  var feature = new ol.Feature({name: "place", id: id});
+  feature.setStyle(PLACE_NORMAL_STYLE);
+  feature.setGeometry(geo);
   return feature;
 };
 
@@ -407,11 +459,30 @@ function showSearchResult(res) {
   updateSearchFeatureLayer([features]);
 }
 
+var placesLayer;
+function updatePlacesLayer(features) {
+  if (placesLayer) {
+    map.removeLayer(placesLayer);
+  }
+
+  console.log(features);
+
+  placesLayer = new ol.layer.Vector({
+    source: new ol.source.Vector({
+      features: features,
+    })
+  });
+
+  map.addLayer(placesLayer);
+}
+
 var poiLayer;
 function updatePoiLayer(features) {
   if (poiLayer) {
     map.removeLayer(poiLayer);
   }
+
+  console.log(features);
 
   poiLayer = new ol.layer.Vector({
     source: new ol.source.Vector({
@@ -443,6 +514,68 @@ function calcDis(lat1, lon1, lat2, lon2)
 }
 
 var lastPoiQueryCenter;
+
+function getBBox() {
+  let extent = map.getView().calculateExtent();
+  console.log(extent);
+
+  extent = ol.extent.buffer(extent, 10000);
+  console.log(extent);
+
+  let tl = ol.proj.toLonLat(ol.extent.getTopLeft(extent));
+  let br = ol.proj.toLonLat(ol.extent.getBottomRight(extent));
+  return {tl, br, extent};
+};
+
+var lastLoadedExtent;
+var isLoadingExtent = false;
+function fetchPlaces() {
+
+  if (isLoadingExtent) return;
+  isLoadingExtent = true
+
+  let currentExtent = map.getView().calculateExtent();
+
+  if (lastLoadedExtent) {
+    console.log(lastLoadedExtent, currentExtent);
+    if (ol.extent.containsExtent(lastLoadedExtent, currentExtent)) {
+      return;
+    }
+  }
+
+  let {tl, br, extent} = getBBox();
+
+  var xhttp = new XMLHttpRequest();
+  console.log(extent);
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4) {
+      isLoadingExtent = false;
+
+      if (this.status == 200) {
+        lastLoadedExtent = extent;
+
+        let json = JSON.parse(this.responseText);
+        showPlaces(json);
+      }
+    }
+  };
+
+  let url = "https://lz4.overpass-api.de/api/interpreter";
+
+  xhttp.open("POST", url, true);
+  let dis = 1000;
+  let str = `[out:json][timeout:5];
+(
+  node["place"="city"](${br[1]},${tl[0]},${tl[1]},${br[0]});
+  node["place"="town"](${br[1]},${tl[0]},${tl[1]},${br[0]});
+);
+out ids tags center;
+>;`;
+
+  xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded; charset=UTF-8');
+  let data = 'data=' + encodeURIComponent(str);
+  xhttp.send(data);
+}
 
 function postOverpass(lon, lat) {
   var xhttp = new XMLHttpRequest();
@@ -478,6 +611,17 @@ out ids tags center;
   xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded; charset=UTF-8');
   let data = 'data=' + encodeURIComponent(str);
   xhttp.send(data);
+}
+
+var places_map = [];
+function showPlaces(res) {
+  console.log(res);
+
+  places_map = res.elements.map(x => [x.lon, x.lat, x.tags, x.id, x.type]);
+
+  let features = places_map.map(x => createPlacesFeature(new ol.geom.Point(ol.proj.fromLonLat([x[0], x[1]])), x[3]));
+
+  updatePlacesLayer(features);
 }
 
 var poi_map = [];
@@ -539,16 +683,22 @@ map.on("click", function(evt) {
 
   var found = false
   this.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
-    if (feature.getProperties().name != "poi") {
-      return;
+    if (feature.getProperties().name == "poi") {
+      let id = feature.getProperties().id;
+      updateURLPoiId(id);
+
+      let r = poi_map.filter(x => x[3] == id);
+      showPoi(r[0]);
+      found = true;
     }
+    else if (feature.getProperties().name == "place") {
+      let id = feature.getProperties().id;
+      updateURLPoiId(id);
 
-    let id = feature.getProperties().id;
-    updateURLPoiId(id);
-
-    let r = poi_map.filter(x => x[3] == id);
-    showPoi(r[0]);
-    found = true;
+      let r = places_map.filter(x => x[3] == id);
+      showPoi(r[0]);
+      found = true;
+    }
   });
   if (!found) {
     closePoi();
@@ -566,7 +716,7 @@ function showPoi(e) {
   }
 
   let name = coalesce(tags.name, "Unnamed");
-  let cat = coalesce(tags['shop'], tags['office'], tags['amenity'], tags['tourism'], tags['leisure']).replace(/_/g, " ");
+  let cat = coalesce(tags['shop'], tags['office'], tags['amenity'], tags['tourism'], tags['leisure'], tags['place']).replace(/_/g, " ");
 
   let latlon = [lat, lon].join(", ");
 
@@ -575,6 +725,9 @@ function showPoi(e) {
   if (tags['addr:street']) str += addLine("Address", (tags['addr:street'] ?? '') +" "+ (tags['addr:housenumber'] ?? '') +" "+ (tags['addr:postcode'] ?? ""));
 
   str += addLine("Coordinates", latlon);
+
+  if (tags['population']) str += addLine("Population", `${tags.population} (${tags["population:date"]})`);
+
   if (tags['opening_hours']) str += addLine("Opening hours", `${tags.opening_hours.replace(/,|;/gi, "<br />")}`);
   if (tags['cuisine']) str += addLine("Cuisine", `${tags.cuisine}`);
   if (tags['brand']) str += addLine("Brand", `${tags.brand}`);
@@ -582,6 +735,8 @@ function showPoi(e) {
   if (tags['website']) str += addLine("Website", `<a href='${tags.website}'>${tags.website}</a>`);
   if (tags['email']) str += addLine("Email", `${tags.email}`);
   if (tags['phone']) str += addLine("Phone", `${tags.phone}`);
+
+
 
 
   if (tags['wheelchair']) str += addLine("Wheelchair", `${tags.wheelchair}`);
