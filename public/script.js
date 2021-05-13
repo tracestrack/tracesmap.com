@@ -219,7 +219,7 @@ function onMoveEnd(evt) {
   }
 
   if (placesLayer) {
-    if (z >= 12 && z <= 14) {
+    if (z >= 13 && z <= 14) {
       placesLayer.setVisible(true);
     }
     else {
@@ -227,7 +227,7 @@ function onMoveEnd(evt) {
     }
   }
 
-  if (z >= 12 && z <= 14) {
+  if (z >= 13 && z <= 14) {
     fetchPlaces();
   }
 
@@ -395,22 +395,11 @@ let POI_NORMAL_STYLE = new ol.style.Style({
 
 let PLACE_NORMAL_STYLE = new ol.style.Style({
   image: new ol.style.RegularShape({
-    fill: new ol.style.Fill({color: '#ffffff22'}),
-    //stroke: new ol.style.Stroke({color: '#ffffffff', width: 5}),
+    fill: new ol.style.Fill({color: '#FFFFFF22'}),
+    stroke: new ol.style.Stroke({color: '#000000ff', width: 0}),
     points: 4,
     radius: 80 / Math.SQRT2,
-    radius2: 80,
-    scale: [1, 0.5]
-  })
-});
-
-let PLACE_HOVER_STYLE = new ol.style.Style({
-  image: new ol.style.RegularShape({
-    fill: new ol.style.Fill({color: '#ffffff66'}),
-    stroke: new ol.style.Stroke({color: 'white', width: 3}),
-    points: 4,
-    radius: 80 / Math.SQRT2,
-    radius2: 80,
+    radius2: 3.14 * 80,
     scale: [1, 0.5]
   })
 });
@@ -493,26 +482,6 @@ function updatePoiLayer(features) {
   map.addLayer(poiLayer);
 }
 
-function toRad(Value)
-{
-  return Value * Math.PI / 180;
-}
-
-function calcDis(lat1, lon1, lat2, lon2)
-{
-  var R = 6371; // km
-  var dLat = toRad(lat2-lat1);
-  var dLon = toRad(lon2-lon1);
-  var lat1 = toRad(lat1);
-  var lat2 = toRad(lat2);
-
-  var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2);
-  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  var d = R * c;
-  return d * 1000; // m
-}
-
 var lastPoiQueryCenter;
 
 function getBBox() {
@@ -569,7 +538,6 @@ function fetchPlaces() {
 (
   node["place"="city"](${br[1]},${tl[0]},${tl[1]},${br[0]});
   node["place"="town"](${br[1]},${tl[0]},${tl[1]},${br[0]});
-  nwr["aeroway"="aerodrome"](${br[1]},${tl[0]},${tl[1]},${br[0]});
 );
 out ids tags center;
 >;`;
@@ -728,7 +696,7 @@ function showPoi(e) {
 
   str += addLine("Coordinates", latlon);
 
-  if (tags['population']) str += addLine("Population", `${tags.population} (${tags["population:date"]})`);
+  if (tags['population']) str += addLine("Population", `${tags.population}` + (tags["population:date"] ? `(${tags["population:date"]})` : ""));
 
   if (tags['opening_hours']) str += addLine("Opening hours", `${tags.opening_hours.replace(/,|;/gi, "<br />")}`);
   if (tags['cuisine']) str += addLine("Cuisine", `${tags.cuisine}`);
