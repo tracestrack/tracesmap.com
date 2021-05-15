@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, FormControl, InputGroup, Row, Container, Col } from 'react-bootstrap';
+import { Button, InputGroup} from 'react-bootstrap';
 
 import Suggest from './Suggest';
 import './App.css';

@@ -1,6 +1,6 @@
-import { Container, Row, Col, Modal, ListGroup, Form, ToggleButton, ToggleButtonGroup } from 'react-bootstrap';
+import { Container, Row, Col, Modal, Form, ToggleButton, ToggleButtonGroup } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import {useState, useEffect} from "react";
+import {useState} from "react";
 
 const server = [["Berlin", "a"],
                 ["Los Angeles", "b"]];
@@ -38,7 +38,7 @@ function SettingView({show, hide}) {
 
   const getServer = function() {
     let c = window.getCookie("server");
-    if (c == "a" || c == "b") {
+    if (c === "a" || c === "b") {
       return c;
     }
     return "a";
@@ -64,7 +64,7 @@ function SettingView({show, hide}) {
                   <Col>                 <Form.Group>
 
                                            <Form.Control as="select" onChange={handleLanguage} >
-                                             {langs.map(k => <option action key={k[1]} value={k[1]} selected={k[1] == lang} >{k[0]}</option>)}
+                                             {langs.map(k => <option action key={k[1]} value={k[1]} selected={k[1] === lang} >{k[0]}</option>)}
                                            </Form.Control>
 
                                          </Form.Group></Col>
