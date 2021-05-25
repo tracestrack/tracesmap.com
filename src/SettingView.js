@@ -7,7 +7,7 @@ const server = [["Berlin", "a"],
 
 const langs = [["Local *", "_-name"],
                ["Arabic", "ar-name"],
-               ["Brazilian Portuguese", "br-name"],
+               ["Breton", "br-name"],
                ["Dutch", "nl-name"],
                ["English *", "en-name"],
                ["Finnish", "fi-name"],
