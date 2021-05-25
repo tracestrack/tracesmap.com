@@ -106,9 +106,9 @@ let base_source = new ol.source.XYZ({
   attributions: [ol.source.OSM.ATTRIBUTION],
   opaque: true,
   imageSmoothing: true,
-  cacheSize: 100,
+  cacheSize: 200,
   transition: 200,
-  url: 'https://' + subserver + 'tiles.tracestrack.com/base/{z}/{x}/{y}.png',
+  urls: ['https://' + subserver + 'tiles.tracestrack.com/base/{z}/{x}/{y}.png', 'https://tiles.tracestrack.com/base/{z}/{x}/{y}.png'],
   crossOrigin: null,
   tilePixelRatio: isRetina() ? 2 : 1
 });
@@ -121,14 +121,14 @@ base_source.on('tileloaderror', function(event) {
 });
 
 let base_layer = new ol.layer.Tile({
-  preload: Infinity,
+  preload: 5,
   source: base_source,
 })
 
 var map = new ol.Map({
   target: 'map',
   interactions: interactions,
-  maxTilesLoading: 8,
+  maxTilesLoading: 12,
   layers: [base_layer],
   controls: [new ol.control.Attribution({collapsible: true}), new ol.control.Zoom({className: "zoomControl"})],
   view: new ol.View({
@@ -157,13 +157,13 @@ function setLanguageLayer(label_name) {
   }
 
   languageLayer = new ol.layer.Tile({
-    preload: Infinity,
+    preload: 5,
     source: new ol.source.XYZ({
       opaque: false,
       imageSmoothing: true,
       cacheSize: 100,
       transition: 100,
-      url: 'https://' + subserver  + 'tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png',
+      urls: ['https://' + subserver + 'tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png', 'https://tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png'],
       crossOrigin: null,
       tilePixelRatio: isRetina() ? 2 : 1
     }),
@@ -730,12 +730,11 @@ function showPoi(e) {
   let navlinks = [
     "<ul class='list-unstyled'>",
     createNavigationLink("Google Maps", "https://www.google.com/maps/dir/?api=1&destination=LATLON", latlon),
-    createNavigationLink("Waze", "https://www.waze.com/ul?ll=LATLON&navigate=yes", latlon),
-    createNavigationLink("TomTom MyDrive", 'https://mydrive.tomtom.com/en_gb/#mode=search+viewport=LATLON,16,0,-0+search=%7B%22input%22:%22%22,%22coords%22:%5BLATLON%5D%7D+ver=3', latlon),
     "</ul>"
   ];
 
   if (iOS()) {
+    navlinks.splice(3, 0, createNavigationLink2("Show in Tracestrack", "https://www.tracestrack.com/point/LAT/LON", lat, lon));
     navlinks.splice(3, 0, createNavigationLink2("OsmAnd", "osmandmaps://navigate?lat=LAT&lon=LON", lat, lon));
     navlinks.splice(3, 0, createNavigationLink2("Magic Earth", "magicearth://?drive_to&lat=LAT&lon=LON", lat, lon));
     navlinks.splice(3, 0, createNavigationLink("Baidu Maps", "baidumap://map/direction?destination=LATLON&coord_type=wgs84&mode=driving", latlon));

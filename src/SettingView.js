@@ -5,16 +5,26 @@ import {useState} from "react";
 const server = [["Berlin", "a"],
                 ["Los Angeles", "b"]];
 
-const langs = [["Local", "_-name"],
+const langs = [["Local *", "_-name"],
                ["Arabic", "ar-name"],
+               ["Brazilian Portuguese", "br-name"],
                ["Dutch", "nl-name"],
-               ["English", "en-name"],
-               ["French", "fr-name"],
+               ["English *", "en-name"],
+               ["Finnish", "fi-name"],
+               ["French *", "fr-name"],
                ["German", "de-name"],
+               ["Hebrew", "he-name"],
+               ["Hungarian", "hu-name"],
+               ["Italian", "it-name"],
+               ["Korean", "ko-name"],
+               ["Polish", "pl-name"],
+               ["Portuguese", "pt-name"],
                ["Japanese", "ja-name"],
                ["Russian", "ru-name"],
-               ["Simplified Chinese", "zh-hans-name"],
-               ["Traditional Chinese", "zh-hant-name"]];
+               ["Simplified Chinese *", "zh-hans-name"],
+               ["Spanish", "es-name"],
+               ["Traditional Chinese", "zh-hant-name"],
+              ];
 
 function SettingView({show, hide}) {
 
@@ -60,7 +70,8 @@ function SettingView({show, hide}) {
               <Container>
 
                 <Row>
-                  <Col>Language</Col>
+                  <Col>Language
+                  </Col>
                   <Col>                 <Form.Group>
 
                                            <Form.Control as="select" onChange={handleLanguage} >
@@ -68,7 +79,10 @@ function SettingView({show, hide}) {
                                            </Form.Control>
 
                                          </Form.Group></Col>
+
                 </Row>
+
+
                 <Row>
                   <Col sm={10}>High Resolution Tiles</Col>
                   <Col>                  <Form.Check
@@ -78,20 +92,13 @@ function SettingView({show, hide}) {
                   checked={retinaEnabled}
                   onChange={handleRetinaEnabled}  /></Col>
                 </Row>
-                <Row>
-                  <Col sm={7}>Tile Server</Col>
-                  <Col>
-                    <ToggleButtonGroup name="radio" defaultValue={getServer()} type="radio" className="mb-2" onChange={handleServerChange}>
 
-                      {server.map(k => <ToggleButton key={k[1]} size="sm" type="radio" variant="light" value={k[1]}>{k[0]}</ToggleButton>)}
 
-                    </ToggleButtonGroup>
-                  </Col>
+                    <Form.Text className="text-muted" size="sm">
+                      Languages with <b>*</b> has full zoom levels, otherwise up to 9.
+                    </Form.Text>
 
-                </Row>
               </Container>
-
-
 
             </Modal.Body>
           </Modal>);
