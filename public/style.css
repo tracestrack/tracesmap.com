@@ -28,6 +28,31 @@ html, body {
     bottom: 42px;
 }
 
+.goto_gmaps {
+    position: absolute;
+    left: 8px;
+    bottom: 42px;
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 0, 0, 0);
+}
+
+.goto_gmaps > button {
+    width: 48px;
+    height: 48px;
+}
+
+.ol-control {
+    background: rgba(255, 0, 0, 0);
+}
+.ol-control:hover {
+    background: rgba(255, 0, 0, 0);
+}
+.ol-control > button:hover {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+
 #poi {
     display: none;
     position: absolute;
