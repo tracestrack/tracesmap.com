@@ -30,7 +30,7 @@ function AboutPage({show, hide}) {
 
                    Maintainer: Qing Cai <br />
 
-                   If you want to use the tiles on your sites, please contact me at <b>[hello (at) tracestrack.com]</b>
+                   If you have questions, please contact me at <b>[tracestrack@icloud.com]</b>
 
                  </small>              </p>
 
