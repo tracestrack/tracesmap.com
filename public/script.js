@@ -51,21 +51,32 @@ var goToGMaps = function(e) {
   let z = map.getView().getZoom();
   let center = ol.proj.toLonLat(map.getView().getCenter());
   let url = `https://www.google.com/maps/@${center[1]},${center[0]},${z}z`;
-  //  window.location.href.replace(url);
 
   window.open(url);
 };
 
 button_google.addEventListener('click', goToGMaps, false);
 
+var button_osm = document.createElement('button');
+button_osm.innerHTML = `<img class="osm" src=https://upload.wikimedia.org/wikipedia/commons/b/b0/Openstreetmap_logo.svg />`;
+
+var goToOSM = function(e) {
+  let z = map.getView().getZoom();
+  let center = ol.proj.toLonLat(map.getView().getCenter());
+  let url = `https://www.openstreetmap.org/#map=${z}/${center[1]}/${center[0]}/`;
+  window.open(url);
+};
+
+button_osm.addEventListener('click', goToOSM, false);
+
 var element_map = document.createElement('div');
-element_map.className = 'goto_gmaps ol-control';
+element_map.className = 'goto_maps ol-control';
 element_map.appendChild(button_google);
+element_map.appendChild(button_osm);
+
 var GoToGMapsControl = new ol.control.Control({
   element: element_map
 });
-
-
 
 function setCookie(cname, cvalue, exdays) {
   var d = new Date();

@@ -28,18 +28,22 @@ html, body {
     bottom: 42px;
 }
 
-.goto_gmaps {
+.goto_maps {
     position: absolute;
     left: 8px;
     bottom: 42px;
-    width: 48px;
-    height: 48px;
+    width: 100px;
+    height: 36px;
     background: rgba(255, 0, 0, 0);
 }
 
-.goto_gmaps > button {
-    width: 48px;
-    height: 48px;
+.goto_maps > button {
+    float: left;
+}
+.goto_maps > button,
+.goto_maps > button > img {
+    width: 36px;
+    height: 36px;
 }
 
 .ol-control {
