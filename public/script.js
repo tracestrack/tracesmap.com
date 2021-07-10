@@ -69,8 +69,19 @@ var goToOSM = function(e) {
 
 button_osm.addEventListener('click', goToOSM, false);
 
+var button_sat = document.createElement('button');
+button_sat.classList.add('sat_button');
+button_sat.innerHTML = `<img src="sat.png" />`;
+
+var goToSat = function(e) {
+  toggleBaseLayer();
+};
+
+button_sat.addEventListener('click', goToSat, false);
+
 var element_map = document.createElement('div');
 element_map.className = 'goto_maps ol-control';
+element_map.appendChild(button_sat);
 element_map.appendChild(button_google);
 element_map.appendChild(button_osm);
 
@@ -141,34 +152,38 @@ var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotat
 var subserver = server + '.';
 subserver = '';
 
-let base_source = new ol.source.XYZ({
-  attributions: [ol.source.OSM.ATTRIBUTION],
-  opaque: true,
-  imageSmoothing: true,
-  cacheSize: 200,
-  transition: 200,
-  urls: ['https://' + subserver + 'tiles.tracestrack.com/base/{z}/{x}/{y}.png', 'https://tiles.tracestrack.com/base/{z}/{x}/{y}.png'],
-  crossOrigin: null,
-  tilePixelRatio: isRetina() ? 2 : 1
-});
+function getBaseLayer(url) {
+  let base_source = new ol.source.XYZ({
+    attributions: [ol.source.OSM.ATTRIBUTION],
+    opaque: true,
+    imageSmoothing: true,
+    cacheSize: 200,
+    transition: 200,
+    //urls: ['https://' + subserver + 'tiles.tracestrack.com/base/{z}/{x}/{y}.png', 'https://tiles.tracestrack.com/base/{z}/{x}/{y}.png'],
+    //urls: ["https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.jpg90?access_token=pk.eyJ1Ijoic3Ryb25nd2lsbG93IiwiYSI6ImxKa2R1SEkifQ.iZ_vj1lvuvrAcUIl0ZE5XA"],
+    urls: [url],
+    crossOrigin: null,
+    tilePixelRatio: isRetina() ? 2 : 1
+  });
 
-base_source.on('tileloaderror', function(event) {
-  setTimeout(function(){
-    console.log("tile error")
-    event.tile.load()
-  }, 10000 * Math.random());
-});
+  base_source.on('tileloaderror', function(event) {
+    setTimeout(function(){
+      console.log("tile error")
+      event.tile.load()
+    }, 10000 * Math.random());
+  });
 
-let base_layer = new ol.layer.Tile({
-  preload: 5,
-  source: base_source,
-})
+  let base_layer = new ol.layer.Tile({
+    preload: 5,
+    source: base_source,
+  })
+  return base_layer;
+}
 
 var map = new ol.Map({
   target: 'map',
   interactions: interactions,
   maxTilesLoading: 12,
-  layers: [base_layer],
   controls: [new ol.control.Attribution({collapsible: true}), new ol.control.Zoom({className: "zoomControl"})],
   view: new ol.View({
     center: ol.proj.fromLonLat(lonlat),
@@ -188,10 +203,38 @@ var geolocation = new ol.Geolocation({
   projection: map.getView().getProjection(),
 });
 
+var baseLayer;
+
+function setBaseLayer(url) {
+  if (baseLayer) {
+    map.removeLayer(baseLayer);
+  }
+  baseLayer = getBaseLayer(url);
+  map.addLayer(baseLayer);
+}
+
+var isSatelliteBase = false;
+
+function toggleBaseLayer() {
+  if (isSatelliteBase) {
+    setBaseLayer("https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.jpg90?access_token=pk.eyJ1Ijoic3Ryb25nd2lsbG93IiwiYSI6ImxKa2R1SEkifQ.iZ_vj1lvuvrAcUIl0ZE5XA");
+    button_sat.innerHTML = `<img src="street.png" />`;
+  }
+  else {
+    setBaseLayer('https://' + subserver + 'tiles.tracestrack.com/base/{z}/{x}/{y}.png');
+    button_sat.innerHTML = `<img src="sat.png" />`;
+  }
+  if (labelName) {
+    setLanguageLayer(labelName);
+  }
+  isSatelliteBase = !isSatelliteBase;
+}
 
 var languageLayer;
+var labelName;
 
 function setLanguageLayer(label_name) {
+  labelName = label_name;
   if (languageLayer) {
     map.removeLayer(languageLayer);
   }
@@ -218,6 +261,8 @@ if (getCookie("lang") === "") {
 }
 
 setLanguageLayer(getCookie("lang"));
+
+toggleBaseLayer();
 
 function setRetinaEnabled(ena) {
   setCookie("retina", ena, 1000);
@@ -831,3 +876,75 @@ function calcDis(lat1, lon1, lat2, lon2)
   var d = R * c;
   return d * 1000; // m
 }
+
+function getRoute() {
+  var xhttp = new XMLHttpRequest();
+  let coord1 = [51.423530925068725, 5.43491075266295];
+  let coord2 = [52.09119812741357, 5.103599395490192];
+  let url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=5b3ce3597851110001cf62488c0ecc42793146ce96a0f582119e0812&start=${coord1[1]},${coord1[0]}&end=${coord2[1]},${coord2[0]}`;
+
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4) {
+      if (this.status == 200) {
+        let json = JSON.parse(this.responseText);
+
+        console.log(json.features[0].geometry.coordinates);
+        var polyline = new ol.geom.LineString(json.features[0].geometry.coordinates);
+        polyline.transform('EPSG:4326', 'EPSG:3857');
+
+        var routeFeature = new ol.Feature();
+        routeFeature.setStyle(new ol.style.Style({
+          stroke: new ol.style.Stroke({
+            width: 5,
+            color: "#000000"
+          })
+        }));
+
+        routeFeature.setGeometry(polyline);
+        new ol.layer.Vector({
+          map: map,
+          source: new ol.source.Vector({
+            features: [routeFeature],
+          }),
+        });
+
+      }
+      else {
+      alert("y");
+      }
+    }
+    else {
+
+    }
+  };
+
+
+  xhttp.open("GET", url, true);
+  xhttp.send();
+}
+
+/*
+var coo = [[0, 53.44241609], [5, 6.84913726]];
+var polyline = new ol.geom.LineString(coo);
+polyline.transform('EPSG:4326', 'EPSG:3857');
+
+
+var routeFeature = new ol.Feature();
+routeFeature.setStyle(new ol.style.Style({
+  stroke: new ol.style.Stroke({
+    width: 100,
+    color: "#000000"
+  })
+})
+);
+
+
+routeFeature.setGeometry(polyline);
+
+new ol.layer.Vector({
+  map: map,
+  source: new ol.source.Vector({
+    features: [routeFeature],
+  }),
+});
+*/

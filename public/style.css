@@ -33,7 +33,7 @@ html, body {
     left: 8px;
     bottom: 42px;
     width: 100px;
-    height: 36px;
+    height: 100px;
     background: rgba(255, 0, 0, 0);
 }
 
@@ -44,6 +44,16 @@ html, body {
 .goto_maps > button > img {
     width: 36px;
     height: 36px;
+}
+
+.goto_maps > button.sat_button {
+    margin: 8px;
+}
+
+.goto_maps > button.sat_button,
+.goto_maps > button.sat_button > img {
+    width: 64px;
+    height: 64px;
 }
 
 .ol-control {
