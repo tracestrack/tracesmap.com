@@ -43,7 +43,7 @@ function AboutPage({show, hide}) {
               <h4>Other information</h4>
               <p><small>
                    Map refresh period: 1 to 7 days <br />
-                   Please use a modern browser such as Chrome, Safari, Firefox, Edge, Opera <br />
+                   Please use a modern browser such as Chrome, Safari, Edge, Opera, Firefox <br />
                    Some tiles are generated on the fly, which could be slow <br />
                  </small>
               </p>

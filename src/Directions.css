@@ -1,0 +1,19 @@
+.directions_input {
+    width: 250px;
+    float: left;
+    margin-right: 10px;
+    margin-bottom: 5px;
+}
+
+.buttons {
+    float: left;
+}
+
+#directions_result {
+    width: 100%;
+    float: left;
+}
+
+.directions {
+    margin-top: 10px;
+}

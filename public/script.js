@@ -14,7 +14,7 @@ function iOS() {
 const coalesce = (...args) => args.find(_ => ![undefined, null].includes(_));
 
 var button = document.createElement('button');
-button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-fill" viewBox="0 0 16 16">  <path fill-rule="evenodd" d="M4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999zm2.493 8.574a.5.5 0 0 1-.411.575c-.712.118-1.28.295-1.655.493a1.319 1.319 0 0 0-.37.265.301.301 0 0 0-.057.09V14l.002.008a.147.147 0 0 0 .016.033.617.617 0 0 0 .145.15c.165.13.435.27.813.395.751.25 1.82.414 3.024.414s2.273-.163 3.024-.414c.378-.126.648-.265.813-.395a.619.619 0 0 0 .146-.15.148.148 0 0 0 .015-.033L12 14v-.004a.301.301 0 0 0-.057-.09 1.318 1.318 0 0 0-.37-.264c-.376-.198-.943-.375-1.655-.493a.5.5 0 1 1 .164-.986c.77.127 1.452.328 1.957.594C12.5 13 13 13.4 13 14c0 .426-.26.752-.544.977-.29.228-.68.413-1.116.558-.878.293-2.059.465-3.34.465-1.281 0-2.462-.172-3.34-.465-.436-.145-.826-.33-1.116-.558C3.26 14.752 3 14.426 3 14c0-.599.5-1 .961-1.243.505-.266 1.187-.467 1.957-.594a.5.5 0 0 1 .575.411z"/></svg>';
+button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M17.27 6.73l-4.24 10.13-1.32-3.42-.32-.83-.82-.32-3.43-1.33 10.13-4.23M21 3L3 10.53v.98l6.84 2.65L12.48 21h.98L21 3z"/></svg>'
 
 var goToCurrentLocation = function(e) {
   geolocation.setTracking(true);
@@ -221,11 +221,16 @@ function toggleBaseLayer() {
     button_sat.innerHTML = `<img src="street.png" />`;
   }
   else {
-    setBaseLayer('https://' + subserver + 'tiles.tracestrack.com/base/{z}/{x}/{y}.png');
+    setBaseLayer('https://a.tiles.tracestrack.com/base/{z}/{x}/{y}.png?key=d750a1a29e913dea376aca86cc95de5a');
     button_sat.innerHTML = `<img src="sat.png" />`;
   }
   if (labelName) {
     setLanguageLayer(labelName);
+  }
+
+  if (routeLayer) {
+    map.removeLayer(routeLayer);
+    map.addLayer(routeLayer);
   }
   isSatelliteBase = !isSatelliteBase;
 }
@@ -246,7 +251,7 @@ function setLanguageLayer(label_name) {
       imageSmoothing: true,
       cacheSize: 100,
       transition: 100,
-      urls: ['https://' + subserver + 'tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png', 'https://tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png'],
+      urls: ['https://b.tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=d750a1a29e913dea376aca86cc95de5a'],
       crossOrigin: null,
       tilePixelRatio: isRetina() ? 2 : 1
     }),
@@ -733,6 +738,8 @@ function updateURLPoiId(id) {
   window.location.href = "#" + qstr + "!" + id;
 }
 
+var routeCoords = [];
+
 map.on("click", function(evt) {
   popupOverlay.setPosition(undefined);
 
@@ -759,7 +766,26 @@ map.on("click", function(evt) {
     closePoi();
     removeSearchResult();
   }
+
+  if (document.getElementById("dir_from") != null) {
+
+    routeCoords.push(ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326'));
+
+    if (routeCoords.length == 1) {
+      document.getElementById("dir_from").value = toStringCoords(routeCoords[0]);
+      document.getElementById("dir_to").value = "";
+    }
+    else if (routeCoords.length == 2) {
+      document.getElementById("dir_to").value = toStringCoords(routeCoords[1]);
+      getRoute(routeCoords[0], routeCoords[1]);
+      routeCoords = [];
+    }
+  }
 });
+
+function toStringCoords(coord) {
+  return coord[1].toFixed(6) + ", " + coord[0].toFixed(6)
+}
 
 function showPoi(e) {
 
@@ -877,40 +903,62 @@ function calcDis(lat1, lon1, lat2, lon2)
   return d * 1000; // m
 }
 
-function getRoute() {
+function resetDirections() {
+  if (routeLayer)   {
+    map.removeLayer(routeLayer);
+    routeLayer = null;
+  }
+  document.getElementById("directions_result").innerHTML = "";
+  document.getElementById("dir_from").value = "";
+  document.getElementById("dir_to").value = "";
+}
+
+var routeLayer;
+function getRoute(coord1, coord2) {
   var xhttp = new XMLHttpRequest();
-  let coord1 = [51.423530925068725, 5.43491075266295];
-  let coord2 = [52.09119812741357, 5.103599395490192];
-  let url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=5b3ce3597851110001cf62488c0ecc42793146ce96a0f582119e0812&start=${coord1[1]},${coord1[0]}&end=${coord2[1]},${coord2[0]}`;
+
+  let url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=5b3ce3597851110001cf62488c0ecc42793146ce96a0f582119e0812&start=${coord1[0]},${coord1[1]}&end=${coord2[0]},${coord2[1]}`;
 
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4) {
       if (this.status == 200) {
+
+        if (routeLayer) {
+          console.log('rmeove')
+          map.removeLayer(routeLayer);
+        }
+
         let json = JSON.parse(this.responseText);
 
-        console.log(json.features[0].geometry.coordinates);
         var polyline = new ol.geom.LineString(json.features[0].geometry.coordinates);
         polyline.transform('EPSG:4326', 'EPSG:3857');
+
+        var summary = json.features[0].properties.summary;
+        console.log(summary);
+
+        var distance = parseInt(summary.distance) / 1000;
+        var duration = parseInt(summary.duration) / 60;
+
+        document.getElementById("directions_result").innerHTML = `Distance: ${distance.toFixed(2)} kilometers Duration: ${duration.toFixed(0)} minutes`;
 
         var routeFeature = new ol.Feature();
         routeFeature.setStyle(new ol.style.Style({
           stroke: new ol.style.Stroke({
             width: 5,
-            color: "#000000"
+            color: "#bc70ff"
           })
         }));
 
         routeFeature.setGeometry(polyline);
-        new ol.layer.Vector({
-          map: map,
+        routeLayer = new ol.layer.Vector({
           source: new ol.source.Vector({
             features: [routeFeature],
           }),
         });
-
+        map.addLayer(routeLayer);
       }
       else {
-      alert("y");
+        alert("route not found");
       }
     }
     else {
@@ -918,33 +966,6 @@ function getRoute() {
     }
   };
 
-
   xhttp.open("GET", url, true);
   xhttp.send();
 }
-
-/*
-var coo = [[0, 53.44241609], [5, 6.84913726]];
-var polyline = new ol.geom.LineString(coo);
-polyline.transform('EPSG:4326', 'EPSG:3857');
-
-
-var routeFeature = new ol.Feature();
-routeFeature.setStyle(new ol.style.Style({
-  stroke: new ol.style.Stroke({
-    width: 100,
-    color: "#000000"
-  })
-})
-);
-
-
-routeFeature.setGeometry(polyline);
-
-new ol.layer.Vector({
-  map: map,
-  source: new ol.source.Vector({
-    features: [routeFeature],
-  }),
-});
-*/
