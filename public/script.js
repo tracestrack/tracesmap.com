@@ -469,6 +469,7 @@ let POI_HOVER_STYLE = new ol.style.Style({
     }),
   }),
 });
+
 let POI_NORMAL_STYLE = new ol.style.Style({
   image: new ol.style.Circle({
     radius: 11,
@@ -739,7 +740,7 @@ function updateURLPoiId(id) {
 }
 
 var routeCoords = [];
-
+var acceptingClick = false;
 map.on("click", function(evt) {
   popupOverlay.setPosition(undefined);
 
@@ -767,21 +768,60 @@ map.on("click", function(evt) {
     removeSearchResult();
   }
 
-  if (document.getElementById("dir_from") != null) {
-
+  if (document.getElementById("dir_from") != null && acceptingClick) {
     routeCoords.push(ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326'));
 
     if (routeCoords.length == 1) {
       document.getElementById("dir_from").value = toStringCoords(routeCoords[0]);
       document.getElementById("dir_to").value = "";
+      addDirectionPoint(routeCoords[0]);
     }
     else if (routeCoords.length == 2) {
       document.getElementById("dir_to").value = toStringCoords(routeCoords[1]);
       getRoute(routeCoords[0], routeCoords[1]);
+      addDirectionPoint(routeCoords[1]);
       routeCoords = [];
+      acceptingClick = false;
     }
   }
 });
+
+let DIR_POINT_STYLE = new ol.style.Style({
+  image: new ol.style.Circle({
+    radius: 5,
+    fill: new ol.style.Fill({
+      color: '#7226b5'
+    }),
+    stroke: new ol.style.Stroke({
+      color: '#ffffffcc',
+      width: 1,
+    }),
+  }),
+});
+
+var directionPointLayers = []
+
+function addDirectionPoint(coord) {
+  var feature = new ol.Feature();
+  feature.setStyle(DIR_POINT_STYLE);
+  feature.setGeometry( new ol.geom.Point(ol.proj.fromLonLat([coord[0], coord[1]])));
+  const routeLayer = new ol.layer.Vector({
+    source: new ol.source.Vector({
+      features: [feature],
+    }),
+  });
+  map.addLayer(routeLayer);
+  directionPointLayers.push(routeLayer);
+}
+
+function clearDirectionPoints() {
+  for (var i in directionPointLayers) {
+    console.log(i);
+    map.removeLayer(directionPointLayers[i]);
+  }
+
+  directionPointLayers = [];
+}
 
 function toStringCoords(coord) {
   return coord[1].toFixed(6) + ", " + coord[0].toFixed(6)
@@ -911,6 +951,9 @@ function resetDirections() {
   document.getElementById("directions_result").innerHTML = "";
   document.getElementById("dir_from").value = "";
   document.getElementById("dir_to").value = "";
+  acceptingClick = true;
+  routeCoords = [];
+  clearDirectionPoints();
 }
 
 var routeLayer;
