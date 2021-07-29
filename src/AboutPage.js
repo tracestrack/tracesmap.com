@@ -26,11 +26,15 @@ function AboutPage({show, hide}) {
 
                    Map framework: <a href="http://openlayers.org">OpenLayers</a> <br/>
 
-                   Dynamic data is powered by <a href="http://overpass-api.de">Overpass API</a> <br/>
+                   Dynamic data: <a href="http://overpass-api.de">Overpass API</a> <br/>
 
-                   Maintainer: Qing Cai <br />
+                   Routing: <a href="https://openrouteservice.org">OpenRouteService</a> <br />
 
-                   If you have questions, please contact me at <b>[tracestrack@icloud.com]</b>
+                   Curator: Qing Cai <br />
+
+                   Support the project: <a href="https://www.patreon.com/tracestrack">Patreon</a> <br />
+
+                   Contact: <b>[tracestrack@icloud.com]</b>
 
                  </small>              </p>
 
@@ -42,9 +46,9 @@ function AboutPage({show, hide}) {
 
               <h4>Other information</h4>
               <p><small>
-                   Map refresh period: 1 to 7 days <br />
-                   Please use a modern browser such as Chrome, Safari, Edge, Opera, Firefox <br />
-                   Some tiles are generated on the fly, which could be slow <br />
+                   Map refreshing period: 1 to 7 days. Usually 3 days. <br />
+                   Please use a modern browser such as Chrome, Edge, Opera, Safari, Firefox. Chromium based browsers are recommended. <br />
+                   Some map tiles are generated on the fly, which could be slow. <br />
                  </small>
               </p>
             </Modal.Body>
