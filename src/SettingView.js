@@ -11,7 +11,7 @@ const langs = [["Local *", "_-name"],
                ["Dutch", "nl-name"],
                ["English *", "en-name"],
                ["Finnish", "fi-name"],
-               ["French *", "fr-name"],
+               ["French", "fr-name"],
                ["German", "de-name"],
                ["Hebrew", "he-name"],
                ["Hungarian", "hu-name"],
@@ -44,14 +44,6 @@ function SettingView({show, hide}) {
 
   const handleServerChange = function(e) {
     window.setServer(e);
-  }
-
-  const getServer = function() {
-    let c = window.getCookie("server");
-    if (c === "a" || c === "b") {
-      return c;
-    }
-    return "a";
   }
 
   return (<Modal
@@ -95,7 +87,7 @@ function SettingView({show, hide}) {
 
 
                     <Form.Text className="text-muted" size="sm">
-                      Languages with <b>*</b> has full zoom levels, otherwise up to 9.
+                      Languages with <b>*</b> has full zoom levels, otherwise up to 10.
                     </Form.Text>
 
               </Container>
