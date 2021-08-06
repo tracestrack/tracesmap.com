@@ -183,7 +183,7 @@ function getBaseLayer(url) {
 var map = new ol.Map({
   target: 'map',
   interactions: interactions,
-  maxTilesLoading: 12,
+  maxTilesLoading: 40,
   controls: [new ol.control.Attribution({collapsible: true}), new ol.control.Zoom({className: "zoomControl"})],
   view: new ol.View({
     center: ol.proj.fromLonLat(lonlat),
@@ -430,6 +430,14 @@ geolocation.on('change:position', function () {
   }
 
   lastCoordinate = coordinates;
+
+  if (acceptingCurrentLocation == "to") {
+    useCurrentLocationAsTo();
+  }
+  else if (acceptingCurrentLocation == "from") {
+    useCurrentLocationAsFrom();
+  }
+
 });
 
 
@@ -739,8 +747,7 @@ function updateURLPoiId(id) {
   window.location.href = "#" + qstr + "!" + id;
 }
 
-var routeCoords = [];
-var acceptingClick = false;
+var acceptingClick;
 map.on("click", function(evt) {
   popupOverlay.setPosition(undefined);
 
@@ -768,20 +775,19 @@ map.on("click", function(evt) {
     removeSearchResult();
   }
 
-  if (document.getElementById("dir_from") != null && acceptingClick) {
-    routeCoords.push(ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326'));
+  if (document.getElementById("dir_from") != null) {
 
-    if (routeCoords.length == 1) {
-      document.getElementById("dir_from").value = toStringCoords(routeCoords[0]);
-      document.getElementById("dir_to").value = "";
-      addDirectionPoint(routeCoords[0]);
+    const coord = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326')
+
+    if (acceptingClick == "from") {
+      document.getElementById("dir_from").value = toStringCoords(coord);
+      setDirectionPoint(coord, "from");
+      getRoute();
     }
-    else if (routeCoords.length == 2) {
-      document.getElementById("dir_to").value = toStringCoords(routeCoords[1]);
-      getRoute(routeCoords[0], routeCoords[1]);
-      addDirectionPoint(routeCoords[1]);
-      routeCoords = [];
-      acceptingClick = false;
+    else if (acceptingClick == "to") {
+      document.getElementById("dir_to").value = toStringCoords(coord);
+      setDirectionPoint(coord, "to");
+      getRoute();
     }
   }
 });
@@ -799,9 +805,10 @@ let DIR_POINT_STYLE = new ol.style.Style({
   }),
 });
 
-var directionPointLayers = []
+var directionPointFromLayer;
+var directionPointToLayer;
 
-function addDirectionPoint(coord) {
+function setDirectionPoint(coord, type) {
   var feature = new ol.Feature();
   feature.setStyle(DIR_POINT_STYLE);
   feature.setGeometry( new ol.geom.Point(ol.proj.fromLonLat([coord[0], coord[1]])));
@@ -811,16 +818,26 @@ function addDirectionPoint(coord) {
     }),
   });
   map.addLayer(routeLayer);
-  directionPointLayers.push(routeLayer);
+
+  if (type == "from") {
+
+    if (directionPointFromLayer)
+      map.removeLayer(directionPointFromLayer);
+    directionPointFromLayer = routeLayer;
+  }
+  else {
+    if (directionPointToLayer)
+      map.removeLayer(directionPointToLayer);
+    directionPointToLayer = routeLayer;
+  }
 }
 
 function clearDirectionPoints() {
-  for (var i in directionPointLayers) {
-    console.log(i);
-    map.removeLayer(directionPointLayers[i]);
-  }
+  if (directionPointFromLayer)
+    map.removeLayer(directionPointFromLayer);
 
-  directionPointLayers = [];
+  if (directionPointToLayer)
+    map.removeLayer(directionPointToLayer);
 }
 
 function toStringCoords(coord) {
@@ -951,16 +968,29 @@ function resetDirections() {
   document.getElementById("directions_result").innerHTML = "";
   document.getElementById("dir_from").value = "";
   document.getElementById("dir_to").value = "";
-  acceptingClick = true;
-  routeCoords = [];
+  acceptingClick = "";
   clearDirectionPoints();
 }
 
 var routeLayer;
-function getRoute(coord1, coord2) {
+function getRoute() {
+
+  const to = document.getElementById("dir_to").value;
+  const from = document.getElementById("dir_from").value;
+
+  if (to != "" && from != "") {
+    acceptingClick = "";
+  }
+  else {
+    return;
+  }
+
   var xhttp = new XMLHttpRequest();
 
-  let url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=5b3ce3597851110001cf62488c0ecc42793146ce96a0f582119e0812&start=${coord1[0]},${coord1[1]}&end=${coord2[0]},${coord2[1]}`;
+  const c1 = from.replace(/ /g, "").split(",");
+  const c2 = to.replace(/ /g, "").split(",");
+
+  let url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=5b3ce3597851110001cf62488c0ecc42793146ce96a0f582119e0812&start=${c1[1]},${c1[0]}&end=${c2[1]},${c2[0]}`;
 
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4) {
@@ -1011,4 +1041,33 @@ function getRoute(coord1, coord2) {
 
   xhttp.open("GET", url, true);
   xhttp.send();
+}
+
+var acceptingCurrentLocation;
+function useCurrentLocationAsFrom() {
+
+  if (lastCoordinate) {
+    document.getElementById("dir_from").value = formatCoordinate(lastCoordinate);
+    getRoute();
+  }
+  else {
+    geolocation.setTracking(true);
+    acceptingCurrentLocation = "from";
+  }
+}
+
+function useCurrentLocationAsTo() {
+
+  if (lastCoordinate) {
+    document.getElementById("dir_to").value = formatCoordinate(lastCoordinate);
+    getRoute();
+  }
+  else {
+    geolocation.setTracking(true);
+    acceptingCurrentLocation = "to";
+  }
+}
+
+function formatCoordinate(c) {
+  return toStringCoords(ol.proj.toLonLat(c));
 }
