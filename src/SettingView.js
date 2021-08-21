@@ -21,7 +21,7 @@ const langs = [["Local *", "_-name"],
                ["Portuguese", "pt-name"],
                ["Japanese", "ja-name"],
                ["Russian", "ru-name"],
-               ["Simplified Chinese *", "zh-hans-name"],
+               ["Simplified Chinese", "zh-hans-name"],
                ["Spanish", "es-name"],
                ["Traditional Chinese", "zh-hant-name"],
               ];
@@ -87,7 +87,7 @@ function SettingView({show, hide}) {
 
 
                     <Form.Text className="text-muted" size="sm">
-                      Languages with <b>*</b> has full zoom levels, otherwise up to 10.
+                      Languages with <b>*</b> has full zoom levels.
                     </Form.Text>
 
               </Container>

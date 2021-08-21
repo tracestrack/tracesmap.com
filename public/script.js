@@ -152,29 +152,26 @@ var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotat
 var subserver = server + '.';
 subserver = '';
 
-function getBaseLayer(url) {
+function getBaseLayer(urls) {
   let base_source = new ol.source.XYZ({
     attributions: [ol.source.OSM.ATTRIBUTION],
     opaque: true,
     imageSmoothing: true,
     cacheSize: 200,
-    transition: 200,
-    //urls: ['https://' + subserver + 'tiles.tracestrack.com/base/{z}/{x}/{y}.png', 'https://tiles.tracestrack.com/base/{z}/{x}/{y}.png'],
-    //urls: ["https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.jpg90?access_token=pk.eyJ1Ijoic3Ryb25nd2lsbG93IiwiYSI6ImxKa2R1SEkifQ.iZ_vj1lvuvrAcUIl0ZE5XA"],
-    urls: [url],
+    transition: 0,
+    urls: urls,
     crossOrigin: null,
     tilePixelRatio: isRetina() ? 2 : 1
   });
 
   base_source.on('tileloaderror', function(event) {
     setTimeout(function(){
-      console.log("tile error")
       event.tile.load()
-    }, 10000 * Math.random());
+    }, 5000 * Math.random());
   });
 
   let base_layer = new ol.layer.Tile({
-    preload: 5,
+    preload: 7,
     source: base_source,
   })
   return base_layer;
@@ -182,14 +179,15 @@ function getBaseLayer(url) {
 
 var map = new ol.Map({
   target: 'map',
+  moveTolerance: 10,
   interactions: interactions,
-  maxTilesLoading: 40,
+  maxTilesLoading: 50,
   controls: [new ol.control.Attribution({collapsible: true}), new ol.control.Zoom({className: "zoomControl"})],
   view: new ol.View({
     center: ol.proj.fromLonLat(lonlat),
     zoom: zoom,
     maxZoom: 19,
-    constrainResolution: true,
+    constrainResolution : true,
   })
 });
 
@@ -205,11 +203,11 @@ var geolocation = new ol.Geolocation({
 
 var baseLayer;
 
-function setBaseLayer(url) {
+function setBaseLayer(urls) {
   if (baseLayer) {
     map.removeLayer(baseLayer);
   }
-  baseLayer = getBaseLayer(url);
+  baseLayer = getBaseLayer(urls);
   map.addLayer(baseLayer);
 }
 
@@ -217,11 +215,11 @@ var isSatelliteBase = false;
 
 function toggleBaseLayer() {
   if (isSatelliteBase) {
-    setBaseLayer("https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.jpg90?access_token=pk.eyJ1Ijoic3Ryb25nd2lsbG93IiwiYSI6ImxKa2R1SEkifQ.iZ_vj1lvuvrAcUIl0ZE5XA");
+    setBaseLayer(["https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.jpg90?access_token=pk.eyJ1Ijoic3Ryb25nd2lsbG93IiwiYSI6ImxKa2R1SEkifQ.iZ_vj1lvuvrAcUIl0ZE5XA"]);
     button_sat.innerHTML = `<img src="street.png" />`;
   }
   else {
-    setBaseLayer('https://a.tiles.tracestrack.com/base/{z}/{x}/{y}.png?key=d750a1a29e913dea376aca86cc95de5a');
+    setBaseLayer(['https://a.tiles.tracestrack.com/base/{z}/{x}/{y}.png?key=d750a1a29e913dea376aca86cc95de5a','https://c.tiles.tracestrack.com/base/{z}/{x}/{y}.png?key=d750a1a29e913dea376aca86cc95de5a']);
     button_sat.innerHTML = `<img src="sat.png" />`;
   }
   if (labelName) {
@@ -250,8 +248,9 @@ function setLanguageLayer(label_name) {
       opaque: false,
       imageSmoothing: true,
       cacheSize: 100,
-      transition: 100,
-      urls: ['https://b.tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=d750a1a29e913dea376aca86cc95de5a'],
+      transition: 0,
+      urls: ['https://b.tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=d750a1a29e913dea376aca86cc95de5a',
+             'https://c.tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=d750a1a29e913dea376aca86cc95de5a'],
       crossOrigin: null,
       tilePixelRatio: isRetina() ? 2 : 1
     }),
@@ -318,18 +317,18 @@ function onMoveEnd(evt) {
   }
 
   if (z >= 13 && z <= 14) {
-    fetchPlaces();
+    //fetchPlaces();
   }
 
   if (z >= 19) {
     if (!lastPoiQueryCenter) {
-      postOverpass(center[0], center[1]);
+      //postOverpass(center[0], center[1]);
       return;
     }
 
     let dis = calcDis(center[1], center[0], lastPoiQueryCenter[1], lastPoiQueryCenter[0]);
     if (dis > 800) {
-      postOverpass(center[0], center[1]);
+      //postOverpass(center[0], center[1]);
     }
   }
 }

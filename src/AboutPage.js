@@ -43,10 +43,9 @@ function AboutPage({show, hide}) {
                 We do not harvest or analyze user data in any way. Cookies is used only to save user preferences locally.
               </p>
 
-
               <h4>Other information</h4>
               <p><small>
-                   Map refreshing period: 1 to 7 days. Usually 3 days. <br />
+                   Map refresh schedule coming up. <br />
                    Please use a modern browser such as Chrome, Edge, Opera, Safari, Firefox. Chromium based browsers are recommended. <br />
                    Some map tiles are generated on the fly, which could be slow. <br />
                  </small>
