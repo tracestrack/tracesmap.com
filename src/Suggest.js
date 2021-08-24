@@ -79,7 +79,6 @@ class Example extends React.Component {
             });
             dataResult = response;
 
-
             if (enterPressed && dataResult.length > 0) {
               let d = dataResult[0];
               window.showSearchResult(d);

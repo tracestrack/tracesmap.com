@@ -142,7 +142,7 @@ if (qstr !== "") {
 
 function isRetina() {
   if (window.devicePixelRatio == 1) {
-    return false
+    return true;
   }
   return getCookie("retina") !== "false";
 }
@@ -156,9 +156,9 @@ function getBaseLayer(urls) {
   let base_source = new ol.source.XYZ({
     attributions: [ol.source.OSM.ATTRIBUTION],
     opaque: true,
-    imageSmoothing: true,
+    imageSmoothing: false,
     cacheSize: 200,
-    transition: 0,
+    transition: 100,
     urls: urls,
     crossOrigin: null,
     tilePixelRatio: isRetina() ? 2 : 1
@@ -179,7 +179,6 @@ function getBaseLayer(urls) {
 
 var map = new ol.Map({
   target: 'map',
-  moveTolerance: 10,
   interactions: interactions,
   maxTilesLoading: 50,
   controls: [new ol.control.Attribution({collapsible: true}), new ol.control.Zoom({className: "zoomControl"})],
@@ -246,9 +245,9 @@ function setLanguageLayer(label_name) {
     preload: 5,
     source: new ol.source.XYZ({
       opaque: false,
-      imageSmoothing: true,
-      cacheSize: 100,
-      transition: 0,
+      imageSmoothing: false,
+      cacheSize: 200,
+      transition: 200,
       urls: ['https://b.tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=d750a1a29e913dea376aca86cc95de5a',
              'https://c.tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=d750a1a29e913dea376aca86cc95de5a'],
       crossOrigin: null,
@@ -645,15 +644,14 @@ out ids tags center;
   xhttp.send(data);
 }
 
-function postOverpass(lon, lat) {
+function postOverpass(lon, lat, cb) {
   var xhttp = new XMLHttpRequest();
 
-  lastPoiQueryCenter = [lon, lat];
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4) {
       if (this.status == 200) {
         let json = JSON.parse(this.responseText);
-        showPois(json);
+        cb(json);
       }
       else {
         lastPoiQueryCenter = null;
@@ -665,16 +663,14 @@ function postOverpass(lon, lat) {
 
   xhttp.open("POST", url, true);
   let dis = 1000;
-  let str = `[out:json][timeout:5];
+  let str = `[out:json][timeout:25];
 (
-  nwr["tourism"](around: ${dis}, ${lat}, ${lon});
-  nwr["leisure"]["name"](around: ${dis}, ${lat}, ${lon});
-  nwr["amenity"](around: ${dis}, ${lat}, ${lon});
-  nwr["office"](around: ${dis}, ${lat}, ${lon});
-  nwr["shop"](around: ${dis}, ${lat}, ${lon});
+  node["place"="city"](around: 1000, ${lat}, ${lon});
+  node["place"="town"](around: 1000, ${lat}, ${lon});
+  node["place"="suburb"](around: 1000, ${lat}, ${lon});
+  node["place"="village"](around: 1000, ${lat}, ${lon});
 );
-out ids tags center;
->;`;
+out 10;`;
 
   xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded; charset=UTF-8');
   let data = 'data=' + encodeURIComponent(str);
@@ -750,7 +746,7 @@ var acceptingClick;
 map.on("click", function(evt) {
   popupOverlay.setPosition(undefined);
 
-  var found = false
+/*  var found = false
   this.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
     if (feature.getProperties().name == "poi") {
       let id = feature.getProperties().id;
@@ -772,12 +768,31 @@ map.on("click", function(evt) {
   if (!found) {
     closePoi();
     removeSearchResult();
-  }
+  }*/
+/*
+  let z = map.getView().getZoom();
+  if (z <= 17 && z >= 9) {
 
+    postOverpass(coord[0], coord[1], function(json) {
+
+      var minDis = 9999;
+      var id = 0;
+      for (i in json.elements) {
+        var d = calcDis(coord[1], coord[0], json.elements[i].lat, json.elements[i].lon);
+        if (d < minDis) {
+          console.log(minDis + " " + i)
+          minDis = d;
+          id = i;
+        }
+      }
+
+      showPoi(json.elements[i]);
+    })
+*/
+
+  const coord = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326')
   if (document.getElementById("dir_from") != null) {
-
-    const coord = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326')
-
+    //nav
     if (acceptingClick == "from") {
       document.getElementById("dir_from").value = toStringCoords(coord);
       setDirectionPoint(coord, "from");
@@ -789,6 +804,7 @@ map.on("click", function(evt) {
       getRoute();
     }
   }
+
 });
 
 let DIR_POINT_STYLE = new ol.style.Style({
@@ -843,9 +859,9 @@ function toStringCoords(coord) {
   return coord[1].toFixed(6) + ", " + coord[0].toFixed(6)
 }
 
-function showPoi(e) {
+function showPoi(ele) {
 
-  let [lon, lat, tags, id, type] = e;
+  let {lon, lat, tags, id, type} = ele;
 
   function addLine(t, d) {
     return `<dt class="col-sm-3">${t}</dt>
