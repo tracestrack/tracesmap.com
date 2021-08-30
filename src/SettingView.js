@@ -1,4 +1,4 @@
-import { Container, Row, Col, Modal, Form, ToggleButton, ToggleButtonGroup } from 'react-bootstrap';
+import { ListGroup, Container, Row, Col, Modal, Form, ToggleButton, ToggleButtonGroup } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {useState} from "react";
 
@@ -29,71 +29,53 @@ const langs = [["Local *", "_-name"],
 function SettingView({show, hide}) {
 
   const [lang, setLang] = useState(window.getCookie('lang'));
-  const [retinaEnabled, setRetinaEnabled] = useState(window.getCookie('retina') !== "false");
+  //const [retinaEnabled, setRetinaEnabled] = useState(window.getCookie('retina') !== "false");
 
   const handleLanguage = function (e) {
-    let t = e.target.value;
-    window.setLanguageLayer(t);
-    setLang(_ => t);
+    let t = e.target.innerText;
+
+    var v = langs.filter(k => k[0] == t)[0][1];
+
+    window.setLanguageLayer(v);
+    setLang(_ => v);
   };
 
-  const handleRetinaEnabled = function(e) {
+  /*const handleRetinaEnabled = function(e) {
     window.setRetinaEnabled(e.target.checked);
     setRetinaEnabled(v => !v);
-  }
-
-  const handleServerChange = function(e) {
-    window.setServer(e);
-  }
+    }*/
 
   return (<Modal
-            show={show}
-            onHide={hide}
-            dialogClassName="modal-90w"
-            aria-labelledby="example-custom-modal-styling-title"
+              show={show}
+              onHide={hide}
+              dialogClassName="modal-90w"
+              aria-labelledby="example-custom-modal-styling-title"
           >
-            <Modal.Header closeButton>
-              <Modal.Title id="example-custom-modal-styling-title">
-                Settings
-              </Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
+          <Modal.Header closeButton>
+            <Modal.Title id="example-custom-modal-styling-title">
+              Settings
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
 
-              <Container>
+            <Container>
+              <h5>Languages</h5>
 
-                <Row>
-                  <Col>Language
-                  </Col>
-                  <Col>                 <Form.Group>
+              <div>
+                <Form.Text className="text-muted" size="sm">
+                  Languages with <b>*</b> has full zoom levels.
+                </Form.Text>
 
-                                           <Form.Control as="select" onChange={handleLanguage} >
-                                             {langs.map(k => <option action key={k[1]} value={k[1]} selected={k[1] === lang} >{k[0]}</option>)}
-                                           </Form.Control>
+                <ListGroup>
+                  {langs.map(k => <ListGroup.Item as="button" active={k[1] === lang} action onClick={handleLanguage}>
+                          {k[0]}
+                        </ListGroup.Item>)}
+                </ListGroup>
+              </div>
+            </Container>
 
-                                         </Form.Group></Col>
-
-                </Row>
-
-
-                <Row>
-                  <Col sm={10}>High Resolution Tiles</Col>
-                  <Col>                  <Form.Check
-                  type="switch"
-                  id="custom-switch"
-                  label=""
-                  checked={retinaEnabled}
-                  onChange={handleRetinaEnabled}  /></Col>
-                </Row>
-
-
-                    <Form.Text className="text-muted" size="sm">
-                      Languages with <b>*</b> has full zoom levels.
-                    </Form.Text>
-
-              </Container>
-
-            </Modal.Body>
-          </Modal>);
+          </Modal.Body>
+        </Modal>);
 };
 
 export default SettingView;
