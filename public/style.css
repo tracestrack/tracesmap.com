@@ -20,6 +20,8 @@ html, body {
     height: 100%;
     width: 100%;
     filter: saturate(150%);
+    background-color: #f2efe9;
+    background-image: url(bg.png);
 }
 
 .current_loc {
@@ -140,4 +142,18 @@ _::-webkit-full-page-media, _:future, #poi, .top {
 
 #popup-content {
 
+}
+
+#popup-context {
+    text-align: center;
+    display: none;
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    position: absolute;
+    left: calc(50% - 80px);
+    bottom: 20px;
+    width: 160px;
+    height: 60px;
+    font-size: 12px;
 }

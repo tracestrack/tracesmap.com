@@ -8,7 +8,7 @@ function iOS() {
     'iPod'
   ].includes(navigator.platform)
   // iPad on iOS 13 detection
-    || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+    || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
 }
 
 const coalesce = (...args) => args.find(_ => ![undefined, null].includes(_));
@@ -201,7 +201,6 @@ var geolocation = new ol.Geolocation({
 });
 
 var baseLayer;
-
 function setBaseLayer(urls) {
   if (baseLayer) {
     map.removeLayer(baseLayer);
@@ -290,6 +289,8 @@ function setURL(lonlat, zoom) {
   setCookie("qstr", qstr, 1000);
 }
 
+map.on('moveend', onMoveEnd);
+
 function onMoveEnd(evt) {
   var map = evt.map;
   let z = map.getView().getZoom();
@@ -305,34 +306,8 @@ function onMoveEnd(evt) {
       poiLayer.setVisible(false);
     }
   }
-
-  if (placesLayer) {
-    if (z >= 13 && z <= 14) {
-      placesLayer.setVisible(true);
-    }
-    else {
-      placesLayer.setVisible(false);
-    }
-  }
-
-  if (z >= 13 && z <= 14) {
-    //fetchPlaces();
-  }
-
-  if (z >= 19) {
-    if (!lastPoiQueryCenter) {
-      //postOverpass(center[0], center[1]);
-      return;
-    }
-
-    let dis = calcDis(center[1], center[0], lastPoiQueryCenter[1], lastPoiQueryCenter[0]);
-    if (dis > 800) {
-      //postOverpass(center[0], center[1]);
-    }
-  }
 }
 
-map.on('moveend', onMoveEnd);
 
 var container = document.getElementById('popup');
 var content = document.getElementById('popup-content');
@@ -349,25 +324,7 @@ map.addOverlay(popupOverlay);
 var prevFeature;
 map.on("pointermove", function (evt) {
   var hit = this.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
-    if (feature.getProperties().name == "poi") {
-      if (prevFeature) {
-        prevFeature.setStyle(POI_NORMAL_STYLE);
-      }
-
-      feature.setStyle(POI_HOVER_STYLE);
-      prevFeature = feature;
-
-      let id = feature.getProperties().id;
-      let r = poi_map.filter(x => x[3] == id);
-
-      var coordinate = feature.getProperties().geometry.getCoordinates();
-
-      content.innerHTML = coalesce(r[0][2].name, "No name");
-
-      coordinate = [coordinate[0] - 2, coordinate[1] - 5];
-      popupOverlay.setPosition(coordinate);
-    }
-    else if (feature.getProperties().name == "place") {
+    if (feature.getProperties().name == "place") {
 
       let id = feature.getProperties().id;
       let r = places_map.filter(x => x[3] == id);
@@ -482,22 +439,18 @@ let POI_NORMAL_STYLE = new ol.style.Style({
     fill: new ol.style.Fill({
       color: '#FFFF0011',
     }),
-    stroke: new ol.style.Stroke({
-      color: '#ffffffcc',
-      width: 2,
-    }),
+    stroke: new ol.style.Stroke({color: '#ff00ff55', width: 2}),
   }),
 });
 
-
 let PLACE_NORMAL_STYLE = new ol.style.Style({
   image: new ol.style.RegularShape({
-    fill: new ol.style.Fill({color: '#FFFFFF22'}),
-    stroke: new ol.style.Stroke({color: '#000000ff', width: 0}),
-    points: 4,
-    radius: 80 / Math.SQRT2,
-    radius2: 3.14 * 80,
-    scale: [1, 0.5]
+    fill: new ol.style.Fill({color: '#FFFFFF11'}),
+    stroke: new ol.style.Stroke({color: '#ff00ff55', width: 2}),
+    points: 5,
+    radius: 20,
+    radius2: 14,
+    angle: 0,
   })
 });
 
@@ -508,9 +461,14 @@ function createPoiFeature(geo, id) {
   return feature;
 };
 
-function createPlacesFeature(geo, id) {
+function createPlacesFeature(geo, tags, id) {
   var feature = new ol.Feature({name: "place", id: id});
-  feature.setStyle(PLACE_NORMAL_STYLE);
+  if (tags["place"]) {
+    feature.setStyle(PLACE_NORMAL_STYLE);
+  }
+  else {
+    feature.setStyle(POI_NORMAL_STYLE);
+  }
   feature.setGeometry(geo);
   return feature;
 };
@@ -579,72 +537,7 @@ function updatePoiLayer(features) {
   map.addLayer(poiLayer);
 }
 
-var lastPoiQueryCenter;
-
-function getBBox() {
-  let extent = map.getView().calculateExtent();
-  console.log(extent);
-
-  extent = ol.extent.buffer(extent, 10000);
-  console.log(extent);
-
-  let tl = ol.proj.toLonLat(ol.extent.getTopLeft(extent));
-  let br = ol.proj.toLonLat(ol.extent.getBottomRight(extent));
-  return {tl, br, extent};
-};
-
-var lastLoadedExtent;
-var isLoadingExtent = false;
-function fetchPlaces() {
-
-  if (isLoadingExtent) return;
-
-  let currentExtent = map.getView().calculateExtent();
-
-  if (lastLoadedExtent) {
-    console.log(lastLoadedExtent, currentExtent);
-    if (ol.extent.containsExtent(lastLoadedExtent, currentExtent)) {
-      return;
-    }
-  }
-
-  let {tl, br, extent} = getBBox();
-
-  var xhttp = new XMLHttpRequest();
-  console.log(extent);
-  isLoadingExtent = true
-
-  xhttp.onreadystatechange = function() {
-    if (this.readyState == 4) {
-      isLoadingExtent = false;
-
-      if (this.status == 200) {
-        lastLoadedExtent = extent;
-
-        let json = JSON.parse(this.responseText);
-        showPlaces(json);
-      }
-    }
-  };
-
-  let url = "https://lz4.overpass-api.de/api/interpreter";
-
-  xhttp.open("POST", url, true);
-  let dis = 1000;
-  let str = `[out:json][timeout:5];
-(
-  node["place"="city"](${br[1]},${tl[0]},${tl[1]},${br[0]});
-  node["place"="town"](${br[1]},${tl[0]},${tl[1]},${br[0]});
-);
-out ids tags center;
->;`;
-
-  xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded; charset=UTF-8');
-  let data = 'data=' + encodeURIComponent(str);
-  xhttp.send(data);
-}
-
-function postOverpass(lon, lat, cb) {
+function postOverpass(data, cb) {
   var xhttp = new XMLHttpRequest();
 
   xhttp.onreadystatechange = function() {
@@ -662,19 +555,10 @@ function postOverpass(lon, lat, cb) {
   let url = "https://lz4.overpass-api.de/api/interpreter";
 
   xhttp.open("POST", url, true);
-  let dis = 1000;
-  let str = `[out:json][timeout:25];
-(
-  node["place"="city"](around: 1000, ${lat}, ${lon});
-  node["place"="town"](around: 1000, ${lat}, ${lon});
-  node["place"="suburb"](around: 1000, ${lat}, ${lon});
-  node["place"="village"](around: 1000, ${lat}, ${lon});
-);
-out 10;`;
 
   xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded; charset=UTF-8');
-  let data = 'data=' + encodeURIComponent(str);
-  xhttp.send(data);
+  let wrapped_data = 'data=' + encodeURIComponent(data);
+  xhttp.send(wrapped_data);
 }
 
 var places_map = [];
@@ -683,41 +567,9 @@ function showPlaces(res) {
 
   places_map = res.elements.map(x => [x["center"] ? x["center"]["lon"] : x.lon, x["center"] ? x["center"]["lat"] : x.lat, x.tags, x.id, x.type]);
 
-  let features = places_map.map(x => createPlacesFeature(new ol.geom.Point(ol.proj.fromLonLat([x[0], x[1]])), x[3]));
+  let features = places_map.map(x => createPlacesFeature(new ol.geom.Point(ol.proj.fromLonLat([x[0], x[1]])), x[2], x[3]));
 
   updatePlacesLayer(features);
-}
-
-var poi_map = [];
-var poi_ids = new Map();
-
-function showPois(res) {
-
-  console.log(res);
-
-  let tmp = res.elements.map(x => [x["center"] ? x["center"]["lon"] : x.lon, x["center"] ? x["center"]["lat"] : x.lat, x.tags, x.id, x.type]);
-
-  for (i in tmp) {
-    let id = tmp[i][3];
-    if (!poi_ids.has(id)) {
-      poi_map.push(tmp[i]);
-      poi_ids.set(id, tmp[i]);
-    }
-  }
-
-  if (map.getView().getZoom() <= 18) {
-    return;
-  }
-
-  let features = poi_map.map(x => createPoiFeature(new ol.geom.Point(ol.proj.fromLonLat([x[0], x[1]])), x[3]));
-
-  updatePoiLayer(features);
-
-  if (selectedPoiId) {
-    let found = poi_map.filter(x => x[3] == selectedPoiId);
-    showPoi(found[0]);
-    selectedPoiId = null;
-  }
 }
 
 new ol.layer.Vector({
@@ -742,11 +594,36 @@ function updateURLPoiId(id) {
   window.location.href = "#" + qstr + "!" + id;
 }
 
-var acceptingClick;
+/*map.on('movestart', function() {
+
+})*/
+
+function findNearby(z) {
+  var pc = document.getElementById("coord");
+  var latlon = pc.innerHTML;
+
+  var data;
+  if (z >= 17) {
+    data = `[out:json][timeout:25];(nwr["amenity"](around: 100, ${latlon});nwr["shop"](around: 100, ${latlon});nwr["office"](around: 100, ${latlon});nwr["leisure"](around: 100, ${latlon});nwr["tourism"](around: 100, ${latlon}););out 100;`
+    postOverpass(data, function(json) {
+      showPlaces(json)
+    })
+  }
+  else if (z >= 10 && z <= 16){
+    data = `[out:json][timeout:25];(node["place"](around: 1000, ${latlon}););out 10;`
+    postOverpass(data, function(json) {
+      showPlaces(json)
+    })
+  }
+  var pc = document.getElementById("popup-context");
+  pc.style.display = "none";
+}
+
 map.on("click", function(evt) {
+
   popupOverlay.setPosition(undefined);
 
-/*  var found = false
+  var found = false
   this.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
     if (feature.getProperties().name == "poi") {
       let id = feature.getProperties().id;
@@ -758,7 +635,7 @@ map.on("click", function(evt) {
     }
     else if (feature.getProperties().name == "place") {
       let id = feature.getProperties().id;
-      updateURLPoiId(id);
+      //updateURLPoiId(id);
 
       let r = places_map.filter(x => x[3] == id);
       showPoi(r[0]);
@@ -768,27 +645,7 @@ map.on("click", function(evt) {
   if (!found) {
     closePoi();
     removeSearchResult();
-  }*/
-/*
-  let z = map.getView().getZoom();
-  if (z <= 17 && z >= 9) {
-
-    postOverpass(coord[0], coord[1], function(json) {
-
-      var minDis = 9999;
-      var id = 0;
-      for (i in json.elements) {
-        var d = calcDis(coord[1], coord[0], json.elements[i].lat, json.elements[i].lon);
-        if (d < minDis) {
-          console.log(minDis + " " + i)
-          minDis = d;
-          id = i;
-        }
-      }
-
-      showPoi(json.elements[i]);
-    })
-*/
+  }
 
   const coord = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326')
   if (document.getElementById("dir_from") != null) {
@@ -804,6 +661,26 @@ map.on("click", function(evt) {
       getRoute();
     }
   }
+
+});
+
+var acceptingClick;
+map.on("singleclick", function(evt) {
+
+  const coord = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326')
+  const z = map.getView().getZoom();
+  let type = ""
+  if (z >= 10 && z <= 16) {
+    type = "places"
+  }
+  else if (z >= 17)
+  {
+    type = "POIs"
+  }
+
+  var pc = document.getElementById("popup-context");
+  pc.style.display = "block";
+  pc.innerHTML = "<span id='coord'>" + toStringCoords(coord) + `</span><button onclick='findNearby(${z})'>Nearby ${type}</button>`;
 
 });
 
@@ -861,7 +738,9 @@ function toStringCoords(coord) {
 
 function showPoi(ele) {
 
-  let {lon, lat, tags, id, type} = ele;
+  console.log(ele)
+
+  let [lon, lat, tags, id, type] = ele;
 
   function addLine(t, d) {
     return `<dt class="col-sm-3">${t}</dt>
@@ -871,7 +750,7 @@ function showPoi(ele) {
   let name = coalesce(tags.name, "Unnamed");
   let cat = coalesce(tags['shop'], tags['office'], tags['amenity'], tags['tourism'], tags['leisure'], tags['place'], tags['aeroway']).replace(/_/g, " ");
 
-  let latlon = [lat, lon].join(", ");
+  let latlon = toStringCoords([lon, lat]);
 
   var str = `<div class="close"><button type="button" class="btn-close" aria-label="Close" onclick="closePoi()"></button></div>`;
   str += `<h2>${name}</h2><h4>${cat}</h4><hr /><dl class="row">`
@@ -1072,7 +951,6 @@ function useCurrentLocationAsFrom() {
 }
 
 function useCurrentLocationAsTo() {
-
   if (lastCoordinate) {
     document.getElementById("dir_to").value = formatCoordinate(lastCoordinate);
     getRoute();
