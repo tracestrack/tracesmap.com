@@ -49,13 +49,13 @@ html, body {
 }
 
 .goto_maps > button.sat_button {
-    margin: 8px;
+    margin: 0 12px 5px 15px;
 }
 
 .goto_maps > button.sat_button,
 .goto_maps > button.sat_button > img {
-    width: 64px;
-    height: 64px;
+    width: 50px;
+    height: 50px;
 }
 
 .ol-control {
@@ -156,4 +156,29 @@ _::-webkit-full-page-media, _:future, #poi, .top {
     width: 160px;
     height: 60px;
     font-size: 12px;
+}
+
+#popup-list {
+    text-align: center;
+    display: absolute;
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    position: absolute;
+    right: 20px;
+    top: 100px;
+    width: 160px;
+    height: 300px;
+    font-size: 12px;
+    overflow: scroll;
+}
+
+li {
+    display:block !important;
+    width: 100%;
+}
+
+li:hover {
+    background: #ccc;
+    width: 100%;
 }

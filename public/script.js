@@ -454,14 +454,8 @@ let PLACE_NORMAL_STYLE = new ol.style.Style({
   })
 });
 
-function createPoiFeature(geo, id) {
-  var feature = new ol.Feature({name: "poi", id: id});
-  feature.setStyle(POI_NORMAL_STYLE);
-  feature.setGeometry(geo);
-  return feature;
-};
-
 function createPlacesFeature(geo, tags, id) {
+
   var feature = new ol.Feature({name: "place", id: id});
   if (tags["place"]) {
     feature.setStyle(PLACE_NORMAL_STYLE);
@@ -561,6 +555,14 @@ function postOverpass(data, cb) {
   xhttp.send(wrapped_data);
 }
 
+function mouseoverlist(i) {
+  console.log(places_map[i])
+}
+
+function mouseclicklist(i) {
+  showPoi(places_map[i]);
+}
+
 var places_map = [];
 function showPlaces(res) {
   console.log(res);
@@ -568,6 +570,13 @@ function showPlaces(res) {
   places_map = res.elements.map(x => [x["center"] ? x["center"]["lon"] : x.lon, x["center"] ? x["center"]["lat"] : x.lat, x.tags, x.id, x.type]);
 
   let features = places_map.map(x => createPlacesFeature(new ol.geom.Point(ol.proj.fromLonLat([x[0], x[1]])), x[2], x[3]));
+
+  var list = "";
+  for(var i in places_map) {
+    list += `<li onmouseenter='mouseoverlist(${i})'><a href='javascript:mouseclicklist(${i})'>` + places_map[i][2]["name"] + "</a></li>";
+  }
+
+  document.getElementById("popup-list").innerHTML = list;
 
   updatePlacesLayer(features);
 }
@@ -594,9 +603,9 @@ function updateURLPoiId(id) {
   window.location.href = "#" + qstr + "!" + id;
 }
 
-/*map.on('movestart', function() {
-
-})*/
+map.on('movestart', function() {
+  document.getElementById("popup-context").style.display = "none";
+})
 
 function findNearby(z) {
   var pc = document.getElementById("coord");
@@ -604,7 +613,8 @@ function findNearby(z) {
 
   var data;
   if (z >= 17) {
-    data = `[out:json][timeout:25];(nwr["amenity"](around: 100, ${latlon});nwr["shop"](around: 100, ${latlon});nwr["office"](around: 100, ${latlon});nwr["leisure"](around: 100, ${latlon});nwr["tourism"](around: 100, ${latlon}););out 100;`
+    data = `[out:json][timeout:25];(nwr["amenity"](around: 100, ${latlon});nwr["shop"](around: 100, ${latlon});nwr["office"](around: 100, ${latlon});nwr["leisure"](around: 100, ${latlon});nwr["tourism"](around: 100, ${latlon}););out ids tags center;`
+
     postOverpass(data, function(json) {
       showPlaces(json)
     })
@@ -625,17 +635,9 @@ map.on("click", function(evt) {
 
   var found = false
   this.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
-    if (feature.getProperties().name == "poi") {
+    if (feature.getProperties().name == "place") {
       let id = feature.getProperties().id;
       updateURLPoiId(id);
-
-      let r = poi_map.filter(x => x[3] == id);
-      showPoi(r[0]);
-      found = true;
-    }
-    else if (feature.getProperties().name == "place") {
-      let id = feature.getProperties().id;
-      //updateURLPoiId(id);
 
       let r = places_map.filter(x => x[3] == id);
       showPoi(r[0]);
@@ -645,6 +647,9 @@ map.on("click", function(evt) {
   if (!found) {
     closePoi();
     removeSearchResult();
+  }
+  else {
+    return;
   }
 
   const coord = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326')
@@ -662,12 +667,6 @@ map.on("click", function(evt) {
     }
   }
 
-});
-
-var acceptingClick;
-map.on("singleclick", function(evt) {
-
-  const coord = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326')
   const z = map.getView().getZoom();
   let type = ""
   if (z >= 10 && z <= 16) {
@@ -676,6 +675,9 @@ map.on("singleclick", function(evt) {
   else if (z >= 17)
   {
     type = "POIs"
+  }
+  else {
+    return;
   }
 
   var pc = document.getElementById("popup-context");
@@ -695,6 +697,13 @@ let DIR_POINT_STYLE = new ol.style.Style({
       width: 1,
     }),
   }),
+
+});
+
+var acceptingClick;
+map.on("singleclick", function(evt) {
+
+
 });
 
 var directionPointFromLayer;
