@@ -563,6 +563,10 @@ function mouseclicklist(i) {
   showPoi(places_map[i]);
 }
 
+function closelist() {
+  document.getElementById("popup-list").style.display = "none";
+}
+
 var places_map = [];
 function showPlaces(res) {
   console.log(res);
@@ -571,12 +575,13 @@ function showPlaces(res) {
 
   let features = places_map.map(x => createPlacesFeature(new ol.geom.Point(ol.proj.fromLonLat([x[0], x[1]])), x[2], x[3]));
 
-  var list = "";
+  var list = `<h5>List</h5><div class="close"><button type="button" class="btn-close" aria-label="Close" onclick="closelist()" /></div>`;
   for(var i in places_map) {
     list += `<li onmouseenter='mouseoverlist(${i})'><a href='javascript:mouseclicklist(${i})'>` + places_map[i][2]["name"] + "</a></li>";
   }
 
   document.getElementById("popup-list").innerHTML = list;
+  document.getElementById("popup-list").style.display = "block";
 
   updatePlacesLayer(features);
 }
