@@ -168,7 +168,7 @@ _::-webkit-full-page-media, _:future, #poi, .top {
 
 #popup-list {
     text-align: center;
-    display: absolute;
+    display: none;
     background: white;
     padding: 10px;
     border-radius: 5px;

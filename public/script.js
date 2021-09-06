@@ -688,7 +688,7 @@ map.on("click", function(evt) {
   var pc = document.getElementById("popup-context");
   pc.style.display = "block";
   pc.innerHTML = "<span id='coord'>" + toStringCoords(coord) + `</span><button onclick='findNearby(${z})'>Nearby ${type}</button>`;
-
+  setClickPoint(coord);
 });
 
 let DIR_POINT_STYLE = new ol.style.Style({
@@ -705,11 +705,44 @@ let DIR_POINT_STYLE = new ol.style.Style({
 
 });
 
+let CLICK_POINT_STYLE = new ol.style.Style({
+  image: new ol.style.Circle({
+    radius: 5,
+    fill: new ol.style.Fill({
+      color: '#ffe091'
+    }),
+    stroke: new ol.style.Stroke({
+      color: '#b0b0b0',
+      width: 2,
+    }),
+  }),
+
+});
+
 var acceptingClick;
 map.on("singleclick", function(evt) {
 
 
 });
+
+
+var clickPointLayer;
+function setClickPoint(coord) {
+
+  if (clickPointLayer) {
+    map.removeLayer(clickPointLayer);
+  }
+
+  var feature = new ol.Feature();
+  feature.setStyle(CLICK_POINT_STYLE);
+  feature.setGeometry( new ol.geom.Point(ol.proj.fromLonLat(coord)));
+  clickPointLayer = new ol.layer.Vector({
+    source: new ol.source.Vector({
+      features: [feature],
+    }),
+  });
+  map.addLayer(clickPointLayer);
+}
 
 var directionPointFromLayer;
 var directionPointToLayer;
