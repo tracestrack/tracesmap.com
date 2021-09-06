@@ -332,8 +332,6 @@ map.on("pointermove", function (evt) {
       var coordinate = feature.getProperties().geometry.getCoordinates();
 
       content.innerHTML = coalesce(r[0][2].name, "No name");
-
-      coordinate = [coordinate[0] - 2, coordinate[1] - 5];
       popupOverlay.setPosition(coordinate);
     }
     return true;
@@ -447,10 +445,10 @@ let PLACE_NORMAL_STYLE = new ol.style.Style({
   image: new ol.style.RegularShape({
     fill: new ol.style.Fill({color: '#FFFFFF11'}),
     stroke: new ol.style.Stroke({color: '#ff00ff55', width: 2}),
-    points: 5,
-    radius: 20,
-    radius2: 14,
-    angle: 0,
+    points: 6,
+    radius: 10,
+    radius2: 10,
+    angle: 00,
   })
 });
 

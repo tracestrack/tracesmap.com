@@ -143,13 +143,13 @@ _::-webkit-full-page-media, _:future, #poi, .top {
 }
 
 #popup {
-    background: white;
+    margin: 20px 0 0 0;
+    background: #ffffffcc;
     padding: 10px;
     border-radius: 5px;
 }
 
 #popup-content {
-
 }
 
 #popup-context {
