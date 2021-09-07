@@ -140,13 +140,6 @@ if (qstr !== "") {
   zoom = maploc[0]
 }
 
-function isRetina() {
-  if (window.devicePixelRatio == 1) {
-    return true;
-  }
-  return getCookie("retina") !== "false";
-}
-
 var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false, doubleClickZoom: true, keyboard: true, shiftDragZoom: true, dragPan: true});
 
 var subserver = server + '.';
@@ -161,7 +154,7 @@ function getBaseLayer(urls) {
     transition: 100,
     urls: urls,
     crossOrigin: null,
-    tilePixelRatio: isRetina() ? 2 : 1
+    tilePixelRatio: 2
   });
 
   base_source.on('tileloaderror', function(event) {
@@ -250,7 +243,7 @@ function setLanguageLayer(label_name) {
       urls: ['https://b.tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=d750a1a29e913dea376aca86cc95de5a',
              'https://c.tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=d750a1a29e913dea376aca86cc95de5a'],
       crossOrigin: null,
-      tilePixelRatio: isRetina() ? 2 : 1
+      tilePixelRatio: 2
     }),
   });
   map.addLayer(languageLayer);
@@ -326,8 +319,14 @@ map.on("pointermove", function (evt) {
   var hit = this.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
     if (feature.getProperties().name == "place") {
 
+      prevFeature = feature;
+
       let id = feature.getProperties().id;
       let r = places_map.filter(x => x[3] == id);
+
+      if (id != poi_selected_id) {
+        feature.setStyle(POI_HOVER_STYLE);
+      }
 
       var coordinate = feature.getProperties().geometry.getCoordinates();
 
@@ -339,11 +338,13 @@ map.on("pointermove", function (evt) {
   if (hit) {
     this.getTargetElement().style.cursor = 'pointer';
   } else {
-    popupOverlay.setPosition(undefined);
-    this.getTargetElement().style.cursor = '';
-    if (prevFeature) {
-      prevFeature.setStyle(POI_NORMAL_STYLE);
-      prevFeature = null;
+    if (prevFeature && prevFeature.getProperties().id != poi_selected_id) {
+      popupOverlay.setPosition(undefined);
+      this.getTargetElement().style.cursor = '';
+      if (prevFeature) {
+        prevFeature.setStyle(POI_NORMAL_STYLE);
+        prevFeature = null;
+      }
     }
   }
 });
@@ -418,6 +419,19 @@ function createSearchFeature(geo) {
   return searchFeature;
 };
 
+let POI_SELECTED_STYLE = new ol.style.Style({
+  image: new ol.style.Circle({
+    radius: 15,
+    fill: new ol.style.Fill({
+      color: '#FFFFee11',
+    }),
+    stroke: new ol.style.Stroke({
+      color: '#ff00ff55',
+      width: 4,
+    }),
+  }),
+});
+
 let POI_HOVER_STYLE = new ol.style.Style({
   image: new ol.style.Circle({
     radius: 11,
@@ -425,8 +439,8 @@ let POI_HOVER_STYLE = new ol.style.Style({
       color: '#FFFFee11',
     }),
     stroke: new ol.style.Stroke({
-      color: '#ffffffcc',
-      width: 4,
+      color: '#ff00ff55',
+      width: 3,
     }),
   }),
 });
@@ -437,7 +451,7 @@ let POI_NORMAL_STYLE = new ol.style.Style({
     fill: new ol.style.Fill({
       color: '#FFFF0011',
     }),
-    stroke: new ol.style.Stroke({color: '#ff00ff55', width: 2}),
+    stroke: new ol.style.Stroke({color: '#ff00ff55', width: 1}),
   }),
 });
 
@@ -456,7 +470,7 @@ function createPlacesFeature(geo, tags, id) {
 
   var feature = new ol.Feature({name: "place", id: id});
   if (tags["place"]) {
-    feature.setStyle(PLACE_NORMAL_STYLE);
+    feature.setStyle(POI_NORMAL_STYLE);//    feature.setStyle(PLACE_NORMAL_STYLE);
   }
   else {
     feature.setStyle(POI_NORMAL_STYLE);
@@ -557,8 +571,18 @@ function mouseoverlist(i) {
   console.log(places_map[i])
 }
 
+
+var poi_selected_id = -1;
+
 function mouseclicklist(i) {
+
   showPoi(places_map[i]);
+
+  if(prevFeature && poi_selected_id != place_features[i].getProperties().id) prevFeature.setStyle(POI_NORMAL_STYLE);
+
+  prevFeature = place_features[i]
+  prevFeature.setStyle(POI_SELECTED_STYLE)
+  poi_selected_id = prevFeature.getProperties().id;
 }
 
 function closelist() {
@@ -566,12 +590,13 @@ function closelist() {
 }
 
 var places_map = [];
+var place_features = [];
 function showPlaces(res) {
   console.log(res);
 
   places_map = res.elements.map(x => [x["center"] ? x["center"]["lon"] : x.lon, x["center"] ? x["center"]["lat"] : x.lat, x.tags, x.id, x.type]);
 
-  let features = places_map.map(x => createPlacesFeature(new ol.geom.Point(ol.proj.fromLonLat([x[0], x[1]])), x[2], x[3]));
+  place_features = places_map.map(x => createPlacesFeature(new ol.geom.Point(ol.proj.fromLonLat([x[0], x[1]])), x[2], x[3]));
 
   var list = `<h5>List</h5><div class="close"><button type="button" class="btn-close" aria-label="Close" onclick="closelist()" /></div>`;
   for(var i in places_map) {
@@ -581,7 +606,7 @@ function showPlaces(res) {
   document.getElementById("popup-list").innerHTML = list;
   document.getElementById("popup-list").style.display = "block";
 
-  updatePlacesLayer(features);
+  updatePlacesLayer(place_features);
 }
 
 new ol.layer.Vector({
@@ -636,6 +661,13 @@ map.on("click", function(evt) {
 
   popupOverlay.setPosition(undefined);
 
+  if (poi_selected_id > -1) {
+    console.log(poi_selected_id)
+    for(var i in place_features) {
+      place_features[i].setStyle(POI_NORMAL_STYLE);
+    }
+  }
+
   var found = false
   this.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
     if (feature.getProperties().name == "place") {
@@ -645,11 +677,16 @@ map.on("click", function(evt) {
       let r = places_map.filter(x => x[3] == id);
       showPoi(r[0]);
       found = true;
+
+
+      feature.setStyle(POI_SELECTED_STYLE);
+      poi_selected_id = id;
     }
   });
   if (!found) {
     closePoi();
     removeSearchResult();
+    poi_selected_id = -1;
   }
   else {
     return;

@@ -143,7 +143,7 @@ _::-webkit-full-page-media, _:future, #poi, .top {
 }
 
 #popup {
-    margin: 20px 0 0 0;
+    margin: 0px 0 0 0;
     background: #ffffffcc;
     padding: 10px;
     border-radius: 5px;
