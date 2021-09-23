@@ -67,10 +67,14 @@ var goToOSM = function(e) {
   window.open(url);
 };
 
+button_osm.id = 'osm_button';
+button_osm.title = "F3";
 button_osm.addEventListener('click', goToOSM, false);
 
 var button_sat = document.createElement('button');
 button_sat.classList.add('sat_button');
+button_sat.id = 'sat_button';
+button_sat.title = "F2";
 button_sat.innerHTML = `<img src="sat.png" />`;
 
 var goToSat = function(e) {
@@ -149,7 +153,7 @@ function getBaseLayer(urls) {
   let base_source = new ol.source.XYZ({
     attributions: [ol.source.OSM.ATTRIBUTION],
     opaque: true,
-    imageSmoothing: false,
+    imageSmoothing: true,
     cacheSize: 200,
     transition: 100,
     urls: urls,
@@ -210,7 +214,7 @@ function toggleBaseLayer() {
     button_sat.innerHTML = `<img src="street.png" />`;
   }
   else {
-    setBaseLayer(['https://a.tiles.tracestrack.com/base/{z}/{x}/{y}.png?key=d750a1a29e913dea376aca86cc95de5a','https://c.tiles.tracestrack.com/base/{z}/{x}/{y}.png?key=d750a1a29e913dea376aca86cc95de5a']);
+    setBaseLayer(['https://a.tiles.tracestrack.com/base/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be','https://c.tiles.tracestrack.com/base/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be']);
     button_sat.innerHTML = `<img src="sat.png" />`;
   }
   if (labelName) {
@@ -237,11 +241,11 @@ function setLanguageLayer(label_name) {
     preload: 5,
     source: new ol.source.XYZ({
       opaque: false,
-      imageSmoothing: false,
+      imageSmoothing: true,
       cacheSize: 200,
-      transition: 200,
-      urls: ['https://b.tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=d750a1a29e913dea376aca86cc95de5a',
-             'https://c.tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=d750a1a29e913dea376aca86cc95de5a'],
+      transition: 100,
+      urls: ['https://b.tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be',
+             'https://c.tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
       crossOrigin: null,
       tilePixelRatio: 2
     }),
@@ -281,6 +285,20 @@ function setURL(lonlat, zoom) {
 
   setCookie("qstr", qstr, 1000);
 }
+
+document.addEventListener('keydown', function (evt) {
+  console.log(evt.which)
+  if (evt.which === 113) {
+    //F2
+    document.getElementById("sat_button").click();
+    evt.preventDefault();
+  }
+  else if (evt.which === 114) {
+    //F3
+    document.getElementById("osm_button").click();
+    evt.preventDefault();
+  }
+});
 
 map.on('moveend', onMoveEnd);
 

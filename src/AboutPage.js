@@ -30,9 +30,11 @@ function AboutPage({show, hide}) {
 
                    Routing: <a href="https://openrouteservice.org">OpenRouteService</a> <br />
 
-                   Curator: Qing Cai <br />
+                   Maintainer: Qing Cai <br />
 
                    Support the project: <a href="https://www.patreon.com/tracestrack">Patreon</a> <br />
+
+                   Like to use the map tiles? Check out <a href="https://www.tracestrack.com/tiles/">Tracestrack Tile Service</a> <br />
 
                    Contact: <b>[tracestrack@icloud.com]</b>
 
@@ -43,9 +45,10 @@ function AboutPage({show, hide}) {
                 We do not harvest or analyze user data in any way. Cookies is used only to save user preferences locally.
               </p>
 
-              <h4>Other information</h4>
+              <h4>Other Information</h4>
               <p><small>
-                   Map refresh schedule coming up. <br />
+                   <a href="https://stats.uptimerobot.com/505xMU0mq4">Service Status</a> <br />
+
                    Please use a modern browser such as Chrome, Edge, Opera, Safari, Firefox. Chromium based browsers are recommended. <br />
                    Some map tiles are generated on the fly, which could be slow. <br />
                  </small>
