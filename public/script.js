@@ -155,7 +155,7 @@ function getBaseLayer(urls) {
     opaque: true,
     imageSmoothing: true,
     cacheSize: 200,
-    transition: 100,
+    transition: 300,
     urls: urls,
     crossOrigin: null,
     tilePixelRatio: 2
@@ -168,7 +168,7 @@ function getBaseLayer(urls) {
   });
 
   let base_layer = new ol.layer.Tile({
-    preload: 7,
+    preload: 1,
     source: base_source,
   })
   return base_layer;
@@ -218,7 +218,14 @@ function toggleBaseLayer() {
     button_sat.innerHTML = `<img src="sat.png" />`;
   }
   if (labelName) {
-    setLanguageLayer(labelName);
+    if (languageLayer) {
+      map.removeLayer(languageLayer);
+      languageLayer = null;
+    }
+
+    setTimeout(function() {
+      setLanguageLayer(labelName);
+    }, 2000);
   }
 
   if (routeLayer) {
@@ -229,6 +236,7 @@ function toggleBaseLayer() {
 }
 
 var languageLayer;
+var routesLayer;
 var labelName;
 
 function setLanguageLayer(label_name) {
@@ -237,19 +245,40 @@ function setLanguageLayer(label_name) {
     map.removeLayer(languageLayer);
   }
 
-  languageLayer = new ol.layer.Tile({
-    preload: 5,
+  if (routesLayer) {
+    map.removeLayer(routeLayer);
+  }
+
+  routesLayer = new ol.layer.Tile({
+    preload: 0,
     source: new ol.source.XYZ({
       opaque: false,
       imageSmoothing: true,
       cacheSize: 200,
       transition: 100,
+      urls: ['https://b.tiles.tracestrack.com/bicycle-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
+      crossOrigin: null,
+      tilePixelRatio: 1
+    })
+  });
+
+
+  languageLayer = new ol.layer.Tile({
+    preload: 0,
+    source: new ol.source.XYZ({
+      opaque: false,
+      imageSmoothing: true,
+      cacheSize: 200,
+      transition: 800,
       urls: ['https://b.tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be',
              'https://c.tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
       crossOrigin: null,
       tilePixelRatio: 2
     }),
   });
+
+
+  //map.addLayer(routesLayer);
   map.addLayer(languageLayer);
 
   setCookie("lang", label_name, 1000);
@@ -287,7 +316,6 @@ function setURL(lonlat, zoom) {
 }
 
 document.addEventListener('keydown', function (evt) {
-  console.log(evt.which)
   if (evt.which === 113) {
     //F2
     document.getElementById("sat_button").click();
