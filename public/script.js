@@ -68,7 +68,7 @@ var goToOSM = function(e) {
 };
 
 button_osm.id = 'osm_button';
-button_osm.title = "F3";
+button_osm.title = "F3: view in OSM\nF4: edit in OSM";
 button_osm.addEventListener('click', goToOSM, false);
 
 var button_sat = document.createElement('button');
@@ -162,13 +162,14 @@ function getBaseLayer(urls) {
   });
 
   base_source.on('tileloaderror', function(event) {
+    /*
     setTimeout(function(){
       event.tile.load()
-    }, 5000 * Math.random());
+    }, 5000 * Math.random());*/
   });
 
   let base_layer = new ol.layer.Tile({
-    preload: 1,
+    preload: 0,
     source: base_source,
   })
   return base_layer;
@@ -177,7 +178,7 @@ function getBaseLayer(urls) {
 var map = new ol.Map({
   target: 'map',
   interactions: interactions,
-  maxTilesLoading: 50,
+  maxTilesLoading: 100,
   controls: [new ol.control.Attribution({collapsible: true}), new ol.control.Zoom({className: "zoomControl"})],
   view: new ol.View({
     center: ol.proj.fromLonLat(lonlat),
@@ -207,6 +208,7 @@ function setBaseLayer(urls) {
 }
 
 var isSatelliteBase = false;
+var languageLayerTimeout;
 
 function toggleBaseLayer() {
   if (isSatelliteBase) {
@@ -214,7 +216,7 @@ function toggleBaseLayer() {
     button_sat.innerHTML = `<img src="street.png" />`;
   }
   else {
-    setBaseLayer(['https://a.tiles.tracestrack.com/base/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be','https://c.tiles.tracestrack.com/base/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be']);
+    setBaseLayer(['https://a.tiles.tracestrack.com/base/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be']);
     button_sat.innerHTML = `<img src="sat.png" />`;
   }
   if (labelName) {
@@ -223,7 +225,8 @@ function toggleBaseLayer() {
       languageLayer = null;
     }
 
-    setTimeout(function() {
+    clearTimeout(languageLayerTimeout);
+    languageLayerTimeout = setTimeout(function() {
       setLanguageLayer(labelName);
     }, 2000);
   }
@@ -270,8 +273,7 @@ function setLanguageLayer(label_name) {
       imageSmoothing: true,
       cacheSize: 200,
       transition: 800,
-      urls: ['https://b.tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be',
-             'https://c.tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
+      urls: ['https://b.tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
       crossOrigin: null,
       tilePixelRatio: 2
     }),
@@ -325,6 +327,13 @@ document.addEventListener('keydown', function (evt) {
     //F3
     document.getElementById("osm_button").click();
     evt.preventDefault();
+  }
+  else if (evt.which === 115) {
+    //F4
+    let z = map.getView().getZoom();
+    let center = ol.proj.toLonLat(map.getView().getCenter());
+    let url = `https://www.openstreetmap.org/edit#map=${z}/${center[1]}/${center[0]}/`;
+    window.open(url);
   }
 });
 
