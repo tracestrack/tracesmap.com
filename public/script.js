@@ -28,6 +28,12 @@ var goToCurrentLocation = function(e) {
   }
 };
 
+var gotoZXY = function(zxy) {
+  let view = map.getView();
+  view.setCenter(ol.proj.fromLonLat([zxy[2], zxy[1]]));
+  view.setZoom(zxy[0]);
+};
+
 button.addEventListener('click', goToCurrentLocation, false);
 
 var element = document.createElement('div');
@@ -122,7 +128,7 @@ if (getCookie("server")) {
 }
 
 var lonlat = [0, 0];
-var zoom = 5;
+var zoom = 3;
 var qstr = "";
 var selectedPoiId;
 if (window.location.href.indexOf("#") > -1) {
@@ -318,6 +324,9 @@ function setURL(lonlat, zoom) {
 }
 
 document.addEventListener('keydown', function (evt) {
+  let z = map.getView().getZoom();
+  let center = ol.proj.toLonLat(map.getView().getCenter());
+
   if (evt.which === 113) {
     //F2
     document.getElementById("sat_button").click();
@@ -330,9 +339,12 @@ document.addEventListener('keydown', function (evt) {
   }
   else if (evt.which === 115) {
     //F4
-    let z = map.getView().getZoom();
-    let center = ol.proj.toLonLat(map.getView().getCenter());
     let url = `https://www.openstreetmap.org/edit#map=${z}/${center[1]}/${center[0]}/`;
+    window.open(url);
+  }
+  else if (evt.which === 123) {
+    //F12
+    let url = `https://alexandermisel.github.io/new_osm/gaode.html#map=${z}/${center[1]}/${center[0]}`;
     window.open(url);
   }
 });

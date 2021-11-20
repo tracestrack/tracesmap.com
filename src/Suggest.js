@@ -10,6 +10,7 @@ const geocoder = new Nominatim({
   limit: 10,
 });
 
+
 var searchValue = "";
 var dataResult;
 var searchDelayTimer;
@@ -26,6 +27,35 @@ const renderSuggestion = suggestion => (
     {suggestion.display_name}
   </div>
 );
+
+
+function matchOSM(url) {
+  const regex = /[=#](\d{1,2}\/[\d-]+\.\d+\/[\d-]+\.\d+)/;
+  const found = url.match(regex);
+
+  if (found && found.length > 1) {
+    const parts = found[1].split("/");
+    const arr = [parseInt(parts[0]), parseFloat(parts[1]), parseFloat(parts[2])];
+    console.log(arr);
+    window.gotoZXY(arr);
+    return true;
+  }
+  return false;
+}
+
+function matchGM(url) {
+  const regex = /@([\d-]+\.\d+,[\d-]+\.\d+,\d{1,2})/;
+  const found = url.match(regex);
+
+  if (found && found.length > 1) {
+    const parts = found[1].split(",");
+    const arr = [parseInt(parts[2]), parseFloat(parts[0]), parseFloat(parts[1])];
+    console.log(arr);
+    window.gotoZXY(arr);
+    return true;
+  }
+  return false;
+}
 
 class Example extends React.Component {
   constructor(props) {
@@ -63,9 +93,17 @@ class Example extends React.Component {
   // You already implemented this logic above, so just use it.
   onSuggestionsFetchRequested = ({ value }) => {
 
+    if (searchValue == value) {
+      return;
+    }
+
     const inputValue = value.trim().toLowerCase();
     const inputLength = inputValue.length;
     searchValue = inputValue;
+
+    if (matchOSM(value) || matchGM(value)) {
+      return;
+    }
 
     clearTimeout(searchDelayTimer);
 
@@ -86,7 +124,7 @@ class Example extends React.Component {
 
           })
           .catch((error) => {
-            console.log(error)
+            console.log(error);
           });
       }, 1000);
     };
@@ -103,6 +141,10 @@ class Example extends React.Component {
     });
   };
 
+  onClick = () => {
+//    alert("XX");
+  };
+
   render() {
     const { value, suggestions } = this.state;
 
@@ -112,6 +154,7 @@ class Example extends React.Component {
       value,
       onChange: this.onChange,
       onKeyDown: this.onKeyPress,
+      onClick: this.onClick,
       autocorrect: "off",
       autocomplete: "off"
     };

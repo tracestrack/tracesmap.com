@@ -22,17 +22,15 @@ function AboutPage({show, hide}) {
 
                    Map style: based on <a href="https://github.com/gravitystorm/openstreetmap-carto">OpenStreetMap Carto</a><br />
 
-                   Search: <a href="https://nominatim.org/">Nominatim</a> <br />
+                   Search service: <a href="https://nominatim.org/">Nominatim</a> <br />
 
                    Map framework: <a href="http://openlayers.org">OpenLayers</a> <br/>
 
-                   Dynamic data: <a href="http://overpass-api.de">Overpass API</a> <br/>
+                   Query service: <a href="http://overpass-api.de">Overpass API</a> <br/>
 
                    Routing: <a href="https://openrouteservice.org">OpenRouteService</a> <br />
 
                    Maintainer: Qing Cai <br />
-
-                   Support the project: <a href="https://www.patreon.com/tracestrack">Patreon</a> <br />
 
                    Like to use the map tiles? Check out <a href="https://www.tracestrack.com/tiles/">Tracestrack Tile Service</a> <br />
 
@@ -45,6 +43,15 @@ function AboutPage({show, hide}) {
                 We do not harvest or analyze user data in any way. Cookies is used only to save user preferences locally.
               </p>
 
+              <h4>Quick tips</h4>
+              <ol>
+                <small>
+                <li>Paste URL of openstreetmap.org and Google Maps to search bar to quick jump</li>
+                <li>Press F2 to toggle between Satellite and Street view</li>
+                <li>Press F3 to open Openstreetmap.org</li>
+                <li>Press F4 to edit in  Openstreetmap.org</li>
+                </small>
+              </ol>
               <h4>Other Information</h4>
               <p><small>
                    <a href="https://stats.uptimerobot.com/505xMU0mq4">Service Status</a> <br />
