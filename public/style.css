@@ -33,7 +33,7 @@ html, body {
 .goto_maps {
     position: absolute;
     left: 8px;
-    bottom: 42px;
+    bottom: 12px;
     width: 100px;
     height: 100px;
     background: rgba(255, 0, 0, 0);
@@ -189,4 +189,13 @@ li {
 li:hover {
     background: #ccc;
     width: 100%;
+}
+
+.overlays-setting {
+    position: absolute;
+    background: white;
+    left: 100px;
+    padding: 0 15px 0 30px;
+    bottom: 22px;
+    border-radius: 10px;
 }

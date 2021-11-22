@@ -247,6 +247,7 @@ function toggleBaseLayer() {
 var languageLayer;
 var routesLayer;
 var labelName;
+var busLayerEnabled = false;
 
 function setLanguageLayer(label_name) {
   labelName = label_name;
@@ -255,22 +256,8 @@ function setLanguageLayer(label_name) {
   }
 
   if (routesLayer) {
-    map.removeLayer(routeLayer);
+    map.removeLayer(routesLayer);
   }
-
-  routesLayer = new ol.layer.Tile({
-    preload: 0,
-    source: new ol.source.XYZ({
-      opaque: false,
-      imageSmoothing: true,
-      cacheSize: 200,
-      transition: 100,
-      urls: ['https://b.tiles.tracestrack.com/bicycle-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
-      crossOrigin: null,
-      tilePixelRatio: 1
-    })
-  });
-
 
   languageLayer = new ol.layer.Tile({
     preload: 0,
@@ -285,8 +272,22 @@ function setLanguageLayer(label_name) {
     }),
   });
 
+  if (busLayerEnabled) {
+    routesLayer = new ol.layer.Tile({
+      preload: 0,
+      source: new ol.source.XYZ({
+        opaque: false,
+        imageSmoothing: false,
+        cacheSize: 200,
+        transition: 800,
+        urls: ['https://b.tiles.tracestrack.com/bus-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
+        crossOrigin: null,
+        tilePixelRatio: 2
+      })
+    });
+    map.addLayer(routesLayer);
+  }
 
-  //map.addLayer(routesLayer);
   map.addLayer(languageLayer);
 
   setCookie("lang", label_name, 1000);
@@ -1016,6 +1017,13 @@ function resetDirections() {
 }
 
 var routeLayer;
+var transportMethod = "driving-car";
+
+function updateTransport(f) {
+  transportMethod = f
+  getRoute()
+}
+
 function getRoute() {
 
   const to = document.getElementById("dir_to").value;
@@ -1033,7 +1041,8 @@ function getRoute() {
   const c1 = from.replace(/ /g, "").split(",");
   const c2 = to.replace(/ /g, "").split(",");
 
-  let url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=5b3ce3597851110001cf62488c0ecc42793146ce96a0f582119e0812&start=${c1[1]},${c1[0]}&end=${c2[1]},${c2[0]}`;
+  let url = `https://api.openrouteservice.org/v2/directions/${transportMethod}?api_key=5b3ce3597851110001cf62488c0ecc42793146ce96a0f582119e0812&start=${c1[1]},${c1[0]}&end=${c2[1]},${c2[0]}`;
+  console.log(url)
 
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4) {
@@ -1112,4 +1121,9 @@ function useCurrentLocationAsTo() {
 
 function formatCoordinate(c) {
   return toStringCoords(ol.proj.toLonLat(c));
+}
+
+function toggleBusRoutes(x) {
+  busLayerEnabled = !busLayerEnabled;
+  setLanguageLayer(getCookie("lang"));
 }

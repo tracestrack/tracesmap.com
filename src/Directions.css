@@ -5,6 +5,13 @@
     margin-bottom: 5px;
 }
 
+.directions_method {
+    float: left;
+    width: 100%;
+    margin-right: 10px;
+    margin-bottom: 5px;
+}
+
 .buttons {
     float: left;
 }

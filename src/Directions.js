@@ -1,4 +1,6 @@
 import Button from 'react-bootstrap/Button';
+import ToggleButton from 'react-bootstrap/ToggleButton';
+import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 
@@ -29,7 +31,31 @@ function Directions({show, hide}) {
     window.useCurrentLocationAsTo();
   }
 
+  function updateTransport(f) {
+    window.updateTransport(f);
+  }
+
   return (<div className="directions">
+            <div className="directions_method">
+              <ToggleButtonGroup type="radio" name="options" defaultValue={1}  onChange={updateTransport}>
+                <ToggleButton id="tbg-radio-1" value="driving-car">
+                  Driving
+                </ToggleButton>
+                <ToggleButton id="tbg-radio-2" value="cycling-regular">
+                  Cycling
+                </ToggleButton>
+                <ToggleButton id="tbg-radio-3" value="cycling-mountain">
+                  Cycling MTB
+                </ToggleButton>
+                <ToggleButton id="tbg-radio-4" value="foot-walking">
+                  Walking
+                </ToggleButton>
+                <ToggleButton id="tbg-radio-5" value="foot-hiking">
+                  Hiking
+                </ToggleButton>
+              </ToggleButtonGroup>
+
+            </div>
 
             <InputGroup size="sm" className="directions_input">
 
