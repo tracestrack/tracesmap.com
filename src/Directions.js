@@ -37,7 +37,7 @@ function Directions({show, hide}) {
 
   return (<div className="directions">
             <div className="directions_method">
-              <ToggleButtonGroup type="radio" name="options" defaultValue={1}  onChange={updateTransport}>
+              <ToggleButtonGroup type="radio" name="options" defaultValue="driving-car" onChange={updateTransport} size="sm">
                 <ToggleButton id="tbg-radio-1" value="driving-car">
                   Driving
                 </ToggleButton>

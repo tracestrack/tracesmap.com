@@ -245,9 +245,11 @@ function toggleBaseLayer() {
 }
 
 var languageLayer;
-var routesLayer;
+var busRoutesLayer;
+var subwayRoutesLayer;
 var labelName;
 var busLayerEnabled = false;
+var subwayLayerEnabled = false;
 
 function setLanguageLayer(label_name) {
   labelName = label_name;
@@ -255,8 +257,11 @@ function setLanguageLayer(label_name) {
     map.removeLayer(languageLayer);
   }
 
-  if (routesLayer) {
-    map.removeLayer(routesLayer);
+  if (busRoutesLayer) {
+    map.removeLayer(busRoutesLayer);
+  }
+  if (subwayRoutesLayer) {
+    map.removeLayer(subwayRoutesLayer);
   }
 
   languageLayer = new ol.layer.Tile({
@@ -273,7 +278,7 @@ function setLanguageLayer(label_name) {
   });
 
   if (busLayerEnabled) {
-    routesLayer = new ol.layer.Tile({
+    busRoutesLayer = new ol.layer.Tile({
       preload: 0,
       source: new ol.source.XYZ({
         opaque: false,
@@ -285,7 +290,23 @@ function setLanguageLayer(label_name) {
         tilePixelRatio: 2
       })
     });
-    map.addLayer(routesLayer);
+    map.addLayer(busRoutesLayer);
+  }
+
+  if (subwayLayerEnabled) {
+    subwayRoutesLayer = new ol.layer.Tile({
+      preload: 0,
+      source: new ol.source.XYZ({
+        opaque: false,
+        imageSmoothing: false,
+        cacheSize: 200,
+        transition: 800,
+        urls: ['https://b.tiles.tracestrack.com/subway-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
+        crossOrigin: null,
+        tilePixelRatio: 2
+      })
+    });
+    map.addLayer(subwayRoutesLayer);
   }
 
   map.addLayer(languageLayer);
@@ -1125,5 +1146,9 @@ function formatCoordinate(c) {
 
 function toggleBusRoutes(x) {
   busLayerEnabled = !busLayerEnabled;
+  setLanguageLayer(getCookie("lang"));
+}
+function toggleSubwayRoutes(x) {
+  subwayLayerEnabled = !subwayLayerEnabled;
   setLanguageLayer(getCookie("lang"));
 }
