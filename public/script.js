@@ -52,10 +52,18 @@ button_google.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="
 	<path fill="#34a853" d="M88.63,117.37c15.39-24.07,33.34-35,33.34-62.98c0-7.67-1.88-14.9-5.19-21.26l-61.55,73.18   c2.61,3.42,5.24,7.06,7.81,11.07c9.36,14.46,6.76,23.13,12.8,23.13C81.86,140.51,79.27,131.83,88.63,117.37"/>
 </svg>`;
 
-var goToGMaps = function(e) {
 
+function tryUseClickPoint(center) {
+  if (clickPointLayer) {
+    var p = clickPointLayer.getSource().getFeatures()[0].getGeometry().flatCoordinates;
+    return ol.proj.toLonLat(p);
+  }
+  return center
+}
+
+var goToGMaps = function(e) {
   let z = map.getView().getZoom();
-  let center = ol.proj.toLonLat(map.getView().getCenter());
+  var center = tryUseClickPoint(ol.proj.toLonLat(map.getView().getCenter()));
   let url = `https://www.google.com/maps/@${center[1]},${center[0]},${z}z`;
 
   window.open(url);
@@ -68,7 +76,7 @@ button_osm.innerHTML = `<img class="osm" src=https://upload.wikimedia.org/wikipe
 
 var goToOSM = function(e) {
   let z = map.getView().getZoom();
-  let center = ol.proj.toLonLat(map.getView().getCenter());
+  var center = tryUseClickPoint(ol.proj.toLonLat(map.getView().getCenter()));
   let url = `https://www.openstreetmap.org/#map=${z}/${center[1]}/${center[0]}/`;
   window.open(url);
 };
@@ -122,11 +130,6 @@ function getCookie(cname) {
   return "";
 }
 
-var server = 'a';
-if (getCookie("server")) {
-  server = getCookie("server");
-}
-
 var lonlat = [0, 0];
 var zoom = 3;
 var qstr = "";
@@ -152,8 +155,30 @@ if (qstr !== "") {
 
 var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false, doubleClickZoom: true, keyboard: true, shiftDragZoom: true, dragPan: true});
 
-var subserver = server + '.';
-subserver = '';
+function tload(imageTile, src) {
+  imageTile.getImage().src = src + "&rd=" + Math.random();
+};
+
+function getLangLayer() {
+
+  const label_name = getCookie("lang");
+  var layer = new ol.layer.Tile({
+    preload: 0,
+    source: new ol.source.XYZ({
+      opaque: false,
+      imageSmoothing: true,
+      cacheSize: 200,
+      transition: 0,
+      urls: ['https://b.tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
+      crossOrigin: null,
+      tileLoadFunction: tload,
+      tilePixelRatio: 2
+    }),
+  });
+
+  return layer;
+}
+
 
 function getBaseLayer(urls) {
   let base_source = new ol.source.XYZ({
@@ -161,10 +186,11 @@ function getBaseLayer(urls) {
     opaque: true,
     imageSmoothing: true,
     cacheSize: 200,
-    transition: 300,
+    transition: 0,
     urls: urls,
     crossOrigin: null,
-    tilePixelRatio: 2
+    tilePixelRatio: 2,
+    tileLoadFunction: tload
   });
 
   base_source.on('tileloaderror', function(event) {
@@ -225,17 +251,17 @@ function toggleBaseLayer() {
     setBaseLayer(['https://a.tiles.tracestrack.com/base/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be']);
     button_sat.innerHTML = `<img src="sat.png" />`;
   }
-  if (labelName) {
-    if (languageLayer) {
-      map.removeLayer(languageLayer);
-      languageLayer = null;
-    }
 
-    clearTimeout(languageLayerTimeout);
-    languageLayerTimeout = setTimeout(function() {
-      setLanguageLayer(labelName);
-    }, 2000);
+  if (languageLayer) {
+    map.removeLayer(languageLayer);
+    languageLayer = null;
   }
+
+  clearTimeout(languageLayerTimeout);
+  languageLayerTimeout = setTimeout(function() {
+    setLanguageLayer();
+  }, 2000);
+
 
   if (routeLayer) {
     map.removeLayer(routeLayer);
@@ -247,12 +273,10 @@ function toggleBaseLayer() {
 var languageLayer;
 var busRoutesLayer;
 var subwayRoutesLayer;
-var labelName;
 var busLayerEnabled = false;
 var subwayLayerEnabled = false;
 
-function setLanguageLayer(label_name) {
-  labelName = label_name;
+function setLanguageLayer() {
   if (languageLayer) {
     map.removeLayer(languageLayer);
   }
@@ -264,18 +288,9 @@ function setLanguageLayer(label_name) {
     map.removeLayer(subwayRoutesLayer);
   }
 
-  languageLayer = new ol.layer.Tile({
-    preload: 0,
-    source: new ol.source.XYZ({
-      opaque: false,
-      imageSmoothing: true,
-      cacheSize: 200,
-      transition: 800,
-      urls: ['https://b.tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
-      crossOrigin: null,
-      tilePixelRatio: 2
-    }),
-  });
+  var mr = Math.random();
+
+  languageLayer = getLangLayer();
 
   if (busLayerEnabled) {
     busRoutesLayer = new ol.layer.Tile({
@@ -310,27 +325,14 @@ function setLanguageLayer(label_name) {
   }
 
   map.addLayer(languageLayer);
-
-  setCookie("lang", label_name, 1000);
 }
 
 if (getCookie("lang") === "") {
   setCookie("lang", "en-name", 1000);
 }
 
-setLanguageLayer(getCookie("lang"));
-
 toggleBaseLayer();
 
-function setRetinaEnabled(ena) {
-  setCookie("retina", ena, 1000);
-  location.reload();
-}
-
-function setServer(s) {
-  setCookie("server", s, 1000);
-  location.reload();
-}
 
 function setURL(lonlat, zoom) {
   let qstr = zoom.toFixed(0) + "/" + lonlat[1].toFixed(4) + "/" + lonlat[0].toFixed(4)
@@ -346,8 +348,9 @@ function setURL(lonlat, zoom) {
 }
 
 document.addEventListener('keydown', function (evt) {
-  let z = map.getView().getZoom();
-  let center = ol.proj.toLonLat(map.getView().getCenter());
+
+  var z = map.getView().getZoom();
+  var center = tryUseClickPoint(ol.proj.toLonLat(map.getView().getCenter()));
 
   if (evt.which === 113) {
     //F2
@@ -366,8 +369,10 @@ document.addEventListener('keydown', function (evt) {
   }
   else if (evt.which === 123) {
     //F12
-    let url = `https://alexandermisel.github.io/new_osm/gaode.html#map=${z}/${center[1]}/${center[0]}`;
-    window.open(url);
+    let url = `https://api.map.baidu.com/marker?location=${center[1]},${center[0]}&title=&content=&output=html&src=webapp.baidu.openAPIdemo&coord_type=wgs84`
+    let popup = window.open(url);
+    popup.blur();
+    window.focus();
   }
 });
 
@@ -388,6 +393,8 @@ function onMoveEnd(evt) {
       poiLayer.setVisible(false);
     }
   }
+
+  resetReloadTimeout()
 }
 
 
@@ -844,11 +851,6 @@ let CLICK_POINT_STYLE = new ol.style.Style({
 });
 
 var acceptingClick;
-map.on("singleclick", function(evt) {
-
-
-});
-
 
 var clickPointLayer;
 function setClickPoint(coord) {
@@ -1146,9 +1148,90 @@ function formatCoordinate(c) {
 
 function toggleBusRoutes(x) {
   busLayerEnabled = !busLayerEnabled;
-  setLanguageLayer(getCookie("lang"));
+  setLanguageLayer();
 }
+
 function toggleSubwayRoutes(x) {
   subwayLayerEnabled = !subwayLayerEnabled;
-  setLanguageLayer(getCookie("lang"));
+  setLanguageLayer();
+}
+
+var lastCenter;
+var reloadTimeout;
+function resetReloadTimeout() {
+
+  if (reloadTimeout) {
+    clearTimeout(reloadTimeout);
+  }
+
+  reloadTimeout = setInterval(function() {
+
+    let newCenter = map.getView().getCenter();
+    if (newCenter == lastCenter) {
+      return;
+    }
+
+    if (document.hidden) {
+      return;
+    }
+
+    if (!isSatelliteBase) {
+      return;
+    }
+
+    lastCenter = newCenter;
+
+    console.log("reload")
+
+    var baseLayerLoaded = 0;
+    var baseLayer2 = getBaseLayer(['https://a.tiles.tracestrack.com/base/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be']);
+
+    baseLayer2.on('postrender', function(e) {
+      baseLayerLoaded++;
+    });
+
+    let layers = map.getLayers();
+
+    var langLayerLoaded = 0;
+
+    var langLayer2 = getLangLayer();
+
+    langLayer2.on('postrender', function(e) {
+      langLayerLoaded++;
+    });
+
+    layers.insertAt(0, baseLayer2);
+    layers.insertAt(1, langLayer2);
+
+    setTimeout(function() {
+
+      if (!isSatelliteBase) {
+        map.removeLayer(baseLayer2);
+        map.removeLayer(langLayer2);
+        return;
+      }
+
+      if (baseLayerLoaded > 0) {
+        map.removeLayer(baseLayer);
+        baseLayer = baseLayer2;
+      }
+
+      if (langLayerLoaded > 0) {
+        map.removeLayer(languageLayer);
+        languageLayer = langLayer2;
+
+        if (subwayLayerEnabled) {
+          map.removeLayer(subwayRoutesLayer);
+          layers.insertAt(1, subwayRoutesLayer);
+        }
+
+        if (busLayerEnabled) {
+          map.removeLayer(busRoutesLayer);
+          layers.insertAt(1, busRoutesLayer);
+        }
+      }
+
+    }, 2000)
+
+  }, 4000);
 }

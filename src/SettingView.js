@@ -1,4 +1,4 @@
-import { ListGroup, Container, Row, Col, Modal, Form, ToggleButton, ToggleButtonGroup } from 'react-bootstrap';
+import { ButtonGroup, ListGroup, Container, Row, Col, Modal, Form, ToggleButton, ToggleButtonGroup } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {useState} from "react";
 
@@ -59,6 +59,7 @@ function SettingView({show, hide}) {
           <Modal.Body>
 
             <Container>
+
               <h5>Languages</h5>
 
               <div>

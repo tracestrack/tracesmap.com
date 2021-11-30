@@ -12,7 +12,7 @@ function AboutPage({show, hide}) {
           >
             <Modal.Header closeButton>
               <Modal.Title id="example-custom-modal-styling-title">
-                About
+                About & Help
               </Modal.Title>
             </Modal.Header>
             <Modal.Body>
@@ -21,6 +21,8 @@ function AboutPage({show, hide}) {
                    Map data: © OpenStreetMap contributors <br />
 
                    Map style: based on <a href="https://github.com/gravitystorm/openstreetmap-carto">OpenStreetMap Carto</a><br />
+
+                   Satellite service provider: <a href="https://www.mapbox.com">Mapbox</a> <br/>
 
                    Search service: <a href="https://nominatim.org/">Nominatim</a> <br />
 
@@ -49,15 +51,18 @@ function AboutPage({show, hide}) {
                 <li>Paste URL of openstreetmap.org and Google Maps to search bar to quick jump</li>
                 <li>Press F2 to toggle between Satellite and Street view</li>
                 <li>Press F3 to open Openstreetmap.org</li>
-                <li>Press F4 to edit in  Openstreetmap.org</li>
+                <li>Press F4 to edit in Openstreetmap.org</li>
+                <li>Press F12 to open in map.baidu.com</li>
                 </small>
               </ol>
+
               <h4>Other Information</h4>
               <p><small>
                    <a href="https://stats.uptimerobot.com/505xMU0mq4">Service Status</a> <br />
 
                    Please use a modern browser such as Chrome, Edge, Opera, Safari, Firefox. Chromium based browsers are recommended. <br />
                    Some map tiles are generated on the fly, which could be slow. <br />
+                   Tracestrack Maps is GPU-intensive, especially with more layers. <br />
                  </small>
               </p>
             </Modal.Body>
