@@ -53,10 +53,11 @@ button_google.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="
 </svg>`;
 
 
+var lastClickCoord;
+
 function tryUseClickPoint(center) {
-  if (clickPointLayer) {
-    var p = clickPointLayer.getSource().getFeatures()[0].getGeometry().flatCoordinates;
-    return ol.proj.toLonLat(p);
+  if (lastClickCoord) {
+    return lastClickCoord
   }
   return center
 }
@@ -276,7 +277,12 @@ var subwayRoutesLayer;
 var busLayerEnabled = false;
 var subwayLayerEnabled = false;
 
-function setLanguageLayer() {
+function setLanguageLayer(lang) {
+
+  if (lang) {
+    setCookie("lang", lang, 1000);
+  }
+
   if (languageLayer) {
     map.removeLayer(languageLayer);
   }
@@ -382,6 +388,8 @@ function onMoveEnd(evt) {
   var map = evt.map;
   let z = map.getView().getZoom();
   let center = ol.proj.toLonLat(map.getView().getCenter());
+
+  lastClickCoord = null;
 
   setURL(center, z);
 
@@ -789,6 +797,8 @@ map.on("click", function(evt) {
   }
 
   const coord = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326')
+
+  lastClickCoord = coord;
   if (document.getElementById("dir_from") != null) {
     //nav
     if (acceptingClick == "from") {
