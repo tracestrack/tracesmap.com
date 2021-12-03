@@ -156,16 +156,33 @@ if (qstr !== "") {
 
 var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false, doubleClickZoom: true, keyboard: true, shiftDragZoom: true, dragPan: true});
 
-function tload(imageTile, src) {
-  imageTile.getImage().src = src + "&rd=" + Math.random();
+
+
+function tload(tile, src) {
+  //console.log("load", tile.getTileCoord());
+  var xhr = new XMLHttpRequest();
+  xhr.responseType = 'blob';
+  xhr.addEventListener('loadend', function (evt) {
+    var data = this.response;
+    if (data !== undefined) {
+      tile.getImage().src = URL.createObjectURL(data);
+
+    } else {
+      tile.setState(3);
+    }
+  });
+  xhr.addEventListener('error', function () {
+    tile.setState(3);
+  });
+  xhr.open('GET', src);
+  xhr.send();
 };
 
+var langlayer_loading_count = 0;
 function getLangLayer() {
 
   const label_name = getCookie("lang");
-  var layer = new ol.layer.Tile({
-    preload: 0,
-    source: new ol.source.XYZ({
+  var source = new ol.source.XYZ({
       opaque: false,
       imageSmoothing: true,
       cacheSize: 200,
@@ -174,12 +191,29 @@ function getLangLayer() {
       crossOrigin: null,
       tileLoadFunction: tload,
       tilePixelRatio: 2
-    }),
+  });
+
+  var layer = new ol.layer.Tile({
+    preload: 0,
+    source: source,
+  });
+
+  source.on('tileloadstart', function () {
+    langlayer_loading_count++
+  });
+
+  source.on('tileloadend', function () {
+    langlayer_loading_count--
+  });
+
+  source.on('tileloaderror', function () {
+    langlayer_loading_count--
   });
 
   return layer;
 }
 
+var baselayer_loading_count = 0;
 
 function getBaseLayer(urls) {
   let base_source = new ol.source.XYZ({
@@ -194,11 +228,16 @@ function getBaseLayer(urls) {
     tileLoadFunction: tload
   });
 
-  base_source.on('tileloaderror', function(event) {
-    /*
-    setTimeout(function(){
-      event.tile.load()
-    }, 5000 * Math.random());*/
+  base_source.on('tileloadstart', function () {
+    baselayer_loading_count++
+  });
+
+  base_source.on('tileloadend', function () {
+    baselayer_loading_count--
+  });
+
+  base_source.on('tileloaderror', function () {
+    baselayer_loading_count--
   });
 
   let base_layer = new ol.layer.Tile({
@@ -240,10 +279,12 @@ function setBaseLayer(urls) {
   map.addLayer(baseLayer);
 }
 
-var isSatelliteBase = false;
+var isSatelliteBase = true; // we'll toggle to init
 var languageLayerTimeout;
 
 function toggleBaseLayer() {
+  isSatelliteBase = !isSatelliteBase;
+
   if (isSatelliteBase) {
     setBaseLayer(["https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.jpg90?access_token=pk.eyJ1Ijoic3Ryb25nd2lsbG93IiwiYSI6ImxKa2R1SEkifQ.iZ_vj1lvuvrAcUIl0ZE5XA"]);
     button_sat.innerHTML = `<img src="street.png" />`;
@@ -261,14 +302,14 @@ function toggleBaseLayer() {
   clearTimeout(languageLayerTimeout);
   languageLayerTimeout = setTimeout(function() {
     setLanguageLayer();
-  }, 2000);
+  }, 1000);
 
 
   if (routeLayer) {
     map.removeLayer(routeLayer);
     map.addLayer(routeLayer);
   }
-  isSatelliteBase = !isSatelliteBase;
+
 }
 
 var languageLayer;
@@ -305,7 +346,7 @@ function setLanguageLayer(lang) {
         opaque: false,
         imageSmoothing: false,
         cacheSize: 200,
-        transition: 800,
+        transition: 200,
         urls: ['https://b.tiles.tracestrack.com/bus-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
         crossOrigin: null,
         tilePixelRatio: 2
@@ -321,7 +362,7 @@ function setLanguageLayer(lang) {
         opaque: false,
         imageSmoothing: false,
         cacheSize: 200,
-        transition: 800,
+        transition: 200,
         urls: ['https://b.tiles.tracestrack.com/subway-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
         crossOrigin: null,
         tilePixelRatio: 2
@@ -353,7 +394,7 @@ function setURL(lonlat, zoom) {
   setCookie("qstr", qstr, 1000);
 }
 
-document.addEventListener('keydown', function (evt) {
+document.addEventListener('keyup', function (evt) {
 
   var z = map.getView().getZoom();
   var center = tryUseClickPoint(ol.proj.toLonLat(map.getView().getCenter()));
@@ -372,6 +413,10 @@ document.addEventListener('keydown', function (evt) {
     //F4
     let url = `https://www.openstreetmap.org/edit#map=${z}/${center[1]}/${center[0]}/`;
     window.open(url);
+  }
+  else if (evt.which === 112) {
+    //F1
+    refresh();
   }
   else if (evt.which === 123) {
     //F12
@@ -402,7 +447,7 @@ function onMoveEnd(evt) {
     }
   }
 
-  resetReloadTimeout()
+//  resetReloadTimeout()
 }
 
 
@@ -1166,82 +1211,9 @@ function toggleSubwayRoutes(x) {
   setLanguageLayer();
 }
 
-var lastCenter;
-var reloadTimeout;
-function resetReloadTimeout() {
-
-  if (reloadTimeout) {
-    clearTimeout(reloadTimeout);
+function refresh() {
+  if (!isSatelliteBase) {
+    baseLayer.getSource().refresh();
   }
-
-  reloadTimeout = setInterval(function() {
-
-    let newCenter = map.getView().getCenter();
-    if (newCenter == lastCenter) {
-      return;
-    }
-
-    if (document.hidden) {
-      return;
-    }
-
-    if (!isSatelliteBase) {
-      return;
-    }
-
-    lastCenter = newCenter;
-
-    console.log("reload")
-
-    var baseLayerLoaded = 0;
-    var baseLayer2 = getBaseLayer(['https://a.tiles.tracestrack.com/base/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be']);
-
-    baseLayer2.on('postrender', function(e) {
-      baseLayerLoaded++;
-    });
-
-    let layers = map.getLayers();
-
-    var langLayerLoaded = 0;
-
-    var langLayer2 = getLangLayer();
-
-    langLayer2.on('postrender', function(e) {
-      langLayerLoaded++;
-    });
-
-    layers.insertAt(0, baseLayer2);
-    layers.insertAt(1, langLayer2);
-
-    setTimeout(function() {
-
-      if (!isSatelliteBase) {
-        map.removeLayer(baseLayer2);
-        map.removeLayer(langLayer2);
-        return;
-      }
-
-      if (baseLayerLoaded > 0) {
-        map.removeLayer(baseLayer);
-        baseLayer = baseLayer2;
-      }
-
-      if (langLayerLoaded > 0) {
-        map.removeLayer(languageLayer);
-        languageLayer = langLayer2;
-
-        if (subwayLayerEnabled) {
-          map.removeLayer(subwayRoutesLayer);
-          layers.insertAt(1, subwayRoutesLayer);
-        }
-
-        if (busLayerEnabled) {
-          map.removeLayer(busRoutesLayer);
-          layers.insertAt(1, busRoutesLayer);
-        }
-      }
-
-    }, 2000)
-
-  }, 4000);
+  languageLayer.getSource().refresh();
 }

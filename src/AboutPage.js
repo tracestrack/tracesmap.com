@@ -49,6 +49,7 @@ function AboutPage({show, hide}) {
               <ol>
                 <small>
                 <li>Paste URL of openstreetmap.org and Google Maps to search bar to quick jump</li>
+                <li>Press F1 to refresh map tiles if you see out-dated map</li>
                 <li>Press F2 to toggle between Satellite and Street view</li>
                 <li>Press F3 to open Openstreetmap.org</li>
                 <li>Press F4 to edit in Openstreetmap.org</li>
