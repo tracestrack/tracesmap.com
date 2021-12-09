@@ -29,7 +29,6 @@ const langs = [["Global *", "_-name"],
 function SettingView({show, hide}) {
 
   const [lang, setLang] = useState(window.getCookie('lang'));
-  //const [retinaEnabled, setRetinaEnabled] = useState(window.getCookie('retina') !== "false");
 
   const handleLanguage = function (e) {
     let t = e.target.innerText;
@@ -40,10 +39,12 @@ function SettingView({show, hide}) {
     setLang(_ => v);
   };
 
-  /*const handleRetinaEnabled = function(e) {
-    window.setRetinaEnabled(e.target.checked);
-    setRetinaEnabled(v => !v);
-    }*/
+  const [value, setValue] = useState(window.getCookie('auto-refresh') == "true");
+
+  const handleChange = function(e) {
+    window.setCookie('auto-refresh', e.target.checked, 1000);
+    setValue(v => !v);
+  };
 
   return (<Modal
               show={show}
@@ -59,6 +60,22 @@ function SettingView({show, hide}) {
           <Modal.Body>
 
             <Container>
+
+              <h5>Options</h5>
+              <p>
+                <Form>
+                  <Form.Check
+                    type="switch"
+                    id="custom-switch"
+                    label="Auto refresh"
+                    checked={value}
+                    onChange={handleChange}
+                  />
+                  <Form.Text className="text-muted">
+                    Refresh maps 10 seconds after moving to a new region
+                  </Form.Text>
+                </Form>
+              </p>
 
               <h5>Languages</h5>
 

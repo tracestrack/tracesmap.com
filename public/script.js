@@ -154,9 +154,7 @@ if (qstr !== "") {
   zoom = maploc[0]
 }
 
-var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false, doubleClickZoom: true, keyboard: true, shiftDragZoom: true, dragPan: true});
-
-
+var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false, doubleClickZoom: true, keyboard: false, shiftDragZoom: true, dragPan: true});
 
 function tload(tile, src) {
   //console.log("load", tile.getTileCoord());
@@ -290,7 +288,7 @@ function toggleBaseLayer() {
     button_sat.innerHTML = `<img src="street.png" />`;
   }
   else {
-    setBaseLayer(['https://a.tiles.tracestrack.com/base/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be']);
+    setBaseLayer(['https://tile.tracestrack.com/base/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be']);
     button_sat.innerHTML = `<img src="sat.png" />`;
   }
 
@@ -425,10 +423,19 @@ document.addEventListener('keyup', function (evt) {
     popup.blur();
     window.focus();
   }
+  else if (evt.which === 189) {
+    // -
+    document.getElementsByClassName("zoomControl-out")[0].click()
+  }
+  else if (evt.which === 187) {
+    //+
+    document.getElementsByClassName("zoomControl-in")[0].click()
+  }
 });
 
 map.on('moveend', onMoveEnd);
 
+var autoRefreshTimeout;
 function onMoveEnd(evt) {
   var map = evt.map;
   let z = map.getView().getZoom();
@@ -447,9 +454,13 @@ function onMoveEnd(evt) {
     }
   }
 
-//  resetReloadTimeout()
+  if (window.getCookie('auto-refresh') == "true") {
+    if (autoRefreshTimeout) {
+      clearTimeout(autoRefreshTimeout)
+    }
+    autoRefreshTimeout = setTimeout(refresh, 10000)
+  }
 }
-
 
 var container = document.getElementById('popup');
 var content = document.getElementById('popup-content');
@@ -805,6 +816,11 @@ function findNearby(z) {
   var pc = document.getElementById("popup-context");
   pc.style.display = "none";
 }
+
+map.getViewport().addEventListener('contextmenu', function (evt) {
+  evt.preventDefault();
+  console.log(map.getEventCoordinate(evt), evt.x, evt.y);
+})
 
 map.on("click", function(evt) {
 
@@ -1216,4 +1232,5 @@ function refresh() {
     baseLayer.getSource().refresh();
   }
   languageLayer.getSource().refresh();
+  console.log("XX")
 }
