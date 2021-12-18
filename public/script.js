@@ -185,7 +185,7 @@ function getLangLayer() {
       imageSmoothing: true,
       cacheSize: 200,
       transition: 0,
-      urls: ['https://b.tiles.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
+      urls: ['https://tile.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
       crossOrigin: null,
       tileLoadFunction: tload,
       tilePixelRatio: 2
@@ -345,7 +345,7 @@ function setLanguageLayer(lang) {
         imageSmoothing: false,
         cacheSize: 200,
         transition: 200,
-        urls: ['https://b.tiles.tracestrack.com/bus-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
+        urls: ['https://tile.tracestrack.com/bus-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
         crossOrigin: null,
         tilePixelRatio: 2
       })
@@ -361,7 +361,7 @@ function setLanguageLayer(lang) {
         imageSmoothing: false,
         cacheSize: 200,
         transition: 200,
-        urls: ['https://b.tiles.tracestrack.com/subway-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
+        urls: ['https://tile.tracestrack.com/subway-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
         crossOrigin: null,
         tilePixelRatio: 2
       })

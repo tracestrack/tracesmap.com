@@ -2,6 +2,7 @@ import { Button, InputGroup} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import ToggleButton from 'react-bootstrap/ToggleButton';
+import Toast from 'react-bootstrap/Toast';
 
 import Suggest from './Suggest';
 import './App.css';
@@ -17,8 +18,9 @@ class App extends Component {
     this.state = {
       showAbout: false,
       showSetting: false,
-      showDirections: false
-    }
+      showDirections: false,
+      show: window.getCookie("news1") === ""
+    };
   }
 
   onKeyUp = this.onKeyUp.bind(this);
@@ -46,7 +48,22 @@ class App extends Component {
 
   render() {
     return (
+      <>
+        <Toast onClose={() => {this.setState({show: false});
+                               window.setCookie("news1", "1");}} show={this.state.show} className="news" autohide delay={10000}>
+          <Toast.Header>
+            <img
+              src="holder.js/20x20?text=%20"
+              className="rounded me-2"
+              alt=""
+            />
+            <strong className="me-auto">News</strong>
+          </Toast.Header>
+          <Toast.Body>We have moved to the new domain: tracesmap.com</Toast.Body>
+         </Toast>
+
       <div className="top">
+
         <InputGroup>
 
           <Button title="Directions" id="dir" key="Xxx" type="checkbox" variant="primary" checked={this.state.showDirections} variant="outline-secondary" onClick={this.handleShowDirections}>
@@ -73,6 +90,7 @@ class App extends Component {
         {this.state.showDirections && (<Directions/>)}
 
       </div>
+      </>
     )}
 }
 
