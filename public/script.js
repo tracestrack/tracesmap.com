@@ -73,7 +73,7 @@ var goToGMaps = function(e) {
 button_google.addEventListener('click', goToGMaps, false);
 
 var button_osm = document.createElement('button');
-button_osm.innerHTML = `<img class="osm" src=https://upload.wikimedia.org/wikipedia/commons/b/b0/Openstreetmap_logo.svg />`;
+button_osm.innerHTML = `<img class="osm" src=/Openstreetmap_logo.svg />`;
 
 var goToOSM = function(e) {
   let z = map.getView().getZoom();
@@ -184,10 +184,10 @@ function getLangLayer() {
       opaque: false,
       imageSmoothing: true,
       cacheSize: 200,
-      transition: 0,
+      transition: 200,
       urls: ['https://tile.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
       crossOrigin: null,
-      tileLoadFunction: tload,
+      //tileLoadFunction: tload,
       tilePixelRatio: 2
   });
 
@@ -219,11 +219,11 @@ function getBaseLayer(urls) {
     opaque: true,
     imageSmoothing: true,
     cacheSize: 200,
-    transition: 0,
+    transition: 200,
     urls: urls,
     crossOrigin: null,
     tilePixelRatio: 2,
-    tileLoadFunction: tload
+    //tileLoadFunction: tload
   });
 
   base_source.on('tileloadstart', function () {
@@ -239,7 +239,7 @@ function getBaseLayer(urls) {
   });
 
   let base_layer = new ol.layer.Tile({
-    preload: 0,
+    preload: 2,
     source: base_source,
   })
   return base_layer;
@@ -339,7 +339,7 @@ function setLanguageLayer(lang) {
 
   if (busLayerEnabled) {
     busRoutesLayer = new ol.layer.Tile({
-      preload: 0,
+      preload: 2,
       source: new ol.source.XYZ({
         opaque: false,
         imageSmoothing: false,
@@ -355,7 +355,7 @@ function setLanguageLayer(lang) {
 
   if (subwayLayerEnabled) {
     subwayRoutesLayer = new ol.layer.Tile({
-      preload: 0,
+      preload: 2,
       source: new ol.source.XYZ({
         opaque: false,
         imageSmoothing: false,
@@ -793,6 +793,7 @@ function updateURLPoiId(id) {
 
 map.on('movestart', function() {
   document.getElementById("popup-context").style.display = "none";
+  hideContextMenu();
 })
 
 function findNearby(z) {
@@ -817,9 +818,16 @@ function findNearby(z) {
   pc.style.display = "none";
 }
 
+var contextMenuEvent;
 map.getViewport().addEventListener('contextmenu', function (evt) {
   evt.preventDefault();
-  console.log(map.getEventCoordinate(evt), evt.x, evt.y);
+  contextMenuEvent = evt;
+
+  var style = document.getElementById("context-menu").style;
+  style.left = evt.x + "px";
+  style.top = evt.y + "px";
+
+  document.getElementById("context-menu").style.display = "block";
 })
 
 map.on("click", function(evt) {
@@ -1233,4 +1241,33 @@ function refresh() {
   }
   languageLayer.getSource().refresh();
   console.log("XX")
+}
+
+function setDirectionFrom() {
+  if (document.getElementsByClassName("directions").length == 0) document.getElementById("directionButton").click();
+
+  const coord = map.getEventCoordinate(contextMenuEvent);
+  setDirectionPoint(coord, "from");
+
+  document.getElementById("dir_from").value = formatCoordinate(coord);
+
+  getRoute();
+  hideContextMenu();
+  return false;
+}
+
+function setDirectionTo() {
+  if (document.getElementsByClassName("directions").length == 0) document.getElementById("directionButton").click();
+
+  const coord = map.getEventCoordinate(contextMenuEvent);
+
+  setDirectionPoint(coord, "to");
+  document.getElementById("dir_to").value = formatCoordinate(coord);
+  getRoute();
+  hideContextMenu();
+  return false;
+}
+
+function hideContextMenu() {
+    document.getElementById("context-menu").style.display = "none";
 }
