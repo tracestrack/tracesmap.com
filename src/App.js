@@ -19,7 +19,7 @@ class App extends Component {
       showAbout: false,
       showSetting: false,
       showDirections: false,
-      show: window.getCookie("news1") === ""
+      show: false//window.getCookie("news1") === ""
     };
   }
 
