@@ -157,7 +157,8 @@ if (qstr !== "") {
 var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false, doubleClickZoom: true, keyboard: false, shiftDragZoom: true, dragPan: true});
 
 function tload(tile, src) {
-  //console.log("load", tile.getTileCoord());
+
+  console.log("tload", tile.getTileCoord());
   var xhr = new XMLHttpRequest();
   xhr.responseType = 'blob';
   xhr.addEventListener('loadend', function (evt) {
@@ -172,7 +173,7 @@ function tload(tile, src) {
   xhr.addEventListener('error', function () {
     tile.setState(3);
   });
-  xhr.open('GET', src);
+  xhr.open('GET', src + "&v=" + getVersion());
   xhr.send();
 };
 
@@ -187,7 +188,7 @@ function getLangLayer() {
       transition: 200,
       urls: ['https://tile.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
       crossOrigin: null,
-      //tileLoadFunction: tload,
+      tileLoadFunction: tload,
       tilePixelRatio: 2
   });
 
@@ -223,7 +224,7 @@ function getBaseLayer(urls) {
     urls: urls,
     crossOrigin: null,
     tilePixelRatio: 2,
-    //tileLoadFunction: tload
+    tileLoadFunction: tload
   });
 
   base_source.on('tileloadstart', function () {
@@ -435,7 +436,6 @@ document.addEventListener('keyup', function (evt) {
 
 map.on('moveend', onMoveEnd);
 
-var autoRefreshTimeout;
 function onMoveEnd(evt) {
   var map = evt.map;
   let z = map.getView().getZoom();
@@ -452,13 +452,6 @@ function onMoveEnd(evt) {
     else {
       poiLayer.setVisible(false);
     }
-  }
-
-  if (window.getCookie('auto-refresh') == "true") {
-    if (autoRefreshTimeout) {
-      clearTimeout(autoRefreshTimeout)
-    }
-    autoRefreshTimeout = setTimeout(refresh, 10000)
   }
 }
 
@@ -1235,12 +1228,21 @@ function toggleSubwayRoutes(x) {
   setLanguageLayer();
 }
 
+function getVersion() {
+  let a = getCookie("v");
+  if (a) {
+    return parseInt(a)
+  }
+  return 0
+}
+
 function refresh() {
+  let new_v = getVersion() + 1
+  setCookie("v", new_v)
   if (!isSatelliteBase) {
     baseLayer.getSource().refresh();
   }
   languageLayer.getSource().refresh();
-  console.log("XX")
 }
 
 function setDirectionFrom() {
