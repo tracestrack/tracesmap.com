@@ -135,6 +135,8 @@ var lonlat = [0, 0];
 var zoom = 3;
 var qstr = "";
 var selectedPoiId;
+var urlParams = "";
+
 if (window.location.href.indexOf("#") > -1) {
   qstr = window.location.href.split("#")[1];
 }
@@ -145,7 +147,8 @@ else {
 if (qstr.indexOf("!") > -1) {
   let arr = qstr.split("!");
   qstr = arr[0];
-  selectedPoiId = arr[1];
+  //selectedPoiId = arr[1];
+  urlParams = arr[1];
 }
 
 if (qstr !== "") {
@@ -157,8 +160,6 @@ if (qstr !== "") {
 var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false, doubleClickZoom: true, keyboard: false, shiftDragZoom: true, dragPan: true});
 
 function tload(tile, src) {
-
-  console.log("tload", tile.getTileCoord());
   var xhr = new XMLHttpRequest();
   xhr.responseType = 'blob';
   xhr.addEventListener('loadend', function (evt) {
@@ -287,10 +288,12 @@ function toggleBaseLayer() {
   if (isSatelliteBase) {
     setBaseLayer(["https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.jpg90?access_token=pk.eyJ1Ijoic3Ryb25nd2lsbG93IiwiYSI6ImxKa2R1SEkifQ.iZ_vj1lvuvrAcUIl0ZE5XA"]);
     button_sat.innerHTML = `<img src="street.png" />`;
+    updateURLParams("view=satellite");
   }
   else {
     setBaseLayer(['https://tile.tracestrack.com/base/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be']);
     button_sat.innerHTML = `<img src="sat.png" />`;
+    updateURLParams("");
   }
 
   if (languageLayer) {
@@ -308,7 +311,6 @@ function toggleBaseLayer() {
     map.removeLayer(routeLayer);
     map.addLayer(routeLayer);
   }
-
 }
 
 var languageLayer;
@@ -380,12 +382,25 @@ if (getCookie("lang") === "") {
 toggleBaseLayer();
 
 
+function updateURLParams(param) {
+  var appending = "";
+  if (param != "") {
+    appending = "!" + param
+  }
+
+  var s = window.location.href.split("!")[0]
+
+  window.location.href = s + appending
+
+  //setCookie("qstr", qstr, 1000);
+}
+
 function setURL(lonlat, zoom) {
   let qstr = zoom.toFixed(0) + "/" + lonlat[1].toFixed(4) + "/" + lonlat[0].toFixed(4)
 
   var appending = "";
-  if (selectedPoiId) {
-    appending = "!" + selectedPoiId;
+  if (urlParams) {
+    appending = "!" + urlParams;
   }
 
   window.location.href = "#" + qstr + appending;
@@ -1272,4 +1287,10 @@ function setDirectionTo() {
 
 function hideContextMenu() {
     document.getElementById("context-menu").style.display = "none";
+}
+
+
+
+if (urlParams == "view=satellite") {
+  button_sat.click();
 }
