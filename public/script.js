@@ -390,8 +390,9 @@ function updateURLParams(param) {
   }
 
   var s = window.location.href.split("!")[0]
-
-  window.location.href = s + appending
+  if (s.indexOf("#") > -1) {
+    window.location.href = s + appending
+  }
 
   //setCookie("qstr", qstr, 1000);
 }
@@ -1306,6 +1307,7 @@ function toggleDirectionPanel(show) {
     resetDirections();
     transportMethod = "driving-car";
   }
+}
 
 if (urlParams == "view=satellite") {
   button_sat.click();
