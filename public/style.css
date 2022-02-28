@@ -191,13 +191,27 @@ li:hover {
     width: 100%;
 }
 
+.overlay-button > button {
+    height: 40px;
+    width: 40px;
+}
+
+.overlay-button {
+    position: absolute;
+    left: 26px;
+    padding: 4px;
+    bottom: 115px;
+    border-radius: 10px;
+}
+
 .overlays-setting {
     position: absolute;
     background: #ffffffcc;
-    left: 100px;
+    left: 90px;
     padding: 0 15px 0 30px;
-    bottom: 22px;
+    bottom: 110px;
     border-radius: 10px;
+    display: none;
 }
 
 #context-menu {

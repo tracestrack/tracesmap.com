@@ -44,6 +44,7 @@ class App extends Component {
   handleShowDirections() {
     this.setState({showDirections: !this.state.showDirections});
     window.acceptingClick = true;
+    window.toggleDirectionPanel(this.state.showDirections);
   };
 
   render() {

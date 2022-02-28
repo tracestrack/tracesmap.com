@@ -22,6 +22,7 @@ var goToCurrentLocation = function(e) {
     let view = map.getView();
     view.setCenter(lastCoordinate);
     view.setZoom(18);
+    refresh();
   }
   else {
     needsSetCenter = true;
@@ -248,7 +249,7 @@ function getBaseLayer(urls) {
 var map = new ol.Map({
   target: 'map',
   interactions: interactions,
-  maxTilesLoading: 100,
+  maxTilesLoading: 40,
   controls: [new ol.control.Attribution({collapsible: true}), new ol.control.Zoom({className: "zoomControl"})],
   view: new ol.View({
     center: ol.proj.fromLonLat(lonlat),
@@ -540,6 +541,7 @@ geolocation.on('change:position', function () {
     let view = map.getView();
     view.setCenter(coordinates);
     view.setZoom(18);
+    refresh();
     needsSetCenter = false;
   }
 
@@ -1240,7 +1242,6 @@ function refresh() {
     baseLayer.getSource().refresh();
   }
   languageLayer.getSource().refresh();
-  console.log("XX")
 }
 
 function setDirectionFrom() {
@@ -1270,4 +1271,20 @@ function setDirectionTo() {
 
 function hideContextMenu() {
     document.getElementById("context-menu").style.display = "none";
+}
+
+function toggleOverlayControl() {
+  if (document.getElementById("overlays-setting").style.display == "") {
+    document.getElementById("overlays-setting").style.display = "block";
+  }
+  else {
+    document.getElementById("overlays-setting").style.display = "";
+  }
+}
+
+function toggleDirectionPanel(show) {
+  if (show) {
+    resetDirections();
+    transportMethod = "driving-car";
+  }
 }
