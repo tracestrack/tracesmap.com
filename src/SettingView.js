@@ -42,8 +42,8 @@ function SettingView({show, hide}) {
   const [value, setValue] = useState(window.getCookie('auto-refresh') == "true");
 
   const handleChange = function(e) {
-    window.setCookie('auto-refresh', e.target.checked, 1000);
-    setValue(v => !v);
+    //window.setCookie('auto-refresh', e.target.checked, 1000);
+    //setValue(v => !v);
   };
 
   return (<Modal
@@ -60,6 +60,7 @@ function SettingView({show, hide}) {
           <Modal.Body>
 
             <Container>
+{/*
 
               <h5>Options</h5>
               <p>
@@ -76,6 +77,8 @@ function SettingView({show, hide}) {
                   </Form.Text>
                 </Form>
               </p>
+A JSX comment */}
+
 
               <h5>Languages</h5>
 

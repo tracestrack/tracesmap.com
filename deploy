@@ -1,0 +1,4 @@
+#!/usr/local/bin/fish
+
+
+scp -P 21098 -r tiles index.html root@h2934425.stratoserver.net:/var/www/tracesmap.com
