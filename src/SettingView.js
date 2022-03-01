@@ -5,7 +5,7 @@ import {useState} from "react";
 const server = [["Berlin", "a"],
                 ["Los Angeles", "b"]];
 
-const langs = [["Global *", "_-name"],
+const langs = [[window.l("Global *"), "_-name"],
                ["عربي", "ar-name"],
                ["Breton", "br-name"],
                ["Deutsch", "de-name"],
@@ -54,7 +54,7 @@ function SettingView({show, hide}) {
           >
           <Modal.Header closeButton>
             <Modal.Title id="example-custom-modal-styling-title">
-              Settings
+              {window.l('Settings')}
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
@@ -80,11 +80,11 @@ function SettingView({show, hide}) {
 A JSX comment */}
 
 
-              <h5>Languages</h5>
+              <h5>{window.l('Languages')}</h5>
 
               <div>
                 <Form.Text className="text-muted" size="sm">
-                  Languages with <b>*</b> has full zoom levels.
+                  {window.l('Languages with <b>*</b> has full zoom levels.')}
                 </Form.Text>
 
                 <ListGroup>

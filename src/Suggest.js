@@ -150,7 +150,7 @@ class Example extends React.Component {
 
     // Autosuggest will pass through all these props to the input.
     const inputProps = {
-      placeholder: 'Search a place',
+      placeholder: window.l("Search a place"),
       value,
       onChange: this.onChange,
       onKeyDown: this.onKeyPress,

@@ -39,19 +39,19 @@ function Directions({show, hide}) {
             <div className="directions_method">
               <ToggleButtonGroup type="radio" name="options" defaultValue="driving-car" onChange={updateTransport} size="sm">
                 <ToggleButton id="tbg-radio-1" value="driving-car">
-                  Driving
+                  {window.l("Driving")}
                 </ToggleButton>
                 <ToggleButton id="tbg-radio-2" value="cycling-regular">
-                  Cycling
+                  {window.l("Cycling")}
                 </ToggleButton>
                 <ToggleButton id="tbg-radio-3" value="cycling-mountain">
-                  Cycling MTB
+                  {window.l("Cycling MTB")}
                 </ToggleButton>
                 <ToggleButton id="tbg-radio-4" value="foot-walking">
-                  Walking
+                  {window.l("Walking")}
                 </ToggleButton>
                 <ToggleButton id="tbg-radio-5" value="foot-hiking">
-                  Hiking
+                  {window.l("Hiking")}
                 </ToggleButton>
               </ToggleButtonGroup>
 
@@ -61,12 +61,12 @@ function Directions({show, hide}) {
 
               <DropdownButton
                 variant="outline-secondary"
-                title="From"
+                title={window.l("From")}
                 size="sm"
                 id="input-group-dropdown-1"
               >
-                <Dropdown.Item onClick={useClickLocationAsFrom}>Click on map</Dropdown.Item>
-                <Dropdown.Item onClick={useCurrentLocationAsFrom}>Use current location</Dropdown.Item>
+                <Dropdown.Item onClick={useClickLocationAsFrom}>{window.l("Click on map")}</Dropdown.Item>
+                <Dropdown.Item onClick={useCurrentLocationAsFrom}>{window.l("Use current location")}</Dropdown.Item>
               </DropdownButton>
 
               <FormControl onClick={useClickLocationAsFrom} id="dir_from" aria-label="Small" aria-describedby="inputGroup-sizing-sm" />
@@ -75,18 +75,18 @@ function Directions({show, hide}) {
             <InputGroup size="sm" className="directions_input">
               <DropdownButton
                 variant="outline-secondary"
-                title="To"
+                title={window.l("To")}
                 size="sm"
                 id="input-group-dropdown-1"
               >
-                <Dropdown.Item onClick={useClickLocationAsTo}>Click on map</Dropdown.Item>
-                <Dropdown.Item onClick={useCurrentLocationAsTo}>Use current location</Dropdown.Item>
+                <Dropdown.Item onClick={useClickLocationAsTo}>{window.l("Click on map")}</Dropdown.Item>
+                <Dropdown.Item onClick={useCurrentLocationAsTo}>{window.l("Use current location")}</Dropdown.Item>
               </DropdownButton>
               <FormControl onClick={useClickLocationAsTo} id="dir_to" aria-label="Small" aria-describedby="inputGroup-sizing-sm" />
             </InputGroup>
 
             <div className="buttons">
-              <Button variant="danger" size="sm" onClick={doReset}>Reset</Button>
+              <Button variant="danger" size="sm" onClick={doReset}>{window.l("Reset")}</Button>
             </div>
 
             <div id="directions_result"/>

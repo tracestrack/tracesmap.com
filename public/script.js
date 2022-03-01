@@ -175,7 +175,13 @@ function tload(tile, src) {
   xhr.addEventListener('error', function () {
     tile.setState(3);
   });
-  xhr.open('GET', src + "&v=" + getVersion());
+
+  var version_suffix = "";
+  if (src.indexOf("mapbox") == -1) {
+    version_suffix = "&v=" + getVersion();
+  }
+
+  xhr.open('GET', src + version_suffix);
   xhr.send();
 };
 
@@ -1312,3 +1318,13 @@ function toggleDirectionPanel(show) {
 if (urlParams == "view=satellite") {
   button_sat.click();
 }
+
+
+function setupI18N() {
+  document.getElementById("label_bus").innerText = l("Bus");
+  document.getElementById("label_subway").innerText = l("Subway");
+  document.getElementById("cm-dir-from").innerText = l("Direction from here");
+  document.getElementById("cm-dir-to").innerText = l("Direction to here");
+}
+
+setupI18N();

@@ -12,11 +12,11 @@ function AboutPage({show, hide}) {
           >
             <Modal.Header closeButton>
               <Modal.Title id="example-custom-modal-styling-title">
-                About & Help
+                {window.l("About & Help")}
               </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              <h4>Acknowledgement</h4>
+              <h4>{window.l("Acknowledgement")}</h4>
               <p><small>
                    Map data: © OpenStreetMap contributors <br />
 
@@ -40,12 +40,12 @@ function AboutPage({show, hide}) {
 
                  </small>              </p>
 
-              <h4>Privacy</h4>
+              <h4>{window.l("Privacy")}</h4>
               <p>
                 We do not harvest or analyze user data in any way. Cookies is used only to save user preferences locally.
               </p>
 
-              <h4>Quick tips</h4>
+              <h4>{window.l("Quick tips")}</h4>
               <ol>
                 <small>
                 <li>Paste URL of openstreetmap.org and Google Maps to search bar to quick jump</li>
@@ -57,7 +57,7 @@ function AboutPage({show, hide}) {
                 </small>
               </ol>
 
-              <h4>Other Information</h4>
+              <h4>{window.l("Other Information")}</h4>
               <p><small>
                    <a href="https://stats.uptimerobot.com/505xMU0mq4">Service Status</a> <br />
 
