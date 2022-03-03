@@ -323,8 +323,10 @@ function toggleBaseLayer() {
 var languageLayer;
 var busRoutesLayer;
 var subwayRoutesLayer;
+var trainRoutesLayer;
 var busLayerEnabled = false;
 var subwayLayerEnabled = false;
+var trainLayerEnabled = false;
 
 function setLanguageLayer(lang) {
 
@@ -341,6 +343,9 @@ function setLanguageLayer(lang) {
   }
   if (subwayRoutesLayer) {
     map.removeLayer(subwayRoutesLayer);
+  }
+  if (trainRoutesLayer) {
+    map.removeLayer(trainRoutesLayer);
   }
 
   var mr = Math.random();
@@ -377,6 +382,22 @@ function setLanguageLayer(lang) {
       })
     });
     map.addLayer(subwayRoutesLayer);
+  }
+
+  if (trainLayerEnabled) {
+    trainRoutesLayer = new ol.layer.Tile({
+      preload: 2,
+      source: new ol.source.XYZ({
+        opaque: false,
+        imageSmoothing: false,
+        cacheSize: 200,
+        transition: 200,
+        urls: ['https://tile.tracestrack.com/train-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
+        crossOrigin: null,
+        tilePixelRatio: 2
+      })
+    });
+    map.addLayer(trainRoutesLayer);
   }
 
   map.addLayer(languageLayer);
@@ -1252,6 +1273,11 @@ function toggleSubwayRoutes(x) {
   setLanguageLayer();
 }
 
+function toggleTrainRoutes(x) {
+  trainLayerEnabled = !trainLayerEnabled;
+  setLanguageLayer();
+}
+
 function getVersion() {
   let a = getCookie("v");
   if (a) {
@@ -1323,6 +1349,7 @@ if (urlParams == "view=satellite") {
 function setupI18N() {
   document.getElementById("label_bus").innerText = l("Bus");
   document.getElementById("label_subway").innerText = l("Subway");
+  document.getElementById("label_train").innerText = l("Train");
   document.getElementById("cm-dir-from").innerText = l("Direction from here");
   document.getElementById("cm-dir-to").innerText = l("Direction to here");
 }

@@ -7,6 +7,7 @@ var localizationMap = {
     "Global *": "当地语言 *",
     "Bus": "巴士与电车",
     "Subway": "地铁与轻轨",
+    "Train": "火车",
     "Direction from here": "设为起点",
     "Direction to here": "设为终点",
     "Driving": "驾车",
@@ -25,7 +26,7 @@ var localizationMap = {
     "Other Information": "其他信息",
     "Quick tips": "小贴士"
   },
-  "nl": {
+  "nl-NL": {
     'Search a place': "Zoek",
     'Settings': 'Instellingen',
     'Languages': 'Talen',
@@ -33,6 +34,7 @@ var localizationMap = {
     "Global *": "Lokale taal *",
     "Bus": "Bus en Tram",
     "Subway": "Metro en lightrail",
+    "Train": "Train",
     "Direction from here": "Instellen als startpunt",
     "Direction to here": "Instellen als bestemming",
     "Driving": "Rijden",
@@ -51,7 +53,7 @@ var localizationMap = {
     "Other Information": "Overige informatie",
     "Quick tips": "Snelle tips"
   },
-  "fr": {
+  "fr-FR": {
     'Search a place': "Rechercher",
     'Settings': 'Paramètres',
     'Languages': 'Langues',
@@ -59,6 +61,7 @@ var localizationMap = {
     "Global *": "Langue locale *",
     "Bus": "Bus et Tramway",
     "Subway": "Métro et Tramway",
+    "Train": "Train",
     "Direction from here": "Direction à partir d'ici",
     "Direction to here": "Direction vers ici",
     "Driving": "Conduite",
