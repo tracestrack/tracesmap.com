@@ -409,12 +409,13 @@ if (getCookie("lang") === "") {
 
 toggleBaseLayer();
 
-
 function updateURLParams(param) {
   var appending = "";
   if (param != "") {
     appending = "!" + param
   }
+
+  urlParams = param
 
   var s = window.location.href.split("!")[0]
   if (s.indexOf("#") > -1) {
@@ -798,7 +799,10 @@ function showPlaces(res) {
 
   var list = `<h5>List</h5><div class="close"><button type="button" class="btn-close" aria-label="Close" onclick="closelist()" /></div>`;
   for(var i in places_map) {
-    list += `<li onmouseenter='mouseoverlist(${i})'><a href='javascript:mouseclicklist(${i})'>` + places_map[i][2]["name"] + "</a></li>";
+    let tags = places_map[i][2];
+    console.log(tags)
+    let cat = coalesce(tags['shop'], tags['office'], tags['amenity'], tags['tourism'], tags['leisure'], tags['place'], tags['aeroway']).replace(/_/g, " ");
+    list += `<li onmouseenter='mouseoverlist(${i})'><a href='javascript:mouseclicklist(${i})'>` + coalesce(places_map[i][2]["name"], cat) + "</a></li>";
   }
 
   document.getElementById("popup-list").innerHTML = list;
@@ -834,32 +838,43 @@ map.on('movestart', function() {
   hideContextMenu();
 })
 
-function findNearby(z) {
-  var pc = document.getElementById("coord");
-  var latlon = pc.innerHTML;
 
-  var data;
-  if (z >= 17) {
-    data = `[out:json][timeout:25];(nwr["amenity"](around: 100, ${latlon});nwr["shop"](around: 100, ${latlon});nwr["office"](around: 100, ${latlon});nwr["leisure"](around: 100, ${latlon});nwr["tourism"](around: 100, ${latlon}););out ids tags center;`
+function findNearbyPlaces() {
 
-    postOverpass(data, function(json) {
-      showPlaces(json)
-    })
-  }
-  else if (z >= 10 && z <= 16){
-    data = `[out:json][timeout:25];(node["place"](around: 1000, ${latlon}););out 10;`
-    postOverpass(data, function(json) {
-      showPlaces(json)
-    })
-  }
-  var pc = document.getElementById("popup-context");
-  pc.style.display = "none";
+  const coord = map.getEventCoordinate(contextMenuEvent);
+  var latlon = formatCoordinate(coord);
+
+  var data = `[out:json][timeout:25];(node["place"](around: 1000, ${latlon}););out 10;`
+  postOverpass(data, function(json) {
+    showPlaces(json)
+  })
+
+  hideContextMenu();
+}
+
+function findNearbyPois() {
+  const coord = map.getEventCoordinate(contextMenuEvent);
+  var latlon = formatCoordinate(coord);
+
+  var data = `[out:json][timeout:25];(nwr["amenity"](around: 100, ${latlon});nwr["shop"](around: 100, ${latlon});nwr["office"](around: 100, ${latlon});nwr["leisure"](around: 100, ${latlon});nwr["tourism"](around: 100, ${latlon}););out ids tags center;`
+
+  postOverpass(data, function(json) {
+    showPlaces(json)
+  })
+
+  hideContextMenu();
 }
 
 var contextMenuEvent;
 map.getViewport().addEventListener('contextmenu', function (evt) {
+
   evt.preventDefault();
   contextMenuEvent = evt;
+
+  const coord = map.getEventCoordinate(contextMenuEvent);
+  setClickPoint(ol.proj.toLonLat(coord));
+  console.log(ol.proj.toLonLat(coord));
+
 
   var style = document.getElementById("context-menu").style;
   style.left = evt.x + "px";
@@ -870,6 +885,7 @@ map.getViewport().addEventListener('contextmenu', function (evt) {
 
 map.on("click", function(evt) {
 
+  hideContextMenu();
   popupOverlay.setPosition(undefined);
 
   if (poi_selected_id > -1) {
@@ -935,7 +951,7 @@ map.on("click", function(evt) {
 
   var pc = document.getElementById("popup-context");
   pc.style.display = "block";
-  pc.innerHTML = "<span id='coord'>" + toStringCoords(coord) + `</span><button onclick='findNearby(${z})'>Nearby ${type}</button>`;
+  pc.innerHTML = "<span id='coord'>" + toStringCoords(coord) + `</span>`;
   setClickPoint(coord);
 });
 

@@ -162,7 +162,7 @@ _::-webkit-full-page-media, _:future, #poi, .top {
     left: calc(50% - 80px);
     bottom: 20px;
     width: 160px;
-    height: 60px;
+    height: 40px;
     font-size: 12px;
 }
 
@@ -222,12 +222,20 @@ li:hover {
     top: 100px;
     border-radius: 10px;
     display:none;
+    padding: 5px 0 5px 0;
 }
 
 #context-menu a {
     font-size: 14px;
     display: block;
-    margin: 5px;
+    margin: 5px 5px 5px 12px;
+}
+
+#context-menu hr {
+    padding: 0;
+    margin: 0;
+    border: 1px dashed gray;
+    height: 0px;
 }
 
 .tools {
