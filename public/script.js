@@ -270,6 +270,7 @@ var map = new ol.Map({
 map.addControl(GotoCurrentLocControl);
 map.addControl(GoToGMapsControl);
 
+
 var geolocation = new ol.Geolocation({
   trackingOptions: {
     enableHighAccuracy: true,
@@ -469,6 +470,7 @@ document.addEventListener('keyup', function (evt) {
     popup.blur();
     window.focus();
   }
+  /*
   else if (evt.which === 189) {
     // -
     document.getElementsByClassName("zoomControl-out")[0].click()
@@ -476,7 +478,7 @@ document.addEventListener('keyup', function (evt) {
   else if (evt.which === 187) {
     //+
     document.getElementsByClassName("zoomControl-in")[0].click()
-  }
+  }*/
 });
 
 map.on('moveend', onMoveEnd);
@@ -875,7 +877,6 @@ map.getViewport().addEventListener('contextmenu', function (evt) {
   setClickPoint(ol.proj.toLonLat(coord));
   console.log(ol.proj.toLonLat(coord));
 
-
   var style = document.getElementById("context-menu").style;
   style.left = evt.x + "px";
   style.top = evt.y + "px";
@@ -884,7 +885,7 @@ map.getViewport().addEventListener('contextmenu', function (evt) {
 })
 
 map.on("click", function(evt) {
-
+  console.log(evt)
   hideContextMenu();
   popupOverlay.setPosition(undefined);
 
@@ -1112,19 +1113,20 @@ function showPoi(ele) {
   str += addLine("Directions", navlinks.join(""));
 
   let edit_link = `https://www.openstreetmap.org/edit?editor=id&${type}=${id}`;
+  let history_link = `https://www.openstreetmap.org/${type}/${id}/history`;
 
   let permURL = window.location.href;
-  str += `<div class="input-group input-group-sm mb-3">
+  str += /*`<div class="input-group input-group-sm mb-3">
 
   <input type="text" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled value="${permURL}" id="permanentURL">
   <div class="input-group-append">
     <button id="btnCopyLink" class="btn btn-outline-secondary" type="button" onclick="copyPermURL()">Copy Link</button>
   </div>
-</div>
+</div>` +*/ `
 <small><a target=_blank href=${edit_link}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
   <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
   <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
-</svg> Edit in OpenStreetMap</a></small>`;
+</svg> Edit in OpenStreetMap</a> (<a target=_blank href=${history_link}>History</a>)</small>`;
 
   str += `</dl>`;
 

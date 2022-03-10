@@ -242,10 +242,17 @@ li:hover {
     position: absolute;
     width: 40px;
     height: 40px;
-    top: 10px;
+    top: 34px;
     right: 10px;
     z-index: 200;
     background: rgba(255, 255, 255, 0.7);
     padding: 5px;
     border-radius: 10px;
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .tools {
+        display: none;
+    }
 }
