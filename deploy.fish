@@ -10,9 +10,5 @@ rm tmp2
 
 tar czvf ../xx.tar.gz .
 
-scp ../xx.tar.gz root@h2934425.stratoserver.net:/tmp
-
-ssh root@h2934425.stratoserver.net tar -xvf /tmp/xx.tar.gz -C /var/www/tracesmap.com/
-
-#scp -P 21098 -r * root@h2934425.stratoserver.net:/var/www/tracesmap.com
-
+scp -i ~/dev/tracestrack-cache-server/aws-uk.pem ../xx.tar.gz ubuntu@18.169.228.79:/tmp
+ssh -i ~/dev/tracestrack-cache-server/aws-uk.pem ubuntu@18.169.228.79 "tar -xvf /tmp/xx.tar.gz -C /var/www/tracesmap.com/"

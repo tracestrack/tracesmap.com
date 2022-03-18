@@ -325,9 +325,11 @@ var languageLayer;
 var busRoutesLayer;
 var subwayRoutesLayer;
 var trainRoutesLayer;
+var trafficLayer;
 var busLayerEnabled = false;
 var subwayLayerEnabled = false;
 var trainLayerEnabled = false;
+var trafficLayerEnabled = false;
 
 function setLanguageLayer(lang) {
 
@@ -347,6 +349,9 @@ function setLanguageLayer(lang) {
   }
   if (trainRoutesLayer) {
     map.removeLayer(trainRoutesLayer);
+  }
+  if (trafficLayer) {
+    map.removeLayer(trafficLayer);
   }
 
   var mr = Math.random();
@@ -399,6 +404,22 @@ function setLanguageLayer(lang) {
       })
     });
     map.addLayer(trainRoutesLayer);
+  }
+
+  if (trafficLayerEnabled) {
+    trafficLayer = new ol.layer.Tile({
+      preload: 2,
+      source: new ol.source.XYZ({
+        opaque: false,
+        imageSmoothing: false,
+        cacheSize: 200,
+        transition: 200,
+        urls: ['https://api.tomtom.com/traffic/map/4/tile/flow/relative/{z}/{x}/{y}.png?key=O5LGYfXUsThtDAoj8FsQKJlf5oll98tq&thickness=8&tileSize=512'],
+        crossOrigin: null,
+        tilePixelRatio: 2
+      })
+    });
+    map.addLayer(trafficLayer);
   }
 
   map.addLayer(languageLayer);
@@ -1293,6 +1314,11 @@ function toggleSubwayRoutes(x) {
 
 function toggleTrainRoutes(x) {
   trainLayerEnabled = !trainLayerEnabled;
+  setLanguageLayer();
+}
+
+function toggleTraffic(x) {
+  trafficLayerEnabled = !trafficLayerEnabled;
   setLanguageLayer();
 }
 
