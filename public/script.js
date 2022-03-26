@@ -323,10 +323,12 @@ function toggleBaseLayer() {
 
 var languageLayer;
 var busRoutesLayer;
+var bikeRoutesLayer;
 var subwayRoutesLayer;
 var trainRoutesLayer;
 var trafficLayer;
 var busLayerEnabled = false;
+var bikeLayerEnabled = false;
 var subwayLayerEnabled = false;
 var trainLayerEnabled = false;
 var trafficLayerEnabled = false;
@@ -343,6 +345,9 @@ function setLanguageLayer(lang) {
 
   if (busRoutesLayer) {
     map.removeLayer(busRoutesLayer);
+  }
+  if (bikeRoutesLayer) {
+    map.removeLayer(bikeRoutesLayer);
   }
   if (subwayRoutesLayer) {
     map.removeLayer(subwayRoutesLayer);
@@ -372,6 +377,22 @@ function setLanguageLayer(lang) {
       })
     });
     map.addLayer(busRoutesLayer);
+  }
+
+  if (bikeLayerEnabled) {
+    bikeRoutesLayer = new ol.layer.Tile({
+      preload: 2,
+      source: new ol.source.XYZ({
+        opaque: false,
+        imageSmoothing: false,
+        cacheSize: 200,
+        transition: 200,
+        urls: ['https://tile.tracestrack.com/bicycle-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
+        crossOrigin: null,
+        tilePixelRatio: 2
+      })
+    });
+    map.addLayer(bikeRoutesLayer);
   }
 
   if (subwayLayerEnabled) {
@@ -414,7 +435,7 @@ function setLanguageLayer(lang) {
         imageSmoothing: false,
         cacheSize: 200,
         transition: 200,
-        urls: ['https://api.tomtom.com/traffic/map/4/tile/flow/relative/{z}/{x}/{y}.png?key=O5LGYfXUsThtDAoj8FsQKJlf5oll98tq&thickness=8&tileSize=512'],
+        urls: ['https://api.tomtom.com/traffic/map/4/tile/flow/relative0/{z}/{x}/{y}.png?key=O5LGYfXUsThtDAoj8FsQKJlf5oll98tq&thickness=8&tileSize=512'],
         crossOrigin: null,
         tilePixelRatio: 2
       })
@@ -1304,6 +1325,11 @@ function formatCoordinate(c) {
 
 function toggleBusRoutes(x) {
   busLayerEnabled = !busLayerEnabled;
+  setLanguageLayer();
+}
+
+function toggleBikeRoutes(x) {
+  bikeLayerEnabled = !bikeLayerEnabled;
   setLanguageLayer();
 }
 
