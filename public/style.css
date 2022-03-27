@@ -19,7 +19,7 @@ html, body {
 .map {
     height: 100%;
     width: 100%;
-    filter: saturate(150%);
+    //filter: saturate(150%);
     background-color: #f2efe9;
     background-image: url(bg.png);
 }
@@ -204,14 +204,19 @@ li:hover {
     border-radius: 10px;
 }
 
+.overlays-setting form {
+    padding: 0;
+    margin: 0;
+}
 .overlays-setting {
     position: absolute;
-    background: #ffffffcc;
     left: 90px;
-    padding: 0 15px 0 30px;
-    bottom: 110px;
-    border-radius: 10px;
+    bottom: 30px;
+    background: #ffffffee;
+    padding: 5px;
     display: none;
+    height: 132px;
+    border-radius: 6px;
 }
 
 #context-menu {
@@ -236,23 +241,4 @@ li:hover {
     margin: 0;
     border: 1px dashed gray;
     height: 0px;
-}
-
-.tools {
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    top: 34px;
-    right: 10px;
-    z-index: 200;
-    background: rgba(255, 255, 255, 0.7);
-    padding: 5px;
-    border-radius: 10px;
-    display: block;
-}
-
-@media (max-width: 768px) {
-    .tools {
-        display: none;
-    }
 }

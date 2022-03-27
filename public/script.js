@@ -92,6 +92,9 @@ button_sat.classList.add('sat_button');
 button_sat.id = 'sat_button';
 button_sat.title = "F2";
 button_sat.innerHTML = `<img src="sat.png" />`;
+button_sat.addEventListener('mouseover', function(e) {
+  toggleOverlayControl()
+}, false);
 
 var goToSat = function(e) {
   toggleBaseLayer();
@@ -193,7 +196,7 @@ function getLangLayer() {
       opaque: false,
       imageSmoothing: true,
       cacheSize: 200,
-      transition: 200,
+      transition: 0,
       urls: ['https://tile.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
       crossOrigin: null,
       tileLoadFunction: tload,
@@ -201,7 +204,7 @@ function getLangLayer() {
   });
 
   var layer = new ol.layer.Tile({
-    preload: 0,
+    preload: 2,
     source: source,
   });
 
@@ -220,7 +223,11 @@ function getLangLayer() {
   return layer;
 }
 
-var baselayer_loading_count = 0;
+var baseStyle = {
+  exposure: 0,
+  contrast: 0,
+  saturation: 0
+};
 
 function getBaseLayer(urls) {
   let base_source = new ol.source.XYZ({
@@ -228,28 +235,16 @@ function getBaseLayer(urls) {
     opaque: true,
     imageSmoothing: true,
     cacheSize: 200,
-    transition: 200,
+    transition: 100,
     urls: urls,
     crossOrigin: null,
     tilePixelRatio: 2,
     tileLoadFunction: tload
   });
 
-  base_source.on('tileloadstart', function () {
-    baselayer_loading_count++
-  });
-
-  base_source.on('tileloadend', function () {
-    baselayer_loading_count--
-  });
-
-  base_source.on('tileloaderror', function () {
-    baselayer_loading_count--
-  });
-
-  let base_layer = new ol.layer.Tile({
-    preload: 2,
-    source: base_source,
+  let base_layer = new ol.layer.WebGLTile({
+    style: baseStyle,
+    source: base_source
   })
   return base_layer;
 }
@@ -278,12 +273,13 @@ var geolocation = new ol.Geolocation({
   projection: map.getView().getProjection(),
 });
 
+var baseLayerUrl;
 var baseLayer;
-function setBaseLayer(urls) {
+function setBaseLayer() {
   if (baseLayer) {
     map.removeLayer(baseLayer);
   }
-  baseLayer = getBaseLayer(urls);
+  baseLayer = getBaseLayer([baseLayerUrl]);
   map.addLayer(baseLayer);
 }
 
@@ -294,12 +290,14 @@ function toggleBaseLayer() {
   isSatelliteBase = !isSatelliteBase;
 
   if (isSatelliteBase) {
-    setBaseLayer(["https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.jpg90?access_token=pk.eyJ1Ijoic3Ryb25nd2lsbG93IiwiYSI6ImxKa2R1SEkifQ.iZ_vj1lvuvrAcUIl0ZE5XA"]);
+    baseLayerUrl = "https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.jpg90?access_token=pk.eyJ1Ijoic3Ryb25nd2lsbG93IiwiYSI6ImxKa2R1SEkifQ.iZ_vj1lvuvrAcUIl0ZE5XA"
+    setBaseLayer();
     button_sat.innerHTML = `<img src="street.png" />`;
     updateURLParams("view=satellite");
   }
   else {
-    setBaseLayer(['https://tile.tracestrack.com/base/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be']);
+    baseLayerUrl = 'https://tile.tracestrack.com/base/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be';
+    setBaseLayer();
     button_sat.innerHTML = `<img src="sat.png" />`;
     updateURLParams("");
   }
@@ -322,16 +320,10 @@ function toggleBaseLayer() {
 }
 
 var languageLayer;
-var busRoutesLayer;
-var bikeRoutesLayer;
-var subwayRoutesLayer;
-var trainRoutesLayer;
-var trafficLayer;
-var busLayerEnabled = false;
-var bikeLayerEnabled = false;
-var subwayLayerEnabled = false;
-var trainLayerEnabled = false;
-var trafficLayerEnabled = false;
+
+var overlayUrl;
+var overlayLayer;
+var overlayEnabled = false;
 
 function setLanguageLayer(lang) {
 
@@ -343,104 +335,26 @@ function setLanguageLayer(lang) {
     map.removeLayer(languageLayer);
   }
 
-  if (busRoutesLayer) {
-    map.removeLayer(busRoutesLayer);
+  if (overlayLayer) {
+    map.removeLayer(overlayLayer);
   }
-  if (bikeRoutesLayer) {
-    map.removeLayer(bikeRoutesLayer);
-  }
-  if (subwayRoutesLayer) {
-    map.removeLayer(subwayRoutesLayer);
-  }
-  if (trainRoutesLayer) {
-    map.removeLayer(trainRoutesLayer);
-  }
-  if (trafficLayer) {
-    map.removeLayer(trafficLayer);
-  }
-
-  var mr = Math.random();
 
   languageLayer = getLangLayer();
 
-  if (busLayerEnabled) {
-    busRoutesLayer = new ol.layer.Tile({
+  if (overlayEnabled) {
+    overlayLayer = new ol.layer.Tile({
       preload: 2,
       source: new ol.source.XYZ({
         opaque: false,
         imageSmoothing: false,
         cacheSize: 200,
-        transition: 200,
-        urls: ['https://tile.tracestrack.com/bus-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
+        transition: 0,
+        urls: [overlayUrl],
         crossOrigin: null,
         tilePixelRatio: 2
       })
     });
-    map.addLayer(busRoutesLayer);
-  }
-
-  if (bikeLayerEnabled) {
-    bikeRoutesLayer = new ol.layer.Tile({
-      preload: 2,
-      source: new ol.source.XYZ({
-        opaque: false,
-        imageSmoothing: false,
-        cacheSize: 200,
-        transition: 200,
-        urls: ['https://tile.tracestrack.com/bicycle-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
-        crossOrigin: null,
-        tilePixelRatio: 2
-      })
-    });
-    map.addLayer(bikeRoutesLayer);
-  }
-
-  if (subwayLayerEnabled) {
-    subwayRoutesLayer = new ol.layer.Tile({
-      preload: 2,
-      source: new ol.source.XYZ({
-        opaque: false,
-        imageSmoothing: false,
-        cacheSize: 200,
-        transition: 200,
-        urls: ['https://tile.tracestrack.com/subway-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
-        crossOrigin: null,
-        tilePixelRatio: 2
-      })
-    });
-    map.addLayer(subwayRoutesLayer);
-  }
-
-  if (trainLayerEnabled) {
-    trainRoutesLayer = new ol.layer.Tile({
-      preload: 2,
-      source: new ol.source.XYZ({
-        opaque: false,
-        imageSmoothing: false,
-        cacheSize: 200,
-        transition: 200,
-        urls: ['https://tile.tracestrack.com/train-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
-        crossOrigin: null,
-        tilePixelRatio: 2
-      })
-    });
-    map.addLayer(trainRoutesLayer);
-  }
-
-  if (trafficLayerEnabled) {
-    trafficLayer = new ol.layer.Tile({
-      preload: 2,
-      source: new ol.source.XYZ({
-        opaque: false,
-        imageSmoothing: false,
-        cacheSize: 200,
-        transition: 200,
-        urls: ['https://api.tomtom.com/traffic/map/4/tile/flow/relative0/{z}/{x}/{y}.png?key=O5LGYfXUsThtDAoj8FsQKJlf5oll98tq&thickness=8&tileSize=512'],
-        crossOrigin: null,
-        tilePixelRatio: 2
-      })
-    });
-    map.addLayer(trafficLayer);
+    map.addLayer(overlayLayer);
   }
 
   map.addLayer(languageLayer);
@@ -1321,6 +1235,50 @@ function useCurrentLocationAsTo() {
 
 function formatCoordinate(c) {
   return toStringCoords(ol.proj.toLonLat(c));
+}
+
+var checkedOverlayValue;
+function onCheckLayer(e) {
+  const urlMap = {"bus": 'https://tile.tracestrack.com/bus-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be',
+                  "bike": 'https://tile.tracestrack.com/bicycle-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be',
+                  "subway": 'https://tile.tracestrack.com/subway-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be',
+                  "train": 'https://tile.tracestrack.com/train-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be',
+                  "traffic": 'https://api.tomtom.com/traffic/map/4/tile/flow/relative-delay/{z}/{x}/{y}.png?key=O5LGYfXUsThtDAoj8FsQKJlf5oll98tq&thickness=10&tileSize=512'
+                 }
+
+  if (checkedOverlayValue == e.value) {
+    // uncheck
+    e.checked = false;
+    checkedOverlayValue = "";
+    overlayEnabled = false;
+    setLanguageLayer();
+    return;
+  }
+
+  overlayEnabled = true;
+  checkedOverlayValue = e.value;
+
+  overlayUrl = urlMap[e.value];
+  setLanguageLayer();
+}
+
+function onChangeStyle(e) {
+  if (e.value == "normal") {
+    baseStyle = {
+      exposure: 0,
+      contrast: 0,
+      saturation: 0
+    }
+  }
+  else {
+    baseStyle = {
+      exposure: 0,
+      contrast: 0,
+      saturation: -0.9
+    }
+  }
+  setBaseLayer();
+  setLanguageLayer();
 }
 
 function toggleBusRoutes(x) {
