@@ -8,6 +8,10 @@ var localizationMap = {
     "Bus": "巴士与电车",
     "Subway": "地铁与轻轨",
     "Train": "火车",
+    "Bicycle": "自行车",
+    "Traffic": "即时路况",
+    "Show Nearby Places": "显示附近地点",
+    "Show Nearby POIs": "显示附近兴趣点",
     "Direction from here": "设为起点",
     "Direction to here": "设为终点",
     "Driving": "驾车",
@@ -24,7 +28,14 @@ var localizationMap = {
     "Acknowledgement": "致谢",
     "Privacy": "隐私",
     "Other Information": "其他信息",
-    "Quick tips": "小贴士"
+    "Quick tips": "小贴士",
+    "Overlay": "图层",
+    "Style": "样式",
+    "Normal": "标准",
+    "Grayscale": "灰度",
+    "Street": "道路图",
+    "Satellite": "卫星图",
+    "Base Map": "底图",
   },
   "nl-NL": {
     'Search a place': "Zoek",
@@ -59,8 +70,12 @@ var localizationMap = {
     'Languages': 'Langues',
     'Languages with <b>*</b> has full zoom levels.': 'Les langues avec <b>*</b> ont des niveaux de zoom complets',
     "Global *": "Langue locale *",
-    "Bus": "Bus et Tramway",
-    "Subway": "Métro et Tramway",
+    "Bus": "Bus",
+    "Subway": "Métro",
+    "Bicycle": "Vélo",
+    "Traffic": "Circulation",
+    "Show Nearby Places": "Afficher les lieux à proximité",
+    "Show Nearby POIs": "Afficher les points d'intérêt à proximité",
     "Train": "Train",
     "Direction from here": "Direction à partir d'ici",
     "Direction to here": "Direction vers ici",
@@ -78,17 +93,24 @@ var localizationMap = {
     "Acknowledgement": "Accusé de réception",
     "Privacy": "Confidentialité",
     "Other Information": "Autres informations",
-    "Quick tips": "Conseils rapides"
+    "Quick tips": "Conseils rapides",
+    "Overlay": "Calques",
+    "Style": "Style",
+    "Normal": "Standard",
+    "Grayscale": "Gris",
+    "Street": "Carte",
+    "Satellite": "Satellite",
+    "Base Map": "Fond de Carte",
   }
 }
 
 function l(tag) {
-  for (var i in navigator.languages) {
-    var langSet = localizationMap[navigator.languages[i]]
-    if (langSet != null) {
-      var string = langSet[tag];
+  const lang = getCookie("ui_lang");
+  var langSet = localizationMap[lang];
+  if (langSet != null) {
+    var string = langSet[tag];
+    if (string)
       return string;
-    }
   }
   return tag;
 }

@@ -37,42 +37,60 @@
 
     <div class="overlays-setting" id="overlays-setting">
 
-      Overlay: <br />
+      <button type="button" class="close" aria-label="Close" onclick="closeOverlaySettingView()">
+        <span aria-hidden="true" style="padding-bottom:5px;display:block;">&times;</span>
+      </button>
+
+      <span id="span_overlay">Overlay</span>:
       <form>
       <div class="btn-group btn-group-sm" role="group" aria-label="Basic radio toggle button group">
         <input type="radio" class="btn-check" name="btnradio" id="btnradio1"
                autocomplete="off" onclick = "onCheckLayer(this)" value="bike">
-        <label class="btn btn-outline-primary" for="btnradio1">Bicycle</label>
+        <label class="btn btn-outline-primary" for="btnradio1" id="label_bicycle">Bicycle</label>
 
         <input type="radio" class="btn-check" name="btnradio" id="btnradio2"
                autocomplete="off" onclick = "onCheckLayer(this)" value="subway">
-        <label class="btn btn-outline-primary" for="btnradio2">Subway</label>
+        <label class="btn btn-outline-primary" for="btnradio2" id="label_subway">Subway</label>
 
         <input type="radio" class="btn-check" name="btnradio" id="btnradio3"
                autocomplete="off" onclick = "onCheckLayer(this)" value="bus">
-        <label class="btn btn-outline-primary" for="btnradio3">Bus</label>
+        <label class="btn btn-outline-primary" for="btnradio3" id="label_bus">Bus</label>
 
         <input type="radio" class="btn-check" name="btnradio" id="btnradio4"
                autocomplete="off" onclick = "onCheckLayer(this)" value="train">
-        <label class="btn btn-outline-primary" for="btnradio4">Train</label>
+        <label class="btn btn-outline-primary" for="btnradio4" id="label_train">Train</label>
 
         <input type="radio" class="btn-check" name="btnradio" id="btnradio5"
                autocomplete="off" onclick = "onCheckLayer(this)" value="traffic">
-        <label class="btn btn-outline-primary" for="btnradio5">Traffic (TomTom)</label>
+        <label class="btn btn-outline-primary" for="btnradio5" id="label_traffic">Traffic</label>
       </div>
       </form>
 
-      Style: <br />
+      <span id="span_style">Style</span>:
 
       <form>
         <div class="btn-group btn-group-sm" role="group" aria-label="Basic radio toggle button group">
           <input type="radio" class="btn-check" name="btnradio" id="btnradio11"
                  value="normal" autocomplete="off" checked onclick = "onChangeStyle(this)">
-          <label class="btn btn-outline-primary" for="btnradio11">Normal</label>
+          <label class="btn btn-outline-primary" for="btnradio11" id="label_normal">Normal</label>
 
           <input type="radio" class="btn-check" name="btnradio" id="btnradio21"
                  value="grayscale" autocomplete="off" onclick = "onChangeStyle(this)">
-          <label class="btn btn-outline-primary" for="btnradio21">Grayscale</label>
+          <label class="btn btn-outline-primary" for="btnradio21" id="label_grayscale">Grayscale</label>
+        </div>
+      </form>
+
+      <span id="span_base_map">Base Map</span>:
+
+      <form>
+        <div class="btn-group btn-group-sm" role="group" aria-label="Basic radio toggle button group">
+          <input type="radio" class="btn-check" name="btnradio" id="btnradio111"
+                 value="street" autocomplete="off" checked onclick = "onChangeBaseMap(this)">
+          <label class="btn btn-outline-primary" for="btnradio111" id="label_street">Street View</label>
+
+          <input type="radio" class="btn-check" name="btnradio" id="btnradio211"
+                 value="satellite" autocomplete="off" onclick = "onChangeBaseMap(this)">
+          <label class="btn btn-outline-primary" for="btnradio211" id="label_satellite">Satellite View</label>
         </div>
       </form>
 

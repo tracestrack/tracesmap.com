@@ -91,16 +91,9 @@ var button_sat = document.createElement('button');
 button_sat.classList.add('sat_button');
 button_sat.id = 'sat_button';
 button_sat.title = "F2";
-button_sat.innerHTML = `<img src="sat.png" />`;
-button_sat.addEventListener('mouseover', function(e) {
-  toggleOverlayControl()
-}, false);
+button_sat.innerHTML = `<img src="layers.png" />`;
 
-var goToSat = function(e) {
-  toggleBaseLayer();
-};
-
-button_sat.addEventListener('click', goToSat, false);
+button_sat.addEventListener('click', toggleOverlayControl, false);
 
 var element_map = document.createElement('div');
 element_map.className = 'goto_maps ol-control';
@@ -292,13 +285,11 @@ function toggleBaseLayer() {
   if (isSatelliteBase) {
     baseLayerUrl = "https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.jpg90?access_token=pk.eyJ1Ijoic3Ryb25nd2lsbG93IiwiYSI6ImxKa2R1SEkifQ.iZ_vj1lvuvrAcUIl0ZE5XA"
     setBaseLayer();
-    button_sat.innerHTML = `<img src="street.png" />`;
     updateURLParams("view=satellite");
   }
   else {
     baseLayerUrl = 'https://tile.tracestrack.com/base/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be';
     setBaseLayer();
-    button_sat.innerHTML = `<img src="sat.png" />`;
     updateURLParams("");
   }
 
@@ -364,6 +355,10 @@ if (getCookie("lang") === "") {
   setCookie("lang", "en-name", 1000);
 }
 
+if (getCookie("ui_lang") === "") {
+  setCookie("ui_lang", "en-US", 1000);
+}
+
 toggleBaseLayer();
 
 function updateURLParams(param) {
@@ -402,7 +397,12 @@ document.addEventListener('keyup', function (evt) {
 
   if (evt.which === 113) {
     //F2
-    document.getElementById("sat_button").click();
+    if (baseMap == "street") {
+      document.getElementById("btnradio211").click();
+    }
+    else {
+      document.getElementById("btnradio111").click();
+    }
     evt.preventDefault();
   }
   else if (evt.which === 114) {
@@ -841,7 +841,6 @@ map.getViewport().addEventListener('contextmenu', function (evt) {
 })
 
 map.on("click", function(evt) {
-  console.log(evt)
   hideContextMenu();
   popupOverlay.setPosition(undefined);
 
@@ -1262,6 +1261,14 @@ function onCheckLayer(e) {
   setLanguageLayer();
 }
 
+var baseMap = "street";
+function onChangeBaseMap(e) {
+  if (baseMap != e.value)  {
+    toggleBaseLayer();
+    baseMap = e.value;
+  }
+}
+
 function onChangeStyle(e) {
   if (e.value == "normal") {
     baseStyle = {
@@ -1278,31 +1285,6 @@ function onChangeStyle(e) {
     }
   }
   setBaseLayer();
-  setLanguageLayer();
-}
-
-function toggleBusRoutes(x) {
-  busLayerEnabled = !busLayerEnabled;
-  setLanguageLayer();
-}
-
-function toggleBikeRoutes(x) {
-  bikeLayerEnabled = !bikeLayerEnabled;
-  setLanguageLayer();
-}
-
-function toggleSubwayRoutes(x) {
-  subwayLayerEnabled = !subwayLayerEnabled;
-  setLanguageLayer();
-}
-
-function toggleTrainRoutes(x) {
-  trainLayerEnabled = !trainLayerEnabled;
-  setLanguageLayer();
-}
-
-function toggleTraffic(x) {
-  trafficLayerEnabled = !trafficLayerEnabled;
   setLanguageLayer();
 }
 
@@ -1369,17 +1351,39 @@ function toggleDirectionPanel(show) {
   }
 }
 
+function closeOverlaySettingView() {
+  toggleOverlayControl();
+}
+
 if (urlParams == "view=satellite") {
   button_sat.click();
 }
 
 
-function setupI18N() {
+function setupI18N(lang) {
+  if (lang) {
+    setCookie("ui_lang", lang, 1000);
+  }
+
+  document.getElementById("label_street").innerText = l("Street");
+  document.getElementById("label_satellite").innerText = l("Satellite");
+
+  document.getElementById("label_normal").innerText = l("Normal");
+  document.getElementById("label_grayscale").innerText = l("Grayscale");
+
+  document.getElementById("span_base_map").innerText = l("Base Map");
+  document.getElementById("span_overlay").innerText = l("Overlay");
+  document.getElementById("span_style").innerText = l("Style");
+
+  document.getElementById("label_traffic").innerText = l("Traffic");
+  document.getElementById("label_bicycle").innerText = l("Bicycle");
   document.getElementById("label_bus").innerText = l("Bus");
   document.getElementById("label_subway").innerText = l("Subway");
   document.getElementById("label_train").innerText = l("Train");
   document.getElementById("cm-dir-from").innerText = l("Direction from here");
   document.getElementById("cm-dir-to").innerText = l("Direction to here");
+  document.getElementById("cm-places").innerText = l("Show Nearby Places");
+  document.getElementById("cm-pois").innerText = l("Show Nearby POIs");
 }
 
 setupI18N();

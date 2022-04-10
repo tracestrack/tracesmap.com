@@ -3,7 +3,7 @@ import Autosuggest from 'react-autosuggest';
 
 const Nominatim = require('nominatim-geocoder');
 const geocoder = new Nominatim({
-  delay: 1000, // delay between requests
+  delay: 500, // delay between requests
   secure: true, // enables ssl
   host:'nominatim.openstreetmap.org',
 }, {
@@ -60,7 +60,6 @@ function matchGM(url) {
 class Example extends React.Component {
   constructor(props) {
     super(props);
-    console.log(props);
     this.props = props;
 
     // Autosuggest is a controlled component.
@@ -155,8 +154,8 @@ class Example extends React.Component {
       onChange: this.onChange,
       onKeyDown: this.onKeyPress,
       onClick: this.onClick,
-      autocorrect: "off",
-      autocomplete: "off"
+      autoCorrect: "off",
+      autoComplete: "off"
     };
 
     // Finally, render it!

@@ -32,17 +32,21 @@ function AboutPage({show, hide}) {
 
                    Routing: <a href="https://openrouteservice.org">OpenRouteService</a> <br />
 
+                   Traffic: <a href="https://www.tomtom.com">TomTom</a> <br />
+
+                   Icons: <b><a href="https://www.flaticon.com/free-icon/paifang_2675611">Paifang</a> from <a href="https://www.flaticon.com/authors/good-ware">Good Ware</a></b>
+
                    Maintainer: Qing Cai <br />
 
                    Like to use the map tiles? Check out <a href="https://www.tracestrack.com/tiles/">Tracestrack Tile Service</a> <br />
 
-                   Contact: <b>[tracestrack@icloud.com]</b>
+                   Contact: <b>[tracestrack@icloud.com] </b> <br />
 
                  </small>              </p>
 
               <h4>{window.l("Privacy")}</h4>
               <p>
-                We do not harvest or analyze user data in any way. Cookies is used only to save user preferences locally.
+                We do not collect user data. Cookies are used only to save user preferences.
               </p>
 
               <h4>{window.l("Quick tips")}</h4>

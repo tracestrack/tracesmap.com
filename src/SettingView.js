@@ -1,24 +1,28 @@
-import { ButtonGroup, ListGroup, Container, Row, Col, Modal, Form, ToggleButton, ToggleButtonGroup } from 'react-bootstrap';
+import { ListGroup, Container, Modal, Form } from 'react-bootstrap';
+
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {useState} from "react";
 
-const server = [["Berlin", "a"],
-                ["Los Angeles", "b"]];
+const ui_langs = [["Dutch / Nederlands", "nl-NL"],
+                  ["English", "en-US"],
+                  ["French / Français", "fr-FR"],
+                  ["Simplified Chinese / 简体中文", "zh-CN"]
+                 ];
 
 const langs = [[window.l("Global *"), "_-name"],
                ["عربي", "ar-name"],
-               ["Breton", "br-name"],
                ["Deutsch", "de-name"],
                ["English *", "en-name"],
                ["español", "es-name"],
                ["suomen kieli", "fi-name"],
-               ["français", "fr-name"],
+               ["Français", "fr-name"],
                ["magyar nyelv", "hu-name"],
                ["עִבְרִית‎", "he-name"],
                ["italiano", "it-name"],
                ["日本語", "ja-name"],
                ["한국어", "ko-name"],
                ["Nederlands", "nl-name"],
+               ["український", "uk-name"],
                ["polski", "pl-name"],
                ["português", "pt-name"],
                ["русский", "ru-name"],
@@ -29,6 +33,7 @@ const langs = [[window.l("Global *"), "_-name"],
 function SettingView({show, hide}) {
 
   const [lang, setLang] = useState(window.getCookie('lang'));
+  const [ui_lang, setUILang] = useState(window.getCookie('ui_lang'));
 
   const handleLanguage = function (e) {
     let t = e.target.innerText;
@@ -39,11 +44,11 @@ function SettingView({show, hide}) {
     setLang(_ => v);
   };
 
-  const [value, setValue] = useState(window.getCookie('auto-refresh') == "true");
-
-  const handleChange = function(e) {
-    //window.setCookie('auto-refresh', e.target.checked, 1000);
-    //setValue(v => !v);
+  const handleUILanguage = function (e) {
+    let t = e.target.value;
+    var v = ui_langs.filter(k => k[1] == t)[0][1];
+    window.setupI18N(v);
+    setUILang(_ => v);
   };
 
   return (<Modal
@@ -60,25 +65,19 @@ function SettingView({show, hide}) {
           <Modal.Body>
 
             <Container>
-{/*
+              <h5>{window.l('Interface Languages')}</h5>
 
-              <h5>Options</h5>
-              <p>
-                <Form>
-                  <Form.Check
-                    type="switch"
-                    id="custom-switch"
-                    label="Auto refresh"
-                    checked={value}
-                    onChange={handleChange}
-                  />
-                  <Form.Text className="text-muted">
-                    Refresh maps 10 seconds after moving to a new region
-                  </Form.Text>
-                </Form>
-              </p>
-A JSX comment */}
-
+              <Form>
+                <Form.Group controlId="exampleForm.SelectCustom">
+                  <Form.Control as="select" custom onChange={handleUILanguage}>
+                    {
+                      ui_langs.map(k => <option key={k[1]} selected={k[1] === ui_lang} value={k[1]}>
+                                          {k[0]}
+                                        </option>)
+                    }
+                  </Form.Control>
+                </Form.Group>
+              </Form>
 
               <h5>{window.l('Languages')}</h5>
 
@@ -88,7 +87,7 @@ A JSX comment */}
                 </Form.Text>
 
                 <ListGroup>
-                  {langs.map(k => <ListGroup.Item as="button" active={k[1] === lang} action onClick={handleLanguage}>
+                  {langs.map(k => <ListGroup.Item key={k[1]} as="button" active={k[1] === lang} action onClick={handleLanguage}>
                           {k[0]}
                         </ListGroup.Item>)}
                 </ListGroup>
