@@ -141,17 +141,18 @@ else {
   qstr = getCookie("qstr");
 }
 
-if (qstr.indexOf("!") > -1) {
-  let arr = qstr.split("!");
-  qstr = arr[0];
-  //selectedPoiId = arr[1];
-  urlParams = arr[1];
+let urlQueryStringArray = qstr.split("/");
+console.log(urlQueryStringArray)
+
+if (urlQueryStringArray.length == 4) {
+  urlParams = urlQueryStringArray[3];
 }
 
-if (qstr !== "") {
-  let maploc = qstr.split("/");
-  lonlat = [maploc[2], maploc[1]];
-  zoom = maploc[0]
+if (urlQueryStringArray.length >= 3) {
+  lonlat = [urlQueryStringArray[2], urlQueryStringArray[1]];
+  zoom = urlQueryStringArray[0]
+
+  console.log(lonlat, zoom)
 }
 
 var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false, doubleClickZoom: true, keyboard: false, shiftDragZoom: true, dragPan: true});
@@ -277,20 +278,23 @@ function setBaseLayer() {
 }
 
 var isSatelliteBase = true; // we'll toggle to init
-var languageLayerTimeout;
 
-function toggleBaseLayer() {
+function toggleBaseLayer(updateParam) {
   isSatelliteBase = !isSatelliteBase;
 
   if (isSatelliteBase) {
     baseLayerUrl = "https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.jpg90?access_token=pk.eyJ1Ijoic3Ryb25nd2lsbG93IiwiYSI6ImxKa2R1SEkifQ.iZ_vj1lvuvrAcUIl0ZE5XA"
     setBaseLayer();
-    updateURLParams("view=satellite");
+    if (updateParam == true) {
+      updateURLParams("view=satellite");
+    }
   }
   else {
     baseLayerUrl = 'https://tile.tracestrack.com/base/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be';
     setBaseLayer();
-    updateURLParams("");
+    if (updateParam == true) {
+      updateURLParams("");
+    }
   }
 
   if (languageLayer) {
@@ -298,11 +302,7 @@ function toggleBaseLayer() {
     languageLayer = null;
   }
 
-  clearTimeout(languageLayerTimeout);
-  languageLayerTimeout = setTimeout(function() {
-    setLanguageLayer();
-  }, 1000);
-
+  setLanguageLayer();
 
   if (routeLayer) {
     map.removeLayer(routeLayer);
@@ -359,12 +359,16 @@ if (getCookie("ui_lang") === "") {
   setCookie("ui_lang", "en-US", 1000);
 }
 
-toggleBaseLayer();
+toggleBaseLayer(false);
 
 function updateURLParams(param) {
   var appending = "";
   if (param != "") {
-    appending = "!" + param
+    appending = "/" + param
+  }
+
+  if (param == urlParams) {
+    return;
   }
 
   urlParams = param
@@ -382,7 +386,7 @@ function setURL(lonlat, zoom) {
 
   var appending = "";
   if (urlParams) {
-    appending = "!" + urlParams;
+    appending = "/" + urlParams;
   }
 
   window.location.href = "#" + qstr + appending;
@@ -1242,7 +1246,8 @@ function onCheckLayer(e) {
                   "bike": 'https://tile.tracestrack.com/bicycle-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be',
                   "subway": 'https://tile.tracestrack.com/subway-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be',
                   "train": 'https://tile.tracestrack.com/train-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be',
-                  "traffic": 'https://api.tomtom.com/traffic/map/4/tile/flow/relative-delay/{z}/{x}/{y}.png?key=O5LGYfXUsThtDAoj8FsQKJlf5oll98tq&thickness=10&tileSize=512'
+                  "traffic": 'https://api.tomtom.com/traffic/map/4/tile/flow/relative-delay/{z}/{x}/{y}.png?key=O5LGYfXUsThtDAoj8FsQKJlf5oll98tq&thickness=10&tileSize=512',
+                  "gps": 'https://gps.tile.openstreetmap.org/lines/{z}/{x}/{y}.png'
                  }
 
   if (checkedOverlayValue == e.value) {
@@ -1264,7 +1269,7 @@ function onCheckLayer(e) {
 var baseMap = "street";
 function onChangeBaseMap(e) {
   if (baseMap != e.value)  {
-    toggleBaseLayer();
+    toggleBaseLayer(true);
     baseMap = e.value;
   }
 }
@@ -1356,7 +1361,7 @@ function closeOverlaySettingView() {
 }
 
 if (urlParams == "view=satellite") {
-  button_sat.click();
+  document.getElementById("btnradio211").click();
 }
 
 
