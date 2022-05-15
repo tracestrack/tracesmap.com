@@ -20,7 +20,7 @@ function AboutPage({show, hide}) {
               <p><small>
                    Map data: © OpenStreetMap contributors <br />
 
-                   Map style: based on <a href="https://github.com/gravitystorm/openstreetmap-carto">OpenStreetMap Carto</a><br />
+                   Map style: <a href="https://www.tracestrack.com/tiles/information/">Tracestrack Tile Style</a> based on <a href="https://github.com/gravitystorm/openstreetmap-carto">OpenStreetMap Carto</a>  <br />
 
                    Satellite service provider: <a href="https://www.mapbox.com">Mapbox</a> <br/>
 
@@ -34,7 +34,7 @@ function AboutPage({show, hide}) {
 
                    Traffic: <a href="https://www.tomtom.com">TomTom</a> <br />
 
-                   Icons: <b><a href="https://www.flaticon.com/free-icon/paifang_2675611">Paifang</a> from <a href="https://www.flaticon.com/authors/good-ware">Good Ware</a></b>
+                   Icons: <b><a href="https://www.flaticon.com/free-icon/paifang_2675611">Paifang</a> from <a href="https://www.flaticon.com/authors/good-ware">Good Ware</a></b> <br />
 
                    Maintainer: Qing Cai <br />
 
@@ -50,14 +50,13 @@ function AboutPage({show, hide}) {
               </p>
 
               <h4>{window.l("Quick tips")}</h4>
-              <ol>
+              <ol className="list-group list-group-flush">
                 <small>
-                <li>Paste URL of openstreetmap.org and Google Maps to search bar to quick jump</li>
-                <li>Press F1 to refresh map tiles if you see out-dated map</li>
-                <li>Press F2 to toggle between Satellite and Street view</li>
-                <li>Press F3 to open Openstreetmap.org</li>
-                <li>Press F4 to edit in Openstreetmap.org</li>
-                <li>Press F12 to open in map.baidu.com</li>
+                  <li className="list-group-item">Paste URLs with <b>[z]/[latitude]/[longitude]</b> part (e.g. https://www.openstreetmap.org/#map=6/44.462/20.355) to search bar for quick jumping</li>
+                <li className="list-group-item">Press F2 to toggle between Satellite and Street view</li>
+                <li className="list-group-item">Press F4 to open openstreetmap.org</li>
+                <li className="list-group-item">Press F6 to edit in openstreetmap.org</li>
+                <li className="list-group-item">Press F12 to open in map.baidu.com</li>
                 </small>
               </ol>
 

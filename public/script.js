@@ -22,7 +22,6 @@ var goToCurrentLocation = function(e) {
     let view = map.getView();
     view.setCenter(lastCoordinate);
     view.setZoom(18);
-    refresh();
   }
   else {
     needsSetCenter = true;
@@ -84,7 +83,7 @@ var goToOSM = function(e) {
 };
 
 button_osm.id = 'osm_button';
-button_osm.title = "F3: view in OSM\nF4: edit in OSM";
+button_osm.title = "F4: view in OSM\nF6: edit in OSM";
 button_osm.addEventListener('click', goToOSM, false);
 
 var button_sat = document.createElement('button');
@@ -94,6 +93,27 @@ button_sat.title = "F2";
 button_sat.innerHTML = `<img src="layers.png" />`;
 
 button_sat.addEventListener('click', toggleOverlayControl, false);
+var showLayerTimeout;
+var hideLayerTimeout;
+button_sat.addEventListener('mouseover', function() {
+  showLayerTimeout = setTimeout(function() {
+    document.getElementById("overlays-setting").style.display = "block";
+  }, 300);
+}, false);
+button_sat.addEventListener('mouseout', function() {
+  clearTimeout(showLayerTimeout)
+}, false);
+
+document.getElementById("overlays-setting").addEventListener('mouseover', function() {
+  clearTimeout(hideLayerTimeout)
+});
+document.getElementById("overlays-setting").addEventListener('mouseout', function() {
+  hideLayerTimeout = setTimeout(function() {
+    document.getElementById("overlays-setting").style.display = "";
+  }, 300);
+});
+
+
 
 var element_map = document.createElement('div');
 element_map.className = 'goto_maps ol-control';
@@ -132,7 +152,10 @@ var lonlat = [0, 0];
 var zoom = 3;
 var qstr = "";
 var selectedPoiId;
-var urlParams = "";
+var urlParamsMap = {};
+var isSatelliteBase = true; // we'll toggle to init
+
+
 
 if (window.location.href.indexOf("#") > -1) {
   qstr = window.location.href.split("#")[1];
@@ -142,18 +165,16 @@ else {
 }
 
 let urlQueryStringArray = qstr.split("/");
-console.log(urlQueryStringArray)
-
-if (urlQueryStringArray.length == 4) {
-  urlParams = urlQueryStringArray[3];
-}
 
 if (urlQueryStringArray.length >= 3) {
   lonlat = [urlQueryStringArray[2], urlQueryStringArray[1]];
   zoom = urlQueryStringArray[0]
-
-  console.log(lonlat, zoom)
+  urlQueryStringArray.shift();
+  urlQueryStringArray.shift();
+  urlQueryStringArray.shift();
 }
+
+console.log(urlQueryStringArray)
 
 var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false, doubleClickZoom: true, keyboard: false, shiftDragZoom: true, dragPan: true});
 
@@ -277,8 +298,6 @@ function setBaseLayer() {
   map.addLayer(baseLayer);
 }
 
-var isSatelliteBase = true; // we'll toggle to init
-
 function toggleBaseLayer(updateParam) {
   isSatelliteBase = !isSatelliteBase;
 
@@ -286,14 +305,14 @@ function toggleBaseLayer(updateParam) {
     baseLayerUrl = "https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.jpg90?access_token=pk.eyJ1Ijoic3Ryb25nd2lsbG93IiwiYSI6ImxKa2R1SEkifQ.iZ_vj1lvuvrAcUIl0ZE5XA"
     setBaseLayer();
     if (updateParam == true) {
-      updateURLParams("view=satellite");
+      updateURLParams("view", "satellite");
     }
   }
   else {
     baseLayerUrl = 'https://tile.tracestrack.com/base/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be';
     setBaseLayer();
     if (updateParam == true) {
-      updateURLParams("");
+      updateURLParams("view", "");
     }
   }
 
@@ -361,36 +380,41 @@ if (getCookie("ui_lang") === "") {
 
 toggleBaseLayer(false);
 
-function updateURLParams(param) {
-  var appending = "";
-  if (param != "") {
-    appending = "/" + param
+
+function getBaseUrl() {
+  var s = window.location.href.split("#");
+  var parts = s[1].split("/");
+  return `${s[0]}#${parts[0]}/${parts[1]}/${parts[2]}`;
+}
+
+function getSettingUrl() {
+  var path = "";
+  for (var i in urlParamsMap) {
+    path += "/" + urlParamsMap[i]
+  }
+  console.log(path)
+  return path
+}
+
+function updateURLParams(key, value) {
+
+  if (value == ""){
+    delete urlParamsMap[key]
+  }
+  else {
+    urlParamsMap[key] = value;
   }
 
-  if (param == urlParams) {
-    return;
-  }
+  var path = getBaseUrl() + getSettingUrl();
 
-  urlParams = param
+  window.location.href = path;
 
-  var s = window.location.href.split("!")[0]
-  if (s.indexOf("#") > -1) {
-    window.location.href = s + appending
-  }
-
-  //setCookie("qstr", qstr, 1000);
+  setCookie("qstr", path.split("#")[1], 1000);
 }
 
 function setURL(lonlat, zoom) {
-  let qstr = zoom.toFixed(0) + "/" + lonlat[1].toFixed(4) + "/" + lonlat[0].toFixed(4)
-
-  var appending = "";
-  if (urlParams) {
-    appending = "/" + urlParams;
-  }
-
-  window.location.href = "#" + qstr + appending;
-
+  let qstr = zoom.toFixed(0) + "/" + lonlat[1].toFixed(4) + "/" + lonlat[0].toFixed(4) + getSettingUrl();
+  window.location.href = "#" + qstr
   setCookie("qstr", qstr, 1000);
 }
 
@@ -409,19 +433,15 @@ document.addEventListener('keyup', function (evt) {
     }
     evt.preventDefault();
   }
-  else if (evt.which === 114) {
-    //F3
+  else if (evt.which === 115) {
+    //F4
     document.getElementById("osm_button").click();
     evt.preventDefault();
   }
-  else if (evt.which === 115) {
-    //F4
+  else if (evt.which === 117) {
+    //F6
     let url = `https://www.openstreetmap.org/edit#map=${z}/${center[1]}/${center[0]}/`;
     window.open(url);
-  }
-  else if (evt.which === 112) {
-    //F1
-    refresh();
   }
   else if (evt.which === 123) {
     //F12
@@ -540,7 +560,6 @@ geolocation.on('change:position', function () {
     let view = map.getView();
     view.setCenter(coordinates);
     view.setZoom(18);
-    refresh();
     needsSetCenter = false;
   }
 
@@ -729,9 +748,8 @@ function postOverpass(data, cb) {
 }
 
 function mouseoverlist(i) {
-  console.log(places_map[i])
+  //console.log(places_map[i])
 }
-
 
 var poi_selected_id = -1;
 
@@ -744,28 +762,39 @@ function mouseclicklist(i) {
   prevFeature = place_features[i]
   prevFeature.setStyle(POI_SELECTED_STYLE)
   poi_selected_id = prevFeature.getProperties().id;
+
+  let view = map.getView();
+  let coord = ol.proj.fromLonLat([places_map[i][0], places_map[i][1]]);
+  view.setCenter(coord);
 }
 
 function closelist() {
   document.getElementById("popup-list").style.display = "none";
+
+  if (placesLayer) {
+    map.removeLayer(placesLayer);
+  }
 }
 
 var places_map = [];
 var place_features = [];
 function showPlaces(res) {
-  console.log(res);
+  //console.log(res);
 
   places_map = res.elements.map(x => [x["center"] ? x["center"]["lon"] : x.lon, x["center"] ? x["center"]["lat"] : x.lat, x.tags, x.id, x.type]);
 
   place_features = places_map.map(x => createPlacesFeature(new ol.geom.Point(ol.proj.fromLonLat([x[0], x[1]])), x[2], x[3]));
 
-  var list = `<h5>List</h5><div class="close"><button type="button" class="btn-close" aria-label="Close" onclick="closelist()" /></div>`;
+
+  var list = `<div class="clearfix"><button type="button" class="btn-close float-right" aria-label="Close" onclick="closelist()"></button></div>`;
+  list += `<div class="card">
+  <ul class="list-group list-group-flush">`;
   for(var i in places_map) {
     let tags = places_map[i][2];
-    console.log(tags)
     let cat = coalesce(tags['shop'], tags['office'], tags['amenity'], tags['tourism'], tags['leisure'], tags['place'], tags['aeroway']).replace(/_/g, " ");
-    list += `<li onmouseenter='mouseoverlist(${i})'><a href='javascript:mouseclicklist(${i})'>` + coalesce(places_map[i][2]["name"], cat) + "</a></li>";
+    list += `<li class="list-group-item" onmouseenter='mouseoverlist(${i})'><a href='javascript:mouseclicklist(${i})'>` + coalesce(places_map[i][2]["name"], cat) + "</a></li>";
   }
+  list += "</ul></div>";
 
   document.getElementById("popup-list").innerHTML = list;
   document.getElementById("popup-list").style.display = "block";
@@ -1243,7 +1272,7 @@ function formatCoordinate(c) {
 var checkedOverlayValue;
 function onCheckLayer(e) {
   const urlMap = {"bus": 'https://tile.tracestrack.com/bus-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be',
-                  "bike": 'https://tile.tracestrack.com/bicycle-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be',
+                  "bicycle": 'https://tile.tracestrack.com/bicycle-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be',
                   "subway": 'https://tile.tracestrack.com/subway-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be',
                   "train": 'https://tile.tracestrack.com/train-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be',
                   "traffic": 'https://api.tomtom.com/traffic/map/4/tile/flow/relative-delay/{z}/{x}/{y}.png?key=O5LGYfXUsThtDAoj8FsQKJlf5oll98tq&thickness=10&tileSize=512',
@@ -1258,6 +1287,8 @@ function onCheckLayer(e) {
     setLanguageLayer();
     return;
   }
+
+  updateURLParams("overlay", e.value);
 
   overlayEnabled = true;
   checkedOverlayValue = e.value;
@@ -1276,6 +1307,7 @@ function onChangeBaseMap(e) {
 
 function onChangeStyle(e) {
   if (e.value == "normal") {
+    updateURLParams("style", "");
     baseStyle = {
       exposure: 0,
       contrast: 0,
@@ -1283,6 +1315,7 @@ function onChangeStyle(e) {
     }
   }
   else {
+    updateURLParams("style", "grayscale");
     baseStyle = {
       exposure: 0,
       contrast: 0,
@@ -1299,15 +1332,6 @@ function getVersion() {
     return parseInt(a)
   }
   return 0
-}
-
-function refresh() {
-  let new_v = getVersion() + 1
-  setCookie("v", new_v)
-  if (!isSatelliteBase) {
-    baseLayer.getSource().refresh();
-  }
-  languageLayer.getSource().refresh();
 }
 
 function setDirectionFrom() {
@@ -1360,11 +1384,6 @@ function closeOverlaySettingView() {
   toggleOverlayControl();
 }
 
-if (urlParams == "view=satellite") {
-  document.getElementById("btnradio211").click();
-}
-
-
 function setupI18N(lang) {
   if (lang) {
     setCookie("ui_lang", lang, 1000);
@@ -1392,3 +1411,18 @@ function setupI18N(lang) {
 }
 
 setupI18N();
+
+
+var a = urlQueryStringArray.shift();
+while (a) {
+  if (a == "satellite") {
+    document.getElementById("label_satellite").click();
+  }
+  else if (a == "grayscale") {
+    document.getElementById("label_grayscale").click();
+  }
+  else if (["bicycle", "subway", "bus", "train", "traffic", "gps"].includes(a)) {
+    document.getElementById("label_"+a).click();
+  }
+  a = urlQueryStringArray.shift();
+}

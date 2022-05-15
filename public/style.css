@@ -114,14 +114,6 @@ _::-webkit-full-page-media, _:future, #poi, .top {
     height: 20px;
 }
 
-#popup-list .close{
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    top: 2px;
-    right: 20px;
-}
-
 .poi_value {
     word-wrap: break-word; /* Internet Explorer 5.5+ */
 }
@@ -149,9 +141,6 @@ _::-webkit-full-page-media, _:future, #poi, .top {
     border-radius: 5px;
 }
 
-#popup-content {
-}
-
 #popup-context {
     text-align: center;
     display: none;
@@ -167,7 +156,7 @@ _::-webkit-full-page-media, _:future, #poi, .top {
 }
 
 #popup-list {
-    text-align: center;
+
     display: none;
     background: white;
     padding: 10px;
@@ -175,8 +164,8 @@ _::-webkit-full-page-media, _:future, #poi, .top {
     position: absolute;
     right: 20px;
     top: 100px;
-    width: 160px;
-    height: 300px;
+    width: 200px;
+    height: 60%;
     font-size: 12px;
     overflow: scroll;
 }
@@ -187,7 +176,7 @@ li {
 }
 
 li:hover {
-    background: #ccc;
+    background: #eee;
     width: 100%;
 }
 
