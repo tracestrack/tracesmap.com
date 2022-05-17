@@ -174,36 +174,8 @@ if (urlQueryStringArray.length >= 3) {
   urlQueryStringArray.shift();
 }
 
-console.log(urlQueryStringArray)
-
 var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false, doubleClickZoom: true, keyboard: false, shiftDragZoom: true, dragPan: true});
 
-function tload(tile, src) {
-  var xhr = new XMLHttpRequest();
-  xhr.responseType = 'blob';
-  xhr.addEventListener('loadend', function (evt) {
-    var data = this.response;
-    if (data !== undefined) {
-      tile.getImage().src = URL.createObjectURL(data);
-
-    } else {
-      tile.setState(3);
-    }
-  });
-  xhr.addEventListener('error', function () {
-    tile.setState(3);
-  });
-
-  var version_suffix = "";
-  if (src.indexOf("mapbox") == -1) {
-    version_suffix = "&v=" + getVersion();
-  }
-
-  xhr.open('GET', src + version_suffix);
-  xhr.send();
-};
-
-var langlayer_loading_count = 0;
 function getLangLayer() {
 
   const label_name = getCookie("lang");
@@ -214,31 +186,31 @@ function getLangLayer() {
       transition: 0,
       urls: ['https://tile.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
       crossOrigin: null,
-      tileLoadFunction: tload,
       tilePixelRatio: 2
   });
 
-  var layer = new ol.layer.Tile({
-    preload: 2,
-    source: source,
-  });
+  if (iOS()) {
+    let layer =  new ol.layer.Tile({
+      preload: 2,
+      source: source
+    });
+    return layer
+  }
 
-  source.on('tileloadstart', function () {
-    langlayer_loading_count++
-  });
-
-  source.on('tileloadend', function () {
-    langlayer_loading_count--
-  });
-
-  source.on('tileloaderror', function () {
-    langlayer_loading_count--
-  });
+  let layer = new ol.layer.WebGLTile({
+    style: langStyle,
+    source: source
+  })
 
   return layer;
 }
 
 var baseStyle = {
+  exposure: 0,
+  contrast: 0,
+  saturation: 0
+};
+var langStyle = {
   exposure: 0,
   contrast: 0,
   saturation: 0
@@ -254,7 +226,6 @@ function getBaseLayer(urls) {
     urls: urls,
     crossOrigin: null,
     tilePixelRatio: 2,
-    tileLoadFunction: tload
   });
 
   let base_layer = new ol.layer.WebGLTile({
@@ -369,16 +340,6 @@ function setLanguageLayer(lang) {
 
   map.addLayer(languageLayer);
 }
-
-if (getCookie("lang") === "") {
-  setCookie("lang", "en-name", 1000);
-}
-
-if (getCookie("ui_lang") === "") {
-  setCookie("ui_lang", "en-US", 1000);
-}
-
-toggleBaseLayer(false);
 
 
 function getBaseUrl() {
@@ -1285,6 +1246,7 @@ function onCheckLayer(e) {
     checkedOverlayValue = "";
     overlayEnabled = false;
     setLanguageLayer();
+    updateURLParams("overlay", "");
     return;
   }
 
@@ -1311,15 +1273,32 @@ function onChangeStyle(e) {
     baseStyle = {
       exposure: 0,
       contrast: 0,
-      saturation: 0
+      saturation: 0.2,
+      gamma: 0.7
+    }
+    langStyle = {
+      brightness: 0,
+      exposure: 0,
+      contrast: 0.1,
+      saturation: 0.3,
+      gamma: 1.4
     }
   }
   else {
     updateURLParams("style", "grayscale");
     baseStyle = {
+      brightness: 0.05,
       exposure: 0,
-      contrast: 0,
-      saturation: -0.9
+      contrast: -0.2,
+      saturation: -1,
+      gamma: 1.4
+    }
+    langStyle = {
+      brightness: 0,
+      exposure: 0.1,
+      contrast: -0.1,
+      saturation: -0.3,
+      gamma: 1.4
     }
   }
   setBaseLayer();
@@ -1426,3 +1405,14 @@ while (a) {
   }
   a = urlQueryStringArray.shift();
 }
+
+
+if (getCookie("lang") === "") {
+  setCookie("lang", "en-name", 1000);
+}
+
+if (getCookie("ui_lang") === "") {
+  setCookie("ui_lang", "en-US", 1000);
+}
+
+toggleBaseLayer(false);
