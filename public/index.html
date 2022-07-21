@@ -12,11 +12,13 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.13.0/css/ol.css" type="text/css">
     <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.13.0/build/ol.js"></script>
+
     <title>TracesMap</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
     <link rel="stylesheet" href="style.css" type="text/css">
+    <link href="https://fonts.openmaptiles.org/Klokantech%20Noto%20Sans%20Regular/0-255.pbf" rel="preload" as="fetch">
   </head>
   <body>
 
@@ -82,6 +84,15 @@
           <input type="radio" class="btn-check" name="btnradio" id="btnradio21"
                  value="grayscale" autocomplete="off" onclick = "onChangeStyle(this)">
           <label class="btn btn-outline-primary" for="btnradio21" id="label_grayscale">Grayscale</label>
+
+          <input type="radio" class="btn-check" name="btnradio" id="btnradio31"
+                 value="vivid" autocomplete="off" onclick = "onChangeStyle(this)">
+          <label class="btn btn-outline-primary" for="btnradio31"
+          id="label_vivid">Vivid</label>
+
+          <input type="radio" class="btn-check" name="btnradio" id="btnradio41"
+                 value="dark" autocomplete="off" onclick = "onChangeStyle(this)">
+          <label class="btn btn-outline-primary" for="btnradio41" id="label_dark">Dark</label>
         </div>
       </form>
 
@@ -91,11 +102,16 @@
         <div class="btn-group btn-group-sm" role="group" aria-label="Basic radio toggle button group">
           <input type="radio" class="btn-check" name="btnradio" id="btnradio111"
                  value="street" autocomplete="off" checked onclick = "onChangeBaseMap(this)">
-          <label class="btn btn-outline-primary" for="btnradio111" id="label_street">Street View</label>
+          <label class="btn btn-outline-primary" for="btnradio111" id="label_street">Street</label>
 
           <input type="radio" class="btn-check" name="btnradio" id="btnradio211"
                  value="satellite" autocomplete="off" onclick = "onChangeBaseMap(this)">
-          <label class="btn btn-outline-primary" for="btnradio211" id="label_satellite">Satellite View</label>
+          <label class="btn btn-outline-primary" for="btnradio211"
+          id="label_satellite">Satellite</label>
+
+          <input type="radio" class="btn-check" name="btnradio" id="btnradio311"
+                 value="topo" autocomplete="off" onclick = "onChangeBaseMap(this)">
+          <label class="btn btn-outline-primary" for="btnradio311" id="label_topo">Topo</label>
         </div>
       </form>
 

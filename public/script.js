@@ -11,6 +11,73 @@ function iOS() {
     || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
 }
 
+function getStyle(name, layername) {
+  let styles = {
+    normal : {
+      base: {
+        exposure: 0,
+        contrast: 0,
+        saturation: 0,
+        gamma: 1
+      },
+      lang: {
+        brightness: 0,
+        exposure: 0,
+        contrast: 0,
+        saturation: 0.3,
+        gamma: 1
+      }
+    },
+    vivid: {
+      base: {
+        exposure: 0,
+        brightness: -0.05,
+        contrast: 0.1,
+        saturation: 0.3,
+        gamma: 0.6
+      },
+      lang: {
+
+      }
+    },
+    grayscale: {
+      base: {
+        brightness: 0,
+        exposure: 0,
+        contrast: 0,
+        saturation: -1,
+        gamma: 1.1
+      },
+      lang: {
+        brightness: 0,
+        exposure: 0,
+        contrast: 0,
+        saturation: -0.5,
+      }
+    },
+    dark: {
+      base: {
+        brightness: 0,
+        exposure: 0,
+        contrast: 0,
+        saturation: -1,
+        gamma: 0.1
+      },
+      lang: {
+        brightness: 0,
+        exposure: 0,
+        contrast: 0,
+        saturation: 0,
+      }
+    }
+  }
+
+  if (!name) name = "normal"
+  console.log(styles)
+
+  return styles[name][layername];
+}
+
 const coalesce = (...args) => args.find(_ => ![undefined, null].includes(_));
 
 var button = document.createElement('button');
@@ -153,9 +220,6 @@ var zoom = 3;
 var qstr = "";
 var selectedPoiId;
 var urlParamsMap = {};
-var isSatelliteBase = true; // we'll toggle to init
-
-
 
 if (window.location.href.indexOf("#") > -1) {
   qstr = window.location.href.split("#")[1];
@@ -197,24 +261,14 @@ function getLangLayer() {
     return layer
   }
 
+  var stylename = getURLParams("style")
   let layer = new ol.layer.WebGLTile({
-    style: langStyle,
+    style: getStyle(stylename, "lang"),
     source: source
   })
 
   return layer;
 }
-
-var baseStyle = {
-  exposure: 0,
-  contrast: 0,
-  saturation: 0
-};
-var langStyle = {
-  exposure: 0,
-  contrast: 0,
-  saturation: 0
-};
 
 function getBaseLayer(urls) {
   let base_source = new ol.source.XYZ({
@@ -228,8 +282,10 @@ function getBaseLayer(urls) {
     tilePixelRatio: 2,
   });
 
+
+  var stylename = getURLParams("style")
   let base_layer = new ol.layer.WebGLTile({
-    style: baseStyle,
+    style: getStyle(baseMap == "satellite" ? "normal" : stylename, "base"),
     source: base_source
   })
   return base_layer;
@@ -270,13 +326,18 @@ function setBaseLayer() {
 }
 
 function toggleBaseLayer(updateParam) {
-  isSatelliteBase = !isSatelliteBase;
-
-  if (isSatelliteBase) {
+  if (baseMap == "satellite") {
     baseLayerUrl = "https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.jpg90?access_token=pk.eyJ1Ijoic3Ryb25nd2lsbG93IiwiYSI6ImxKa2R1SEkifQ.iZ_vj1lvuvrAcUIl0ZE5XA"
     setBaseLayer();
     if (updateParam == true) {
       updateURLParams("view", "satellite");
+    }
+  }
+  else if (baseMap == "topo") {
+    baseLayerUrl = 'https://tile.tracestrack.com/topo/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be';
+    setBaseLayer();
+    if (updateParam == true) {
+      updateURLParams("view", "topo");
     }
   }
   else {
@@ -286,6 +347,7 @@ function toggleBaseLayer(updateParam) {
       updateURLParams("view", "");
     }
   }
+
 
   if (languageLayer) {
     map.removeLayer(languageLayer);
@@ -373,12 +435,17 @@ function updateURLParams(key, value) {
   setCookie("qstr", path.split("#")[1], 1000);
 }
 
+function getURLParams(key) {
+  return urlParamsMap[key];
+}
+
 function setURL(lonlat, zoom) {
   let qstr = zoom.toFixed(0) + "/" + lonlat[1].toFixed(4) + "/" + lonlat[0].toFixed(4) + getSettingUrl();
   window.location.href = "#" + qstr
   setCookie("qstr", qstr, 1000);
 }
 
+var lastBaseMap = baseMap;
 document.addEventListener('keyup', function (evt) {
 
   var z = map.getView().getZoom();
@@ -386,21 +453,25 @@ document.addEventListener('keyup', function (evt) {
 
   if (evt.which === 113) {
     //F2
-    if (baseMap == "street") {
-      document.getElementById("btnradio211").click();
+    if (baseMap == "satellite") {
+      if (lastBaseMap == "street")
+        document.getElementById("btnradio111").click();
+      else if (lastBaseMap == "topo")
+        document.getElementById("btnradio311").click();
     }
     else {
-      document.getElementById("btnradio111").click();
+      lastBaseMap = baseMap;
+      document.getElementById("btnradio211").click();
     }
+    evt.preventDefault();
+  }
+  else if (evt.which === 114) {
+    //F3
+    document.getElementById("osm_button").click();
     evt.preventDefault();
   }
   else if (evt.which === 115) {
     //F4
-    document.getElementById("osm_button").click();
-    evt.preventDefault();
-  }
-  else if (evt.which === 117) {
-    //F6
     let url = `https://www.openstreetmap.org/edit#map=${z}/${center[1]}/${center[0]}/`;
     window.open(url);
   }
@@ -1262,45 +1333,14 @@ function onCheckLayer(e) {
 var baseMap = "street";
 function onChangeBaseMap(e) {
   if (baseMap != e.value)  {
-    toggleBaseLayer(true);
     baseMap = e.value;
+    toggleBaseLayer(true);
   }
 }
 
 function onChangeStyle(e) {
-  if (e.value == "normal") {
-    updateURLParams("style", "");
-    baseStyle = {
-      exposure: 0,
-      contrast: 0,
-      saturation: 0.2,
-      gamma: 0.7
-    }
-    langStyle = {
-      brightness: 0,
-      exposure: 0,
-      contrast: 0.1,
-      saturation: 0.3,
-      gamma: 1.4
-    }
-  }
-  else {
-    updateURLParams("style", "grayscale");
-    baseStyle = {
-      brightness: 0.05,
-      exposure: 0,
-      contrast: -0.2,
-      saturation: -1,
-      gamma: 1.4
-    }
-    langStyle = {
-      brightness: 0,
-      exposure: 0.1,
-      contrast: -0.1,
-      saturation: -0.3,
-      gamma: 1.4
-    }
-  }
+  updateURLParams("style", e.value);
+
   setBaseLayer();
   setLanguageLayer();
 }
@@ -1370,9 +1410,12 @@ function setupI18N(lang) {
 
   document.getElementById("label_street").innerText = l("Street");
   document.getElementById("label_satellite").innerText = l("Satellite");
+  document.getElementById("label_topo").innerText = l("Topo");
 
   document.getElementById("label_normal").innerText = l("Normal");
   document.getElementById("label_grayscale").innerText = l("Grayscale");
+  document.getElementById("label_vivid").innerText = l("Vivid");
+  document.getElementById("label_dark").innerText = l("Dark");
 
   document.getElementById("span_base_map").innerText = l("Base Map");
   document.getElementById("span_overlay").innerText = l("Overlay");
@@ -1397,8 +1440,11 @@ while (a) {
   if (a == "satellite") {
     document.getElementById("label_satellite").click();
   }
-  else if (a == "grayscale") {
-    document.getElementById("label_grayscale").click();
+  else if (a == "topo") {
+    document.getElementById("label_topo").click();
+  }
+  else if (["grayscale", "normal", "dark", "vivid"].includes(a)) {
+    document.getElementById("label_"+a).click();
   }
   else if (["bicycle", "subway", "bus", "train", "traffic", "gps"].includes(a)) {
     document.getElementById("label_"+a).click();

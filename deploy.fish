@@ -10,5 +10,5 @@ rm tmp2
 
 tar czvf ../xx.tar.gz .
 
-scp -i ~/dev/tracestrack-cache-server/aws-uk.pem ../xx.tar.gz ubuntu@18.169.228.79:/tmp
-ssh -i ~/dev/tracestrack-cache-server/aws-uk.pem ubuntu@18.169.228.79 "tar -xvf /tmp/xx.tar.gz -C /var/www/tracesmap.com/"
+scp -i ~/dev/tracestrack-cache-server/keys/aws-uk.pem ../xx.tar.gz ubuntu@18.169.228.79:/tmp
+ssh -i ~/dev/tracestrack-cache-server/keys/aws-uk.pem ubuntu@18.169.228.79 "tar -xvf /tmp/xx.tar.gz -C /var/www/tracesmap.com/"

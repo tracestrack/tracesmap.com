@@ -20,7 +20,7 @@ function AboutPage({show, hide}) {
               <p><small>
                    Map data: © OpenStreetMap contributors <br />
 
-                   Map style: <a href="https://www.tracestrack.com/tiles/information/">Tracestrack Tile Style</a> based on <a href="https://github.com/gravitystorm/openstreetmap-carto">OpenStreetMap Carto</a>  <br />
+                   Map style: <a href="https://www.tracestrack.com/information/">Tracestrack Tile Style</a> based on <a href="https://github.com/gravitystorm/openstreetmap-carto">OpenStreetMap Carto</a> and <a href="https://opentopomap.org/">OpenTopoMap</a>  <br />
 
                    Satellite service provider: <a href="https://www.mapbox.com">Mapbox</a> <br/>
 
@@ -34,11 +34,9 @@ function AboutPage({show, hide}) {
 
                    Traffic: <a href="https://www.tomtom.com">TomTom</a> <br />
 
-                   Icons: <b><a href="https://www.flaticon.com/free-icon/paifang_2675611">Paifang</a> from <a href="https://www.flaticon.com/authors/good-ware">Good Ware</a></b> <br />
+                   Some map icon credit: See <a href="https://www.tracestrack.com/information/">Tracestrack Tile Style</a>
 
-                   Maintainer: Qing Cai <br />
-
-                   Like to use the map tiles? Check out <a href="https://www.tracestrack.com/tiles/">Tracestrack Tile Service</a> <br />
+                   Like to use the map tile service? Check out <a href="https://www.tracestrack.com/">Tracestrack Tile Service</a> <br />
 
                    Contact: <b>[tracestrack@icloud.com] </b> <br />
 
@@ -59,16 +57,6 @@ function AboutPage({show, hide}) {
                 <li className="list-group-item">Press F12 to open in map.baidu.com</li>
                 </small>
               </ol>
-
-              <h4>{window.l("Other Information")}</h4>
-              <p><small>
-                   <a href="https://stats.uptimerobot.com/505xMU0mq4">Service Status</a> <br />
-
-                   Please use a modern browser such as Chrome, Edge, Opera, Safari, Firefox. Chromium based browsers are recommended. <br />
-                   Some map tiles are generated on the fly, which could be slow. <br />
-                   Tracestrack Maps is GPU-intensive, especially with more layers. <br />
-                 </small>
-              </p>
             </Modal.Body>
           </Modal>);
 };
