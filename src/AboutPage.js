@@ -34,7 +34,7 @@ function AboutPage({show, hide}) {
 
                    Traffic: <a href="https://www.tomtom.com">TomTom</a> <br />
 
-                   Some map icon credit: See <a href="https://www.tracestrack.com/information/">Tracestrack Tile Style</a>
+                   Some map icon credit: See <a href="https://www.tracestrack.com/information/">Tracestrack Tile Style</a> <br />
 
                    Like to use the map tile service? Check out <a href="https://www.tracestrack.com/">Tracestrack Tile Service</a> <br />
 

@@ -245,7 +245,7 @@ function getLangLayer() {
   const label_name = getCookie("lang");
   var source = new ol.source.XYZ({
       opaque: false,
-      imageSmoothing: true,
+      imageSmoothing: false,
       cacheSize: 200,
       transition: 0,
       urls: ['https://tile.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
@@ -276,7 +276,7 @@ function getBaseLayer(urls) {
     opaque: true,
     imageSmoothing: true,
     cacheSize: 200,
-    transition: 100,
+    transition: 400,
     urls: urls,
     crossOrigin: null,
     tilePixelRatio: 2,
@@ -391,7 +391,7 @@ function setLanguageLayer(lang) {
         opaque: false,
         imageSmoothing: false,
         cacheSize: 200,
-        transition: 0,
+        transition: 100,
         urls: [overlayUrl],
         crossOrigin: null,
         tilePixelRatio: 2
