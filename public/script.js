@@ -238,7 +238,7 @@ if (urlQueryStringArray.length >= 3) {
   urlQueryStringArray.shift();
 }
 
-var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false, doubleClickZoom: true, keyboard: false, shiftDragZoom: true, dragPan: true});
+//var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false, doubleClickZoom: true, keyboard: false, shiftDragZoom: true, dragPan: true});
 
 function getLangLayer() {
 
@@ -293,7 +293,7 @@ function getBaseLayer(urls) {
 
 var map = new ol.Map({
   target: 'map',
-  interactions: interactions,
+  //interactions: interactions,
   maxTilesLoading: 40,
   controls: [new ol.control.Attribution({collapsible: true}), new ol.control.Zoom({className: "zoomControl"})],
   view: new ol.View({

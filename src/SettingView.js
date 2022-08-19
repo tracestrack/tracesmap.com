@@ -9,26 +9,28 @@ const ui_langs = [["Dutch / Nederlands", "nl-NL"],
                   ["Simplified Chinese / 简体中文", "zh-CN"]
                  ];
 
-const langs = [[window.l("Global *"), "_-name"],
-               ["عربي", "ar-name"],
-               ["Deutsch", "de-name"],
-               ["English *", "en-name"],
-               ["español", "es-name"],
-               ["suomen kieli", "fi-name"],
-               ["Français", "fr-name"],
-               ["magyar nyelv", "hu-name"],
-               ["עִבְרִית‎", "he-name"],
-               ["italiano", "it-name"],
-               ["日本語", "ja-name"],
-               ["한국어", "ko-name"],
-               ["Nederlands", "nl-name"],
-               ["український", "uk-name"],
-               ["polski", "pl-name"],
-               ["português", "pt-name"],
-               ["русский", "ru-name"],
-               ["简体中文", "zh-hans-name"],
-               ["繁體中文", "zh-hant-name"],
-              ];
+const langs = [
+  [window.l("Auto"), "auto-name"],
+  [window.l("Global *"), "_-name"],
+  ["عربي", "ar-name"],
+  ["Deutsch", "de-name"],
+  ["English *", "en-name"],
+  ["español", "es-name"],
+  ["suomen kieli", "fi-name"],
+  ["Français", "fr-name"],
+  ["magyar nyelv", "hu-name"],
+  ["עִבְרִית‎", "he-name"],
+  ["italiano", "it-name"],
+  ["日本語", "ja-name"],
+  ["한국어", "ko-name"],
+  ["Nederlands", "nl-name"],
+  ["український", "uk-name"],
+  ["polski", "pl-name"],
+  ["português", "pt-name"],
+  ["русский", "ru-name"],
+  ["简体中文", "zh-hans-name"],
+  ["繁體中文", "zh-hant-name"],
+];
 
 function SettingView({show, hide}) {
 
@@ -38,7 +40,7 @@ function SettingView({show, hide}) {
   const handleLanguage = function (e) {
     let t = e.target.innerText;
 
-    var v = langs.filter(k => k[0] == t)[0][1];
+    var v = langs.filter(k => k[0] === t)[0][1];
 
     window.setLanguageLayer(v);
     setLang(_ => v);
@@ -46,7 +48,7 @@ function SettingView({show, hide}) {
 
   const handleUILanguage = function (e) {
     let t = e.target.value;
-    var v = ui_langs.filter(k => k[1] == t)[0][1];
+    var v = ui_langs.filter(k => k[1] === t)[0][1];
     window.setupI18N(v);
     setUILang(_ => v);
   };

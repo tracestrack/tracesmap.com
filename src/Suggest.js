@@ -92,7 +92,7 @@ class Example extends React.Component {
   // You already implemented this logic above, so just use it.
   onSuggestionsFetchRequested = ({ value }) => {
 
-    if (searchValue == value) {
+    if (searchValue === value) {
       return;
     }
 
