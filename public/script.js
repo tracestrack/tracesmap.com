@@ -238,8 +238,6 @@ if (urlQueryStringArray.length >= 3) {
   urlQueryStringArray.shift();
 }
 
-//var interactions = ol.interaction.defaults({altShiftDragRotate:false, pinchRotate:false, doubleClickZoom: true, keyboard: false, shiftDragZoom: true, dragPan: true});
-
 function getLangLayer() {
 
   const label_name = getCookie("lang");
