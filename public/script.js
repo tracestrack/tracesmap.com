@@ -253,7 +253,7 @@ function getLangLayer() {
 
   if (iOS()) {
     let layer =  new ol.layer.Tile({
-      preload: 2,
+      preload: 4,
       source: source
     });
     return layer
@@ -384,7 +384,7 @@ function setLanguageLayer(lang) {
 
   if (overlayEnabled) {
     overlayLayer = new ol.layer.Tile({
-      preload: 2,
+      preload: 4,
       source: new ol.source.XYZ({
         opaque: false,
         imageSmoothing: false,
