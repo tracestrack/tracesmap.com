@@ -241,12 +241,14 @@ if (urlQueryStringArray.length >= 3) {
 function getLangLayer() {
 
   const label_name = getCookie("lang");
+  var stylename = getURLParams("style")
+
   var source = new ol.source.XYZ({
       opaque: false,
       imageSmoothing: false,
       cacheSize: 200,
       transition: 0,
-      urls: ['https://tile.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'],
+      urls: ['https://tile.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be&style=' + (stylename == "dark" ? "dark3" : "")],
       crossOrigin: null,
       tilePixelRatio: 2
   });
@@ -254,6 +256,7 @@ function getLangLayer() {
   if (iOS()) {
     let layer =  new ol.layer.Tile({
       preload: 4,
+      style: getStyle(stylename, "lang"),
       source: source
     });
     return layer
@@ -261,7 +264,6 @@ function getLangLayer() {
 
   var stylename = getURLParams("style")
   let layer = new ol.layer.WebGLTile({
-    style: getStyle(stylename, "lang"),
     source: source
   })
 
@@ -269,21 +271,22 @@ function getLangLayer() {
 }
 
 function getBaseLayer(urls) {
+
+  var stylename = getURLParams("style")
+
   let base_source = new ol.source.XYZ({
     attributions: [ol.source.OSM.ATTRIBUTION],
     opaque: true,
     imageSmoothing: true,
     cacheSize: 200,
     transition: 400,
-    urls: urls,
+    urls: [urls[0] + (stylename == "dark" ? "&style=dark3" : "")],
     crossOrigin: null,
     tilePixelRatio: 2,
   });
 
-
-  var stylename = getURLParams("style")
   let base_layer = new ol.layer.WebGLTile({
-    style: getStyle(baseMap == "satellite" ? "normal" : stylename, "base"),
+    style: getStyle(baseMap == "satellite" || stylename == "dark" ? "normal" : stylename, "base"),
     source: base_source
   })
   return base_layer;
