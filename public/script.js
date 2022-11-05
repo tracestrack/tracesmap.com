@@ -249,8 +249,7 @@ function getLangLayer() {
       cacheSize: 200,
       transition: 0,
       urls: ['https://tile.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be&style=' + (stylename == "dark" ? "dark3" : "")],
-      crossOrigin: null,
-      tilePixelRatio: 2
+      crossOrigin: null
   });
 
   if (iOS()) {
