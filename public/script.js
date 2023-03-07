@@ -254,8 +254,8 @@ function getLangLayer() {
 
   if (iOS()) {
     let layer =  new ol.layer.Tile({
-      preload: 4,
       style: getStyle(stylename, "lang"),
+      preload: Infinity,
       source: source
     });
     return layer
@@ -286,6 +286,7 @@ function getBaseLayer(urls) {
 
   let base_layer = new ol.layer.WebGLTile({
     style: getStyle(baseMap == "satellite" || stylename == "dark" ? "normal" : stylename, "base"),
+    preload: Infinity,
     source: base_source
   })
   return base_layer;
