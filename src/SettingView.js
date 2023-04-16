@@ -28,6 +28,8 @@ const langs = [
   ["polski", "pl-name"],
   ["português", "pt-name"],
   ["русский", "ru-name"],
+  ["Svenska", "sv-name"],
+  ["Türkçe", "tr-name"],
   ["แบบไทย", "th-name"],
   ["简体中文", "zh-hans-name"],
   ["繁體中文", "zh-hant-name"],
