@@ -215,6 +215,7 @@ function getCookie(cname) {
   return "";
 }
 
+// parse params from location.href
 var lonlat = [0, 0];
 var zoom = 3;
 var qstr = "";
@@ -231,7 +232,10 @@ else {
 let urlQueryStringArray = qstr.split("/");
 
 if (urlQueryStringArray.length >= 3) {
-  lonlat = [urlQueryStringArray[2], urlQueryStringArray[1]];
+  let lon = urlQueryStringArray[2].split("!")[0];
+  let lat = urlQueryStringArray[1];
+  lonlat = [lon, lat];
+
   zoom = urlQueryStringArray[0]
   urlQueryStringArray.shift();
   urlQueryStringArray.shift();
@@ -455,10 +459,13 @@ document.addEventListener('keyup', function (evt) {
   if (evt.which === 113) {
     //F2
     if (baseMap == "satellite") {
-      if (lastBaseMap == "street")
+      if (lastBaseMap == "street") {
         document.getElementById("btnradio111").click();
-      else if (lastBaseMap == "topo")
+      } else if (lastBaseMap == "topo") {
         document.getElementById("btnradio311").click();
+      } else {
+        document.getElementById("btnradio111").click();
+      }
     }
     else {
       lastBaseMap = baseMap;
@@ -1095,7 +1102,7 @@ function showPoi(ele) {
   if (tags['website']) str += addLine("Website", `<a href='${tags.website}'>${tags.website}</a>`);
   if (tags['email']) str += addLine("Email", `${tags.email}`);
   if (tags['phone']) str += addLine("Phone", `${tags.phone}`);
-
+  if (tags['check_date']) str += addLine("Check date", `${tags.check_date}`);
 
 
 
@@ -1120,6 +1127,7 @@ function showPoi(ele) {
   let navlinks = [
     "<ul class='list-unstyled'>",
     createNavigationLink("Google Maps", "https://www.google.com/maps/dir/?api=1&destination=LATLON", latlon),
+    createNavigationLink("TomTom Plan", "https://plan.tomtom.com/route/plan?p=LATLON,19z", latlon),
     "</ul>"
   ];
 
