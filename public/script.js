@@ -399,7 +399,9 @@ function setLanguageLayer(lang) {
     map.addLayer(overlayLayer);
   }
 
-  map.addLayer(languageLayer);
+  if (getURLParams('overlay') != 'orm') {
+    map.addLayer(languageLayer);
+  }
 }
 
 
@@ -1320,8 +1322,8 @@ function onCheckLayer(e) {
     e.checked = false;
     checkedOverlayValue = "";
     overlayEnabled = false;
-    setLanguageLayer();
     updateURLParams("overlay", "");
+    setLanguageLayer();
     return;
   }
 
