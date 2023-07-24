@@ -249,26 +249,20 @@ function getLangLayer() {
 
   var source = new ol.source.XYZ({
       opaque: false,
-      imageSmoothing: false,
-      cacheSize: 200,
-      transition: 0,
+      imageSmoothing: true,
+      cacheSize: 2000,
+      transition: 100,
       urls: ['https://tile.tracestrack.com/' + label_name + '/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be&style=' + (stylename == "dark" ? "dark3" : "")],
-      crossOrigin: null
+      crossOrigin: null,
+    interpolate: false,
+    tilePixelRatio: 2
   });
 
-  if (iOS()) {
-    let layer =  new ol.layer.Tile({
-      style: getStyle(stylename, "lang"),
-      preload: Infinity,
-      source: source
-    });
-    return layer
-  }
-
-  var stylename = getURLParams("style")
-  let layer = new ol.layer.WebGLTile({
+  let layer =  new ol.layer.Tile({
+    style: getStyle(stylename, "lang"),
+    preload: Infinity,
     source: source
-  })
+  });
 
   return layer;
 }
@@ -391,7 +385,7 @@ function setLanguageLayer(lang) {
 
   if (overlayEnabled) {
     overlayLayer = new ol.layer.Tile({
-      preload: 4,
+      preload: Infinity,
       source: new ol.source.XYZ({
         opaque: false,
         imageSmoothing: false,
