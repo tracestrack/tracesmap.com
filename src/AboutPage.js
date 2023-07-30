@@ -17,7 +17,10 @@ function AboutPage({show, hide}) {
             </Modal.Header>
             <Modal.Body>
               <h4>{window.l("Acknowledgement")}</h4>
+              <p>                   Tracesmap is an open source project that makes plenty use of openstreetmap based data. It's open sourced on <a href="https://github.com/tracestrack/tracesmap.com">Github</a>. You are welcome to open issues and pull requests.
+</p>
               <p><small>
+
                    Map data: © OpenStreetMap contributors, © ESA WorldCover project / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium, NASADEM, SRTM <br />
 
                    Map style: <a href="https://www.tracestrack.com/information/">Tracestrack Tile Style</a> based on <a href="https://github.com/gravitystorm/openstreetmap-carto">OpenStreetMap Carto</a> and <a href="https://opentopomap.org/">OpenTopoMap</a>  <br />

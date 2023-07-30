@@ -5,10 +5,19 @@ raster tiles, OpenRouteService, Overpass API, Nominatim search, OpenRailwayMap,
 as well as some commercial products like Mapbox Satellite Imagery and TomTom
 Traffic.
 
-# Roadmap
+# Features to think of
 
-Current goal is to refactor the codebase into react.
+1. Refactor the codebase
+2. Add another search provider
+3. More overpass integration
+4. More overlay integration
 
-# Build locally
+# Build and run
 
 `npm install && npm start`
+
+# API Keys
+
+The projects uses several paid service such as Mapbox and TomTom. All the keys
+are in the repository and available to use. Please do not abuse and we do rotate
+the keys periodically.
