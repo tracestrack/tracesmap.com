@@ -204,8 +204,9 @@ li:hover {
     background: #ffffffee;
     padding: 5px;
     display: none;
-    height: 202px;
+    height: 250px;
     border-radius: 6px;
+    width: 340px;
 }
 
 #context-menu {

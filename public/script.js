@@ -399,7 +399,7 @@ function setLanguageLayer(lang) {
     map.addLayer(overlayLayer);
   }
 
-  if (getURLParams('overlay') != 'orm') {
+  if (getURLParams('overlay') != 'orm-infra') {
     map.addLayer(languageLayer);
   }
 }
@@ -1312,7 +1312,8 @@ function onCheckLayer(e) {
                   "bicycle": 'https://tile.tracestrack.com/bicycle-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be',
                   "subway": 'https://tile.tracestrack.com/subway-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be',
                   "train": 'https://tile.tracestrack.com/train-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be',
-                  "orm": 'https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png',
+                  "orm-infra": 'https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png',
+                  "orm-speed": 'https://tiles.openrailwaymap.org/maxspeed/{z}/{x}/{y}.png',
                   "traffic": 'https://api.tomtom.com/traffic/map/4/tile/flow/relative-delay/{z}/{x}/{y}.png?key=O5LGYfXUsThtDAoj8FsQKJlf5oll98tq&thickness=10&tileSize=512',
                   "gps": 'https://gps.tile.openstreetmap.org/lines/{z}/{x}/{y}.png'
                  }
@@ -1452,7 +1453,7 @@ while (a) {
   else if (["grayscale", "normal", "dark", "vivid"].includes(a)) {
     document.getElementById("label_"+a).click();
   }
-  else if (["bicycle", "subway", "bus", "train", 'orm', "traffic", "gps"].includes(a)) {
+  else if (["bicycle", "subway", "bus", "train", 'orm-infra', 'orm-speed', "traffic", "gps"].includes(a)) {
     document.getElementById("label_"+a).click();
   }
   a = urlQueryStringArray.shift();
