@@ -2,42 +2,45 @@
   "name": "tracesmap.com",
   "version": "0.2.1",
   "private": true,
-  "dependencies": {
-    "@testing-library/jest-dom": "^5.11.10",
-    "@testing-library/react": "^11.2.6",
-    "@testing-library/user-event": "^12.8.3",
-    "bootstrap": "^4.6.0",
-    "nominatim-geocoder": "^0.1.4",
-    "query-overpass": "^1.5.5",
-    "react": "^17.0.2",
-    "react-autosuggest": "^10.1.0",
-    "react-bootstrap": "^1.5.2",
-    "react-dom": "^17.0.2",
-    "react-scripts": "4.0.3",
-    "web-vitals": "^1.1.1"
-  },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "vite dev",
+    "build": "vite build",
+    "test": "jest",
+    "lint": "tsc"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+  "dependencies": {
+    "@adobe/react-spectrum": "^3.29.0",
+    "@spectrum-icons/workflow": "^4.2.3",
+    "@types/lodash": "^4.14.197",
+    "@types/react": "^18.0.26",
+    "@types/react-dom": "^18.0.9",
+    "classnames": "^2.3.1",
+    "es2015-i18n-tag": "^1.6.1",
+    "lodash": "^4.17.21",
+    "ol": "^7.5.1",
+    "query-overpass": "^1.5.5",
+    "react": "^18.0.2",
+    "react-aria": "^3.27.0",
+    "react-dom": "^18.0.2",
+    "react-hook-form": "^7.45.4",
+    "react-router-dom": "^6.15.0",
+    "recoil": "^0.7.6",
+    "whatwg-fetch": "^3.6.17"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "devDependencies": {
+    "@testing-library/react": "^14.0.0",
+    "@types/jest": "^29.2.4",
+    "@vitejs/plugin-basic-ssl": "^1.0.1",
+    "@vitejs/plugin-react": "^4.0.4",
+    "env-cmd": "^10.1.0",
+    "husky": "4.3.8",
+    "jest": "^29.3.1",
+    "jest-environment-jsdom": "^29.3.1",
+    "lint-staged": "^11.1.2",
+    "postcss-preset-env": "^9.1.1",
+    "prettier": "^3.0.2",
+    "ts-jest": "^29.0.3",
+    "typescript": "^5.1.6",
+    "vite": "^4.4.9"
   }
 }
