@@ -1,5 +1,6 @@
 import lodash from 'lodash'
 import { Feature, Map, View } from 'ol'
+import { Attribution, Zoom } from 'ol/control'
 import { Coordinate } from 'ol/coordinate'
 import { pointerMove, click } from 'ol/events/condition'
 import { LineString, Point } from 'ol/geom'
@@ -84,13 +85,14 @@ interface UseMapArg {
 
 export function useMap(arg?: UseMapArg) {
   const [mapRef, setMapRef] = useRecoilState(state.map.ref)
-  const center = useRecoilValue(state.map.center)
+  const center = transform(useRecoilValue(state.map.center), 'EPSG:4326', 'EPSG:3857')
   const zoom = useRecoilValue(state.map.zoom)
 
   useEffect(() => {
     if (mapRef) return
     if (!arg?.target) return
 
+    console.log(center)
     const view = new View({
       center,
       zoom,
@@ -102,7 +104,7 @@ export function useMap(arg?: UseMapArg) {
       target: arg.target,
       maxTilesLoading: 40,
       view,
-      controls: [],
+      controls: [new Attribution({ collapsible: true }), new Zoom({ className: 'zoomControl' })],
     })
 
     setMapRef(map)
@@ -141,8 +143,10 @@ export function useBaseLayer() {
     }
     const baseLayerSource = new XYZSource(baseLayerSourceOptions)
 
-    const baseLayerStyle = utils.map.getStyle(baseLayerStyleName, 'lang')
-
+    const baseLayerStyle = utils.map.getStyle(
+      mapSettings.baseLayer == 'satellite' || baseLayerStyleName == 'dark' ? 'normal' : baseLayerStyleName,
+      'base',
+    )
     const newBaseLayer = new WebGLTileLayer({
       preload: Infinity,
       style: baseLayerStyle,
@@ -300,7 +304,7 @@ export function useMapEvents() {
 
   const viewOnChangeCenter = lodash.debounce(e => {
     const v = e.target.getCenter()
-    setCenter(v)
+    setCenter(transform(v, 'EPSG:3857', 'EPSG:4326'))
   }, 600)
 
   const viewOnChangeResolutions = lodash.debounce(e => {

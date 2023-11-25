@@ -20,7 +20,6 @@ export function Map() {
   return (
     <>
       <div id={styles.map} />
-      <Zoom />
       <ContextMenu />
       <Coordinates />
     </>

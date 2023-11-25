@@ -52,7 +52,7 @@ export const urlHashPersistence: (key: string) => AtomEffect<any> =
       let values = Array(6).fill(undefined)
       let a = u.hash.replace('#', '').split('/')
       values = values.map((v, i) => a[i] || v)
-
+      console.log(values)
       const index = variables.urlHashKeys.findIndex(v => v === key)
 
       if (isReset || newValue === undefined) values = values.slice(0, index)

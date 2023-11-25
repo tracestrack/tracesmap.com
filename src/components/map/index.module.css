@@ -10,3 +10,28 @@
 .control-zoom {
   display: none;
 }
+
+.zoomControl {
+  right: 8px;
+  bottom: 86px;
+}
+
+.ol-control button {
+  background: #ffffffcc;
+  color: black;
+  border-radius: 10px;
+}
+
+.ol-attribution ul {
+  font-size: 12px;
+}
+
+.ol-control {
+  background: rgba(255, 0, 0, 0);
+}
+.ol-control:hover {
+  background: rgba(255, 0, 0, 0);
+}
+.ol-control > button:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
