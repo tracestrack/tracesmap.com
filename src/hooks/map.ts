@@ -143,18 +143,15 @@ export function useBaseLayer() {
     }
     const baseLayerSource = new XYZSource(baseLayerSourceOptions)
 
-    const baseLayerStyle = utils.map.getStyle(
-      mapSettings.baseLayer == 'satellite' || baseLayerStyleName == 'dark' ? 'normal' : baseLayerStyleName,
-      'base',
-    )
     const newBaseLayer = new WebGLTileLayer({
       preload: Infinity,
-      style: baseLayerStyle,
       source: baseLayerSource,
     })
 
     if (baseLayer) mapRef.removeLayer(baseLayer)
-    mapRef.addLayer(newBaseLayer)
+    if (mapSettings.baseLayer === 'satellite') {
+      mapRef.addLayer(newBaseLayer)
+    }
 
     // reset layers
     // 0. base layer
@@ -212,20 +209,28 @@ export function useLanguageLayer() {
 
     const baseLayerStyleName = mapSettings.baseLayer === 'satellite' ? 'normal' : mapSettings.style
 
-    const mapLanguageLayerSourceUrl = utils.map.getLanguageLayerSourceUrl(mapSettings.language, baseLayerStyleName)
+    var mapLanguageLayerSourceUrl = utils.map.getLanguageLayerSourceUrl(mapSettings.language, baseLayerStyleName)
+    if (mapSettings.baseLayer === 'street') {
+      mapLanguageLayerSourceUrl = mapLanguageLayerSourceUrl.replace('-name', '')
+    } else if (mapSettings.baseLayer === 'topo') {
+      mapLanguageLayerSourceUrl = mapLanguageLayerSourceUrl.replace('-name', '').replace('.com/', '.com/topo_')
+    }
 
-    const languageLayerSource = new XYZSource({
-      opaque: false,
-      cacheSize: 2000,
-      transition: 100,
+    const langLayerSourceOptions = {
+      opaque: true,
+      cacheSize: 200,
+      transition: 400,
       urls: [mapLanguageLayerSourceUrl],
       crossOrigin: null,
       tilePixelRatio: 2,
-    })
+    }
 
-    const newLanguageLayer = new TileLayer({
+    const langLayerSource = new XYZSource(langLayerSourceOptions)
+    const langLayerStyle = utils.map.getStyle(baseLayerStyleName, 'base')
+    const newLanguageLayer = new WebGLTileLayer({
       preload: Infinity,
-      source: languageLayerSource,
+      style: baseLayerStyleName === 'dark' ? null : langLayerStyle,
+      source: langLayerSource,
     })
 
     mapRef.removeLayer(languageLayer)

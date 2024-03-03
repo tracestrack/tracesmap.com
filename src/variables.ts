@@ -29,6 +29,7 @@ export const mapLanguages = [
 ] as const
 
 export const mapOverlayLayers = [
+  'none',
   'bicycle',
   'subway',
   'bus',

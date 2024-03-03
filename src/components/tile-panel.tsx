@@ -71,6 +71,7 @@ export const TilePanel: FunctionComponent<TilePanelProps> = props => {
 }
 
 const mapOverlays: Record<MapOverlayLayer, string> = {
+  none: 'None',
   bicycle: 'Bicycle',
   subway: 'Subway',
   bus: 'Bus',
