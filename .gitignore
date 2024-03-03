@@ -10,7 +10,6 @@
 !src
 
 !index.html
-!package.json
 !postcss.config.js
 !tsconfig.json
 !vite.config.js
