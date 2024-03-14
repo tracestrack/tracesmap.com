@@ -41,8 +41,10 @@ export const urlHashPersistence: (key: string) => AtomEffect<any> =
       const u = new URL(location.href)
       // e.g. `/#9/32.0323/119.2003/topo/bus/vivid`
       const values = u.hash.replace('#', '').split('/')
+
       const index = variables.urlHashKeys.findIndex(v => v === key)
       const savedValue = values[index]
+
       if (savedValue !== null && savedValue !== undefined) setSelf(savedValue)
     }
 

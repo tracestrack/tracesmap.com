@@ -85,14 +85,15 @@ interface UseMapArg {
 
 export function useMap(arg?: UseMapArg) {
   const [mapRef, setMapRef] = useRecoilState(state.map.ref)
-  const center = transform(useRecoilValue(state.map.center), 'EPSG:4326', 'EPSG:3857')
+  let centerLonLat = useRecoilValue(state.map.center)
+  const center = transform([centerLonLat[1], centerLonLat[0]], 'EPSG:4326', 'EPSG:3857')
   const zoom = useRecoilValue(state.map.zoom)
 
+  console.log(useRecoilValue(state.map.center))
   useEffect(() => {
     if (mapRef) return
     if (!arg?.target) return
 
-    console.log(center)
     const view = new View({
       center,
       zoom,
@@ -309,7 +310,8 @@ export function useMapEvents() {
 
   const viewOnChangeCenter = lodash.debounce(e => {
     const v = e.target.getCenter()
-    setCenter(transform(v, 'EPSG:3857', 'EPSG:4326'))
+    let c = transform(v, 'EPSG:3857', 'EPSG:4326')
+    setCenter([c[1].toFixed(4), c[0].toFixed(4)])
   }, 600)
 
   const viewOnChangeResolutions = lodash.debounce(e => {

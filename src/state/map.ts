@@ -14,7 +14,7 @@ export const baseLayer = atom<MapBaseLayer>({
 
 export const overlayLayer = atom<MapOverlayLayer>({
   key: 'map.overlayLayer',
-  default: variables.mapOverlayLayers[1],
+  default: variables.mapOverlayLayers[0],
   effects: [effects.urlHashPersistence(variables.urlHashKeys[5])],
 })
 
