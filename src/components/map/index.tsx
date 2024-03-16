@@ -13,6 +13,8 @@ export function Map() {
   hooks.map.usePositionPointLayer()
   hooks.map.useDirectionLayer()
   hooks.map.useNearbyPlacesLayer()
+  hooks.map.useSearchLayer()
+  hooks.map.useAddSearchPoint()
   hooks.map.usePOIPlacesLayer()
 
   hooks.map.useMapEvents()

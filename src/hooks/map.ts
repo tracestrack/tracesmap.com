@@ -3,7 +3,7 @@ import { Feature, Map, View } from 'ol'
 import { Attribution, Zoom } from 'ol/control'
 import { Coordinate } from 'ol/coordinate'
 import { pointerMove, click } from 'ol/events/condition'
-import { LineString, Point } from 'ol/geom'
+import { LineString, Point, MultiPoint } from 'ol/geom'
 import { Select } from 'ol/interaction'
 import { Tile as TileLayer, Vector as VectorLayer, WebGLTile as WebGLTileLayer } from 'ol/layer'
 import { fromLonLat, transform } from 'ol/proj'
@@ -577,16 +577,31 @@ export function useControl() {
     view.setZoom(nextZoom)
   }
 
-  const moveCenter = (lat, lon) => {
+  const setSearchResultPosition = (lat, lon) => {
+    if (!map) return
+
+    const c = fromLonLat([Number(lon), Number(lat)])
+
+    var f = new Feature({
+      geometry: new Point(c),
+    })
+
+    // useAddSearchPoint(f)
+  }
+
+  const setBoundingBox = (p1, p2) => {
     if (!map) return
 
     const view = map.getView()
-    const c = fromLonLat([Number(lon), Number(lat)])
-    view.setZoom(11)
-    view.setCenter(c)
-  }
+    const neLL = fromLonLat([Number(p1.lon), Number(p1.lat)])
+    const swLL = fromLonLat([Number(p2.lon), Number(p2.lat)])
+    let points = new MultiPoint([neLL, swLL])
 
-  return { zoomIn, zoomOut, moveCenter }
+    console.log(points)
+
+    view.fit(points)
+  }
+  return { zoomIn, zoomOut, setSearchResultPosition, setBoundingBox }
 }
 
 export function useSearchLayer() {
@@ -815,12 +830,10 @@ export function usePOIPlacesLayer() {
   return layer
 }
 
-export function useAddSearchPoint() {
+export function useAddSearchPoint(feature) {
   const searchLayer = useRecoilValue(state.map.layerRef(variables.searchLayerID))
 
   const addSearchPoint = useCallback(() => {
-    const feature = new Feature()
-
     feature.setStyle(
       new Style({
         image: new Circle({
@@ -835,8 +848,8 @@ export function useAddSearchPoint() {
         }),
       }),
     )
-
-    // feature.setGeometry([])
+    searchLayer.getSource().addFeature(feature)
+    console.log(searchLayer)
   }, [searchLayer])
 
   return [addSearchPoint]
@@ -853,6 +866,8 @@ export const map = {
   usePositionPointLayer,
   useDirectionLayer,
   useNearbyPlacesLayer,
+  useSearchLayer,
+  useAddSearchPoint,
   usePOIPlacesLayer,
 
   useMapEvents,

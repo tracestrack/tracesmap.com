@@ -66,7 +66,7 @@ export const urlHashPersistence: (key: string) => AtomEffect<any> =
           if (variables.urlHashKeys[i] === 'lat') return `${variables.center[0]}`
           if (variables.urlHashKeys[i] === 'lon') return `${variables.center[1]}`
           if (variables.urlHashKeys[i] === 'base') return `${variables.mapBaseLayers[1]}`
-          if (variables.urlHashKeys[i] === 'overlay') return `${variables.mapOverlayLayers[1]}`
+          if (variables.urlHashKeys[i] === 'overlay') return `${variables.mapOverlayLayers[0]}`
           if (variables.urlHashKeys[i] === 'style') return `${variables.mapStyles[0]}`
         }
         return v
