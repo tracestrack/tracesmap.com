@@ -61,11 +61,11 @@ export function Search() {
     const [n] = s.values()
     if (n === undefined) return
 
-    const { display_name } = suggestions[n]
+    const { display_name, lat, lon } = suggestions[n]
 
     setSearchText(display_name)
     setSelectedSuggestions([s])
-    moveCenter(position[0], position[1])
+    moveCenter(lat, lon)
   }
 
   return (

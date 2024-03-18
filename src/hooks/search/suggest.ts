@@ -18,9 +18,9 @@ export function useSuggest() {
 
       resetSuggestionPlaces()
       setSuggestionPlaces(
-        res.map(({ data, position, display_name }) => ({
-          id: data?.place_id,
-          coordinate: [position?.[1], position?.[0]],
+        res.map(({ id, lat, lon, display_name }) => ({
+          id,
+          coordinate: [lon, lat],
           name: display_name,
         })),
       )
