@@ -52,28 +52,8 @@ export async function search(o: SearchParams, s: SearchServiceKey = 'openstreetm
     if (o) for (const k in o) url.searchParams.append(k, o[k])
     const res = await fetch(url.toString(), { method: 'GET' })
     const d = await res.json()
-    if (s === 'openstreetmap')
-      return d.map(v => ({
-        display_name: v.display_name,
-        source: 'osm',
-        data: v,
-        position: [parseFloat(v.lat), parseFloat(v.lon)],
-        viewport: [
-          [v.boundingbox[0], v.boundingbox[2]].map(v => parseFloat(v)),
-          [v.boundingbox[1], v.boundingbox[3]].map(v => parseFloat(v)),
-        ],
-      }))
-    if (s === 'tomtom')
-      return d.results.map(v => ({
-        display_name: v.address.freeformAddress,
-        source: 'tomtom',
-        data: v,
-        position: [v.position.lat, v.position.lon],
-        viewport: [
-          [v.viewport.btmRightPoint.lat, v.viewport.btmRightPoint.lon],
-          [v.viewport.topLeftPoint.lat, v.viewport.topLeftPoint.lon],
-        ],
-      }))
+    if (s === 'openstreetmap') return d
+    if (s === 'tomtom') return d.results.map(v => ({ display_name: v.address.freeformAddress, ...v.position }))
   } catch (e) {
     console.error(e)
   }
