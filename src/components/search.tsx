@@ -61,7 +61,7 @@ export function Search() {
     const [n] = s.values()
     if (n === undefined) return
 
-    const { display_name, data, viewport, position } = suggestions[n]
+    const { display_name } = suggestions[n]
 
     setSearchText(display_name)
     setSelectedSuggestions([s])
