@@ -30,7 +30,7 @@ export function Search() {
   const [selectedSuggestions, setSelectedSuggestions] = useState([])
 
   const { suggest, suggestions } = hooks.search.useSuggest()
-  const { setSearchResultPosition, setBoundingBox } = hooks.map.useControl()
+  const { moveCenter } = hooks.map.useControl()
 
   const suggestionHidden = lodash.isEmpty(suggestionItems)
 
@@ -65,9 +65,7 @@ export function Search() {
 
     setSearchText(display_name)
     setSelectedSuggestions([s])
-
-    // setSearchResultPosition(position[0], position[1] );
-    setBoundingBox({ lat: viewport[0][0], lon: viewport[0][1] }, { lat: viewport[1][0], lon: viewport[1][1] })
+    moveCenter(position[0], position[1])
   }
 
   return (

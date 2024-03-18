@@ -16,6 +16,7 @@ import { state } from '../state'
 import { utils } from '../utils'
 import type { MapBaseLayer, MapLanguage, MapOverlayLayer, MapStyle } from '../variables'
 import { variables } from '../variables'
+import { type SearchReturn } from '../api/search'
 
 interface useSettingsValue {
   baseLayer?: MapBaseLayer
@@ -89,7 +90,6 @@ export function useMap(arg?: UseMapArg) {
   const center = transform([centerLonLat[1], centerLonLat[0]], 'EPSG:4326', 'EPSG:3857')
   const zoom = useRecoilValue(state.map.zoom)
 
-  console.log(useRecoilValue(state.map.center))
   useEffect(() => {
     if (mapRef) return
     if (!arg?.target) return
@@ -124,6 +124,7 @@ export function useBaseLayer() {
   const [directionLayer] = useRecoilState(state.map.layerRef(variables.directionLayerID))
   const [nearbyPlacesLayer] = useRecoilState(state.map.layerRef(variables.nearbyPlacesLayerID))
   const [poiPlacesLayer] = useRecoilState(state.map.layerRef(variables.poiPlacesLayerID))
+  const [suggestionPlacesLayer] = useRecoilState(state.map.layerRef(variables.suggestionPlacesLayerID))
 
   useEffect(() => {
     if (!mapRef) return
@@ -163,6 +164,7 @@ export function useBaseLayer() {
     // 5. search layer
     // 6. nearby places layer
     // 7. poi places layer
+    // 8. suggestion places layer
     if (overlayLayer) {
       mapRef.removeLayer(overlayLayer)
       mapRef.addLayer(overlayLayer)
@@ -191,6 +193,11 @@ export function useBaseLayer() {
     if (poiPlacesLayer) {
       mapRef.removeLayer(poiPlacesLayer)
       mapRef.addLayer(poiPlacesLayer)
+    }
+
+    if (suggestionPlacesLayer) {
+      mapRef.removeLayer(suggestionPlacesLayer)
+      mapRef.addLayer(suggestionPlacesLayer)
     }
 
     setBaseLayer(newBaseLayer)
@@ -577,31 +584,16 @@ export function useControl() {
     view.setZoom(nextZoom)
   }
 
-  const setSearchResultPosition = (lat, lon) => {
-    if (!map) return
-
-    const c = fromLonLat([Number(lon), Number(lat)])
-
-    var f = new Feature({
-      geometry: new Point(c),
-    })
-
-    // useAddSearchPoint(f)
-  }
-
-  const setBoundingBox = (p1, p2) => {
+  const moveCenter = (lat, lon) => {
     if (!map) return
 
     const view = map.getView()
-    const neLL = fromLonLat([Number(p1.lon), Number(p1.lat)])
-    const swLL = fromLonLat([Number(p2.lon), Number(p2.lat)])
-    let points = new MultiPoint([neLL, swLL])
-
-    console.log(points)
-
-    view.fit(points)
+    const c = fromLonLat([Number(lon), Number(lat)])
+    view.setZoom(11)
+    view.setCenter(c)
   }
-  return { zoomIn, zoomOut, setSearchResultPosition, setBoundingBox }
+
+  return { zoomIn, zoomOut, moveCenter }
 }
 
 export function useSearchLayer() {
@@ -830,29 +822,152 @@ export function usePOIPlacesLayer() {
   return layer
 }
 
-export function useAddSearchPoint(feature) {
-  const searchLayer = useRecoilValue(state.map.layerRef(variables.searchLayerID))
+export function useSuggestionPlacesLayer() {
+  const [mapRef] = useRecoilState(state.map.ref)
+  const [mapSettings] = useSettings()
+  const [layer, setLayer] = useRecoilState(state.map.layerRef(variables.suggestionPlacesLayerID))
+  const suggestionPlaces = useRecoilValue(state.map.suggestionPlaces)
+  const [selectedSuggestionPlace, setSelectedSuggestionPlace] = useRecoilState(state.map.selectedSuggestionPlace)
 
-  const addSearchPoint = useCallback(() => {
-    feature.setStyle(
+  const style = useMemo(
+    () =>
       new Style({
         image: new Circle({
-          radius: 20,
-          fill: new Fill({
-            color: '#FFFF0099',
-          }),
+          radius: 7,
+          fill: new Fill({ color: '#219ebc' }),
           stroke: new Stroke({
-            color: '#ff6600cc',
+            color: 'white',
             width: 2,
           }),
         }),
       }),
-    )
-    searchLayer.getSource().addFeature(feature)
-    console.log(searchLayer)
-  }, [searchLayer])
+    [],
+  )
 
-  return [addSearchPoint]
+  const hoverStyle = useMemo(
+    () =>
+      new Style({
+        image: new Circle({
+          radius: 9,
+          fill: new Fill({ color: '#219ebc' }),
+          stroke: new Stroke({
+            color: 'white',
+            width: 2,
+          }),
+        }),
+      }),
+    [],
+  )
+
+  const suggestionPlaceMarkerHoverInteraction = useMemo(
+    () =>
+      new Select({
+        condition: pointerMove,
+        style: hoverStyle,
+      }),
+    [],
+  )
+
+  const suggestionPlaceMarkerInteractionFn = useCallback(
+    e => {
+      const id = e?.selected?.[0]?.getProperties()?.id
+      if (id == selectedSuggestionPlace?.id) return
+
+      const o = suggestionPlaces?.find(v => v.id == id)
+      if (o) setSelectedSuggestionPlace(o)
+    },
+    [suggestionPlaces, selectedSuggestionPlace],
+  )
+
+  suggestionPlaceMarkerHoverInteraction.un('select', suggestionPlaceMarkerInteractionFn)
+  suggestionPlaceMarkerHoverInteraction.on('select', suggestionPlaceMarkerInteractionFn)
+
+  useEffect(() => {
+    if (!mapRef) return
+    if (layer) return
+
+    const source = new VectorSource({
+      features: [],
+    })
+
+    const newLayer = new VectorLayer({
+      source,
+    })
+
+    mapRef.addLayer(newLayer)
+    setLayer(newLayer)
+
+    mapRef.removeInteraction(suggestionPlaceMarkerHoverInteraction)
+    mapRef.addInteraction(suggestionPlaceMarkerHoverInteraction)
+  }, [mapRef, mapSettings, layer])
+
+  useEffect(() => {
+    if (!layer) return
+
+    const source = layer.getSource()
+
+    source.forEachFeature(v => source.removeFeature(v))
+
+    const features = suggestionPlaces.map(v => {
+      const f = new Feature({
+        id: v.id,
+        geometry: new Point(fromLonLat(v.coordinate)),
+      })
+
+      if (selectedSuggestionPlace?.id == v.id) f.setStyle(hoverStyle)
+      else f.setStyle(style)
+
+      return f
+    })
+
+    source.addFeatures(features)
+  }, [layer, suggestionPlaces, selectedSuggestionPlace])
+
+  return layer
+}
+
+export function useAddSearchPoint() {
+  const map = useRecoilValue(state.map.ref)
+  const searchLayer = useRecoilValue(state.map.layerRef(variables.searchLayerID))
+
+  const addSearchPoint = useCallback(
+    (arg: SearchReturn) => {
+      if (!map) return
+
+      const c = fromLonLat([Number(arg.lon), Number(arg.lat)])
+
+      const feature = new Feature({
+        geometry: new Point(c),
+      })
+
+      feature.setStyle(
+        new Style({
+          image: new Circle({
+            radius: 20,
+            fill: new Fill({
+              color: '#FFFF0099',
+            }),
+            stroke: new Stroke({
+              color: '#ff6600cc',
+              width: 2,
+            }),
+          }),
+        }),
+      )
+
+      // searchLayer.getSource().addFeature(feature)
+
+      const view = map.getView()
+      const neLL = fromLonLat([Number(arg.viewport[0][0]), Number(arg.viewport[0][1])])
+      const swLL = fromLonLat([Number(arg.viewport[1][0]), Number(arg.viewport[1][1])])
+      const points = new MultiPoint([neLL, swLL])
+
+      view.fit(points)
+    },
+    [searchLayer],
+  )
+
+  return addSearchPoint
 }
 
 export const map = {
@@ -865,10 +980,13 @@ export const map = {
   useLanguageLayer,
   usePositionPointLayer,
   useDirectionLayer,
+
   useNearbyPlacesLayer,
+  usePOIPlacesLayer,
+  useSuggestionPlacesLayer,
+
   useSearchLayer,
   useAddSearchPoint,
-  usePOIPlacesLayer,
 
   useMapEvents,
 

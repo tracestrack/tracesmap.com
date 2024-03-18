@@ -12,10 +12,10 @@ export function Map() {
   hooks.map.useLanguageLayer()
   hooks.map.usePositionPointLayer()
   hooks.map.useDirectionLayer()
-  hooks.map.useNearbyPlacesLayer()
   hooks.map.useSearchLayer()
-  hooks.map.useAddSearchPoint()
+  hooks.map.useNearbyPlacesLayer()
   hooks.map.usePOIPlacesLayer()
+  hooks.map.useSuggestionPlacesLayer()
 
   hooks.map.useMapEvents()
 
