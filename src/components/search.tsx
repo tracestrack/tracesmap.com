@@ -41,7 +41,7 @@ export function Search() {
   }, [searchText, suggestionStatus])
 
   useEffect(() => {
-    const arr = suggestions.map((v, i) => ({ id: i, name: v.display_name }))
+    const arr = suggestions.map((v, i) => ({ id: i, name: v.name }))
     setSuggestionItems(arr)
   }, [suggestions])
 
@@ -61,9 +61,9 @@ export function Search() {
     const [n] = s.values()
     if (n === undefined) return
 
-    const { display_name, lat, lon } = suggestions[n]
+    const { name, lat, lon } = suggestions[n]
 
-    setSearchText(display_name)
+    setSearchText(name)
     setSelectedSuggestions([s])
     moveCenter(lat, lon)
   }

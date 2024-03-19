@@ -2,7 +2,6 @@ import { hooks } from '../../hooks'
 import { ContextMenu } from './context-menu'
 import { Coordinates } from './coordinates'
 import styles from './index.module.css'
-import { Zoom } from './zoom'
 
 export function Map() {
   hooks.map.useMap({ target: styles.map })

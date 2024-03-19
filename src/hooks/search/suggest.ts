@@ -1,7 +1,5 @@
-import { useState } from 'react'
 import { useRecoilState } from 'recoil'
 import { api } from '../../api'
-import { type SearchReturn } from '../../api/search'
 import { state } from '../../state'
 import { variables, type SearchServiceKey } from '../../variables'
 import { useSuggestPlace } from './suggest-place'
@@ -18,10 +16,10 @@ export function useSuggest() {
 
       resetSuggestionPlaces()
       setSuggestionPlaces(
-        res.map(({ place_id, lat, lon, display_name }) => ({
-          id: place_id,
+        res.map(({ id, lat, lon, name }) => ({
+          id,
           coordinate: [lon, lat],
-          name: display_name,
+          name,
         })),
       )
 
