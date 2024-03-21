@@ -16,38 +16,40 @@ export interface SearchParams {
   format?: string
 }
 
-const searchReturnType = z.enum(['openstreetmap', 'tomtom'])
-type SearchReturnType = z.infer<typeof searchReturnType>
+const suggestionPlaceType = z.enum(['openstreetmap', 'tomtom'])
+type SuggestionPlaceType = z.infer<typeof suggestionPlaceType>
 
-const searchReturn = z.array(
-  z.object({
-    id: z.string(),
-    address: z
-      .object({
-        city: z.string().optional(),
-        country: z.string().optional(),
-        postcode: z.string().optional(),
-        province: z.string().optional(),
-        district: z.string().optional(),
-        street: z.string().optional(),
-        state: z.string().optional(),
-      })
-      .optional(),
-    boundingbox: z.array(z.string()).optional(),
-    name: z.string(),
-    lat: z.string(),
-    lon: z.string(),
-    type: searchReturnType,
-  }),
-)
+const suggestionPlace = z.object({
+  id: z.string(),
+  address: z
+    .object({
+      city: z.string().optional(),
+      country: z.string().optional(),
+      postcode: z.string().optional(),
+      province: z.string().optional(),
+      district: z.string().optional(),
+      street: z.string().optional(),
+      state: z.string().optional(),
+    })
+    .optional(),
+  boundingbox: z.array(z.string()).optional(),
+  name: z.string(),
+  lat: z.string(),
+  lon: z.string(),
+  type: suggestionPlaceType,
+})
 
-export type SearchReturn = z.infer<typeof searchReturn>
+export type SuggestionPlace = z.infer<typeof suggestionPlace>
 
-export async function search(o: SearchParams, s: SearchServiceKey = 'openstreetmap'): Promise<SearchReturn> {
+const suggestionPlaces = z.array(suggestionPlace)
+
+export type SuggestionPlaces = z.infer<typeof suggestionPlaces>
+
+export async function search(o: SearchParams, s: SearchServiceKey = 'openstreetmap'): Promise<SuggestionPlaces> {
   try {
     let u = ''
-    if (s === searchReturnType.enum.openstreetmap) u = constants.SEARCH_API_URL_OPENSTREETMAP.replace('{q}', o.q)
-    if (s === searchReturnType.enum.tomtom) u = constants.SEARCH_API_URL_TOMTOM.replace('{q}', o.q)
+    if (s === suggestionPlaceType.enum.openstreetmap) u = constants.SEARCH_API_URL_OPENSTREETMAP.replace('{q}', o.q)
+    if (s === suggestionPlaceType.enum.tomtom) u = constants.SEARCH_API_URL_TOMTOM.replace('{q}', o.q)
     if (u === '') throw new Error('unkown search api url')
 
     const url = new URL(u)
@@ -57,9 +59,9 @@ export async function search(o: SearchParams, s: SearchServiceKey = 'openstreetm
     const res = await fetch(url.toString(), { method: 'GET' })
     const d = await res.json()
 
-    let r: SearchReturn = []
+    let r: SuggestionPlaces = []
 
-    if (s === searchReturnType.enum.openstreetmap) {
+    if (s === suggestionPlaceType.enum.openstreetmap) {
       r = d?.map(
         ({ display_name, boundingbox, lat, lon, osm_id }) =>
           ({
@@ -69,11 +71,11 @@ export async function search(o: SearchParams, s: SearchServiceKey = 'openstreetm
             lon: String(lon),
             id: String(osm_id),
             type: 'openstreetmap',
-          }) as SearchReturn[number],
+          }) as SuggestionPlaces[number],
       )
     }
 
-    if (s === searchReturnType.enum.tomtom) {
+    if (s === suggestionPlaceType.enum.tomtom) {
       r = d?.results?.map(
         ({ address, position, id, viewport }) =>
           ({
@@ -88,11 +90,11 @@ export async function search(o: SearchParams, s: SearchServiceKey = 'openstreetm
             lon: String(position.lon),
             id: String(id),
             type: 'tomtom',
-          }) as SearchReturn[number],
+          }) as SuggestionPlaces[number],
       )
     }
 
-    searchReturn.parse(r)
+    suggestionPlaces.parse(r)
 
     return r
   } catch (e) {

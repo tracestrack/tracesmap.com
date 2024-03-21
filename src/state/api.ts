@@ -1,7 +1,7 @@
 import { atom } from 'recoil'
-import { type SearchReturn } from '../api/search'
+import { type SuggestionPlaces } from '../api/search'
 
-export const suggestion = atom<SearchReturn[]>({
+export const suggestion = atom<SuggestionPlaces>({
   key: 'api.suggestion',
   default: [],
 })
