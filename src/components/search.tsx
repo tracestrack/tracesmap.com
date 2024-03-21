@@ -12,8 +12,6 @@ import {
   View,
 } from '@adobe/react-spectrum'
 import lodash from 'lodash'
-import { boundingExtent } from 'ol/extent'
-import { get, transformExtent } from 'ol/proj'
 import { useEffect, useState } from 'react'
 import { hooks } from '../hooks'
 import { variables } from '../variables'
@@ -31,9 +29,7 @@ export function Search() {
   const [directionPanelOpen, setDirectionPanelOpen] = useState(false)
   const [selectedSuggestions, setSelectedSuggestions] = useState([])
 
-  const map = hooks.map.useMap()
   const { suggest, suggestions } = hooks.search.useSuggest()
-  const { suggestionPlaces } = hooks.search.useSuggestPlace()
   const { moveCenter } = hooks.map.useControl()
 
   const suggestionHidden = lodash.isEmpty(suggestionItems)
@@ -48,24 +44,6 @@ export function Search() {
     const arr = suggestions.map((v, i) => ({ id: i, name: v.name }))
     setSuggestionItems(arr)
   }, [suggestions])
-
-  useEffect(() => {
-    if (!map) return
-    if (suggestionPlaces?.length === 0) return
-
-    const coordinates = suggestionPlaces.map(v => v.coordinate)
-
-    if (coordinates.length > 1) {
-      let be = boundingExtent(coordinates)
-      be = transformExtent(be, get('EPSG:4326'), get('EPSG:3857'))
-      const view = map.getView()
-      view.fit(be)
-    }
-
-    if (coordinates.length === 1) {
-      moveCenter(coordinates[0][1], coordinates[0][0])
-    }
-  }, [map, suggestionPlaces])
 
   const debouncedSuggest = lodash.debounce(suggest, 300)
 

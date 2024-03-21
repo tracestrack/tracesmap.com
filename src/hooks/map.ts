@@ -17,6 +17,9 @@ import { utils } from '../utils'
 import type { MapBaseLayer, MapLanguage, MapOverlayLayer, MapStyle } from '../variables'
 import { variables } from '../variables'
 import { type SearchReturn } from '../api/search'
+import { useSuggestPlace } from './search/suggest-place'
+import { boundingExtent } from 'ol/extent'
+import { get, transformExtent } from 'ol/proj'
 
 interface useSettingsValue {
   baseLayer?: MapBaseLayer
@@ -970,6 +973,30 @@ export function useAddSearchPoint() {
   return addSearchPoint
 }
 
+export const useFitViewToSuggestionPlaces = () => {
+  const map = useMap()
+  const { moveCenter } = useControl()
+  const { suggestionPlaces } = useSuggestPlace()
+
+  useEffect(() => {
+    if (!map) return
+    if (suggestionPlaces?.length === 0) return
+
+    const coordinates = suggestionPlaces.map(v => v.coordinate)
+
+    if (coordinates.length > 1) {
+      let be = boundingExtent(coordinates)
+      be = transformExtent(be, get('EPSG:4326'), get('EPSG:3857'))
+      const view = map.getView()
+      view.fit(be)
+    }
+
+    if (coordinates.length === 1) {
+      moveCenter(coordinates[0][1], coordinates[0][0])
+    }
+  }, [map, suggestionPlaces])
+}
+
 export const map = {
   useSettings,
 
@@ -987,6 +1014,8 @@ export const map = {
 
   useSearchLayer,
   useAddSearchPoint,
+
+  useFitViewToSuggestionPlaces,
 
   useMapEvents,
 
