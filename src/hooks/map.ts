@@ -2,11 +2,12 @@ import lodash from 'lodash'
 import { Feature, Map, View } from 'ol'
 import { Attribution, Zoom } from 'ol/control'
 import { Coordinate } from 'ol/coordinate'
-import { pointerMove, click } from 'ol/events/condition'
-import { LineString, Point, MultiPoint } from 'ol/geom'
+import { pointerMove } from 'ol/events/condition'
+import { boundingExtent } from 'ol/extent'
+import { LineString, Point } from 'ol/geom'
 import { Select } from 'ol/interaction'
 import { Tile as TileLayer, Vector as VectorLayer, WebGLTile as WebGLTileLayer } from 'ol/layer'
-import { fromLonLat, transform } from 'ol/proj'
+import { fromLonLat, get, transform, transformExtent } from 'ol/proj'
 import { Vector as VectorSource, XYZ as XYZSource } from 'ol/source'
 import { Circle, Fill, Stroke, Style } from 'ol/style'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -16,10 +17,7 @@ import { state } from '../state'
 import { utils } from '../utils'
 import type { MapBaseLayer, MapLanguage, MapOverlayLayer, MapStyle } from '../variables'
 import { variables } from '../variables'
-import { type SearchReturn } from '../api/search'
 import { useSuggestPlace } from './search/suggest-place'
-import { boundingExtent } from 'ol/extent'
-import { get, transformExtent } from 'ol/proj'
 
 interface useSettingsValue {
   baseLayer?: MapBaseLayer
@@ -308,9 +306,6 @@ export function usePositionPointLayer() {
 }
 
 export function useMapEvents() {
-  const selectedNearbyPlaceMarker = useRef(null)
-  const nearbyPlaceMarkers = useRef([])
-
   const [_, addPinPosition] = usePinPosition()
   const contextMenu = useContextMenu()
 
@@ -321,7 +316,7 @@ export function useMapEvents() {
   const viewOnChangeCenter = lodash.debounce(e => {
     const v = e.target.getCenter()
     let c = transform(v, 'EPSG:3857', 'EPSG:4326')
-    setCenter([c[1].toFixed(4), c[0].toFixed(4)])
+    setCenter([Number(c[1].toFixed(4)), Number(c[0].toFixed(4))])
   }, 600)
 
   const viewOnChangeResolutions = lodash.debounce(e => {
@@ -929,50 +924,6 @@ export function useSuggestionPlacesLayer() {
   return layer
 }
 
-export function useAddSearchPoint() {
-  const map = useRecoilValue(state.map.ref)
-  const searchLayer = useRecoilValue(state.map.layerRef(variables.searchLayerID))
-
-  const addSearchPoint = useCallback(
-    (arg: SearchReturn) => {
-      if (!map) return
-
-      const c = fromLonLat([Number(arg.lon), Number(arg.lat)])
-
-      const feature = new Feature({
-        geometry: new Point(c),
-      })
-
-      feature.setStyle(
-        new Style({
-          image: new Circle({
-            radius: 20,
-            fill: new Fill({
-              color: '#FFFF0099',
-            }),
-            stroke: new Stroke({
-              color: '#ff6600cc',
-              width: 2,
-            }),
-          }),
-        }),
-      )
-
-      // searchLayer.getSource().addFeature(feature)
-
-      const view = map.getView()
-      const neLL = fromLonLat([Number(arg.viewport[0][0]), Number(arg.viewport[0][1])])
-      const swLL = fromLonLat([Number(arg.viewport[1][0]), Number(arg.viewport[1][1])])
-      const points = new MultiPoint([neLL, swLL])
-
-      view.fit(points)
-    },
-    [searchLayer],
-  )
-
-  return addSearchPoint
-}
-
 export const useFitViewToSuggestionPlaces = () => {
   const map = useMap()
   const { moveCenter } = useControl()
@@ -1013,7 +964,6 @@ export const map = {
   useSuggestionPlacesLayer,
 
   useSearchLayer,
-  useAddSearchPoint,
 
   useFitViewToSuggestionPlaces,
 
