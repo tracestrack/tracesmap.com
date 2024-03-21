@@ -2,11 +2,12 @@ import lodash from 'lodash'
 import { Feature, Map, View } from 'ol'
 import { Attribution, Zoom } from 'ol/control'
 import { Coordinate } from 'ol/coordinate'
-import { pointerMove, click } from 'ol/events/condition'
-import { LineString, Point, MultiPoint } from 'ol/geom'
+import { pointerMove } from 'ol/events/condition'
+import { boundingExtent } from 'ol/extent'
+import { LineString, Point } from 'ol/geom'
 import { Select } from 'ol/interaction'
 import { Tile as TileLayer, Vector as VectorLayer, WebGLTile as WebGLTileLayer } from 'ol/layer'
-import { fromLonLat, transform } from 'ol/proj'
+import { fromLonLat, get, transform, transformExtent } from 'ol/proj'
 import { Vector as VectorSource, XYZ as XYZSource } from 'ol/source'
 import { Circle, Fill, Stroke, Style } from 'ol/style'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -16,6 +17,7 @@ import { state } from '../state'
 import { utils } from '../utils'
 import type { MapBaseLayer, MapLanguage, MapOverlayLayer, MapStyle } from '../variables'
 import { variables } from '../variables'
+import { useSuggestPlace } from './search/suggest-place'
 
 interface useSettingsValue {
   baseLayer?: MapBaseLayer
@@ -89,7 +91,6 @@ export function useMap(arg?: UseMapArg) {
   const center = transform([centerLonLat[1], centerLonLat[0]], 'EPSG:4326', 'EPSG:3857')
   const zoom = useRecoilValue(state.map.zoom)
 
-  console.log(useRecoilValue(state.map.center))
   useEffect(() => {
     if (mapRef) return
     if (!arg?.target) return
@@ -124,6 +125,7 @@ export function useBaseLayer() {
   const [directionLayer] = useRecoilState(state.map.layerRef(variables.directionLayerID))
   const [nearbyPlacesLayer] = useRecoilState(state.map.layerRef(variables.nearbyPlacesLayerID))
   const [poiPlacesLayer] = useRecoilState(state.map.layerRef(variables.poiPlacesLayerID))
+  const [suggestionPlacesLayer] = useRecoilState(state.map.layerRef(variables.suggestionPlacesLayerID))
 
   useEffect(() => {
     if (!mapRef) return
@@ -163,6 +165,7 @@ export function useBaseLayer() {
     // 5. search layer
     // 6. nearby places layer
     // 7. poi places layer
+    // 8. suggestion places layer
     if (overlayLayer) {
       mapRef.removeLayer(overlayLayer)
       mapRef.addLayer(overlayLayer)
@@ -191,6 +194,11 @@ export function useBaseLayer() {
     if (poiPlacesLayer) {
       mapRef.removeLayer(poiPlacesLayer)
       mapRef.addLayer(poiPlacesLayer)
+    }
+
+    if (suggestionPlacesLayer) {
+      mapRef.removeLayer(suggestionPlacesLayer)
+      mapRef.addLayer(suggestionPlacesLayer)
     }
 
     setBaseLayer(newBaseLayer)
@@ -298,9 +306,6 @@ export function usePositionPointLayer() {
 }
 
 export function useMapEvents() {
-  const selectedNearbyPlaceMarker = useRef(null)
-  const nearbyPlaceMarkers = useRef([])
-
   const [_, addPinPosition] = usePinPosition()
   const contextMenu = useContextMenu()
 
@@ -311,7 +316,7 @@ export function useMapEvents() {
   const viewOnChangeCenter = lodash.debounce(e => {
     const v = e.target.getCenter()
     let c = transform(v, 'EPSG:3857', 'EPSG:4326')
-    setCenter([c[1].toFixed(4), c[0].toFixed(4)])
+    setCenter([Number(c[1].toFixed(4)), Number(c[0].toFixed(4))])
   }, 600)
 
   const viewOnChangeResolutions = lodash.debounce(e => {
@@ -577,31 +582,16 @@ export function useControl() {
     view.setZoom(nextZoom)
   }
 
-  const setSearchResultPosition = (lat, lon) => {
-    if (!map) return
-
-    const c = fromLonLat([Number(lon), Number(lat)])
-
-    var f = new Feature({
-      geometry: new Point(c),
-    })
-
-    // useAddSearchPoint(f)
-  }
-
-  const setBoundingBox = (p1, p2) => {
+  const moveCenter = (lat, lon) => {
     if (!map) return
 
     const view = map.getView()
-    const neLL = fromLonLat([Number(p1.lon), Number(p1.lat)])
-    const swLL = fromLonLat([Number(p2.lon), Number(p2.lat)])
-    let points = new MultiPoint([neLL, swLL])
-
-    console.log(points)
-
-    view.fit(points)
+    const c = fromLonLat([Number(lon), Number(lat)])
+    view.setZoom(11)
+    view.setCenter(c)
   }
-  return { zoomIn, zoomOut, setSearchResultPosition, setBoundingBox }
+
+  return { zoomIn, zoomOut, moveCenter }
 }
 
 export function useSearchLayer() {
@@ -830,29 +820,132 @@ export function usePOIPlacesLayer() {
   return layer
 }
 
-export function useAddSearchPoint(feature) {
-  const searchLayer = useRecoilValue(state.map.layerRef(variables.searchLayerID))
+export function useSuggestionPlacesLayer() {
+  const [mapRef] = useRecoilState(state.map.ref)
+  const [mapSettings] = useSettings()
+  const [layer, setLayer] = useRecoilState(state.map.layerRef(variables.suggestionPlacesLayerID))
+  const suggestionPlaces = useRecoilValue(state.map.suggestionPlaces)
+  const [selectedSuggestionPlace, setSelectedSuggestionPlace] = useRecoilState(state.map.selectedSuggestionPlace)
 
-  const addSearchPoint = useCallback(() => {
-    feature.setStyle(
+  const style = useMemo(
+    () =>
       new Style({
         image: new Circle({
-          radius: 20,
-          fill: new Fill({
-            color: '#FFFF0099',
-          }),
+          radius: 7,
+          fill: new Fill({ color: '#219ebc' }),
           stroke: new Stroke({
-            color: '#ff6600cc',
+            color: 'white',
             width: 2,
           }),
         }),
       }),
-    )
-    searchLayer.getSource().addFeature(feature)
-    console.log(searchLayer)
-  }, [searchLayer])
+    [],
+  )
 
-  return [addSearchPoint]
+  const hoverStyle = useMemo(
+    () =>
+      new Style({
+        image: new Circle({
+          radius: 9,
+          fill: new Fill({ color: '#219ebc' }),
+          stroke: new Stroke({
+            color: 'white',
+            width: 2,
+          }),
+        }),
+      }),
+    [],
+  )
+
+  const suggestionPlaceMarkerHoverInteraction = useMemo(
+    () =>
+      new Select({
+        condition: pointerMove,
+        style: hoverStyle,
+      }),
+    [],
+  )
+
+  const suggestionPlaceMarkerInteractionFn = useCallback(
+    e => {
+      const id = e?.selected?.[0]?.getProperties()?.id
+      if (id == selectedSuggestionPlace?.id) return
+
+      const o = suggestionPlaces?.find(v => v.id == id)
+      if (o) setSelectedSuggestionPlace(o)
+    },
+    [suggestionPlaces, selectedSuggestionPlace],
+  )
+
+  suggestionPlaceMarkerHoverInteraction.un('select', suggestionPlaceMarkerInteractionFn)
+  suggestionPlaceMarkerHoverInteraction.on('select', suggestionPlaceMarkerInteractionFn)
+
+  useEffect(() => {
+    if (!mapRef) return
+    if (layer) return
+
+    const source = new VectorSource({
+      features: [],
+    })
+
+    const newLayer = new VectorLayer({
+      source,
+    })
+
+    mapRef.addLayer(newLayer)
+    setLayer(newLayer)
+
+    mapRef.removeInteraction(suggestionPlaceMarkerHoverInteraction)
+    mapRef.addInteraction(suggestionPlaceMarkerHoverInteraction)
+  }, [mapRef, mapSettings, layer])
+
+  useEffect(() => {
+    if (!layer) return
+
+    const source = layer.getSource()
+
+    source.forEachFeature(v => source.removeFeature(v))
+
+    const features = suggestionPlaces.map(v => {
+      const f = new Feature({
+        id: v.id,
+        geometry: new Point(fromLonLat(v.coordinate)),
+      })
+
+      if (selectedSuggestionPlace?.id == v.id) f.setStyle(hoverStyle)
+      else f.setStyle(style)
+
+      return f
+    })
+
+    source.addFeatures(features)
+  }, [layer, suggestionPlaces, selectedSuggestionPlace])
+
+  return layer
+}
+
+export const useFitViewToSuggestionPlaces = () => {
+  const map = useMap()
+  const { moveCenter } = useControl()
+  const { suggestionPlaces } = useSuggestPlace()
+
+  useEffect(() => {
+    if (!map) return
+    if (suggestionPlaces?.length === 0) return
+
+    const coordinates = suggestionPlaces.map(v => v.coordinate)
+
+    if (coordinates.length > 1) {
+      let be = boundingExtent(coordinates)
+      be = transformExtent(be, get('EPSG:4326'), get('EPSG:3857'))
+      const view = map.getView()
+      view.fit(be)
+    }
+
+    if (coordinates.length === 1) {
+      moveCenter(coordinates[0][1], coordinates[0][0])
+    }
+  }, [map, suggestionPlaces])
 }
 
 export const map = {
@@ -865,10 +958,14 @@ export const map = {
   useLanguageLayer,
   usePositionPointLayer,
   useDirectionLayer,
+
   useNearbyPlacesLayer,
-  useSearchLayer,
-  useAddSearchPoint,
   usePOIPlacesLayer,
+  useSuggestionPlacesLayer,
+
+  useSearchLayer,
+
+  useFitViewToSuggestionPlaces,
 
   useMapEvents,
 

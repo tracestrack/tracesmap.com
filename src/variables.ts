@@ -67,6 +67,7 @@ export const directionLayerID = 'direction-layer' as const
 export const searchLayerID = 'search-layer' as const
 export const nearbyPlacesLayerID = 'nearby-places-layer' as const
 export const poiPlacesLayerID = 'poi-places-layer' as const
+export const suggestionPlacesLayerID = 'suggestion-places-layer' as const
 
 const layerIDS = [baseLayerID, overlayLayerID, languageLayerID, positionPointLayerID] as const
 
@@ -112,6 +113,7 @@ export const variables = {
   searchLayerID,
   nearbyPlacesLayerID,
   poiPlacesLayerID,
+  suggestionPlacesLayerID,
 
   urlHashKeys,
 

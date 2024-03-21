@@ -3,6 +3,7 @@ import { Coordinate } from 'ol/coordinate'
 import { atom, atomFamily, selector } from 'recoil'
 import type { Direction, MapBaseLayer, MapLanguage, MapOverlayLayer, MapStyle } from '../variables'
 import { variables } from '../variables'
+import { api as apiState } from './api'
 import { effects } from './effects'
 import { url } from './url'
 
@@ -168,6 +169,16 @@ export const selectedPOIPlace = atom<Place>({
   default: null,
 })
 
+export const suggestionPlaces = atom<Place[]>({
+  key: 'map.suggestionPlaces',
+  default: [],
+})
+
+export const selectedSuggestionPlace = atom<Place>({
+  key: 'map.selectedSuggestionPlace',
+  default: null,
+})
+
 export const map = {
   baseLayer,
   overlayLayer,
@@ -189,4 +200,6 @@ export const map = {
   selectedNearbyPlace,
   poiPlaces,
   selectedPOIPlace,
+  suggestionPlaces,
+  selectedSuggestionPlace,
 }

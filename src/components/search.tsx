@@ -12,7 +12,9 @@ import {
   View,
 } from '@adobe/react-spectrum'
 import lodash from 'lodash'
-import { useEffect, useState } from 'react'
+import { MultiPoint } from 'ol/geom'
+import { fromLonLat } from 'ol/proj'
+import { useCallback, useEffect, useState } from 'react'
 import { hooks } from '../hooks'
 import { variables } from '../variables'
 import { AboutDialog } from './about-dialog'
@@ -29,8 +31,8 @@ export function Search() {
   const [directionPanelOpen, setDirectionPanelOpen] = useState(false)
   const [selectedSuggestions, setSelectedSuggestions] = useState([])
 
+  const map = hooks.map.useMap()
   const { suggest, suggestions } = hooks.search.useSuggest()
-  const { setSearchResultPosition, setBoundingBox } = hooks.map.useControl()
 
   const suggestionHidden = lodash.isEmpty(suggestionItems)
 
@@ -41,7 +43,7 @@ export function Search() {
   }, [searchText, suggestionStatus])
 
   useEffect(() => {
-    const arr = suggestions.map((v, i) => ({ id: i, name: v.display_name }))
+    const arr = suggestions.map((v, i) => ({ id: i, name: v.name }))
     setSuggestionItems(arr)
   }, [suggestions])
 
@@ -54,21 +56,27 @@ export function Search() {
     setSearchText(s)
   }
 
-  const onSelectSuggestion = s => {
-    setSuggestionStatus('off')
-    setSuggestionItems([])
+  const onSelectSuggestion = useCallback(
+    s => {
+      setSuggestionStatus('off')
+      setSuggestionItems([])
 
-    const [n] = s.values()
-    if (n === undefined) return
+      const [n] = s.values() as number[]
+      if (n === undefined) return
 
-    const { display_name, data, viewport, position } = suggestions[n]
+      const { name, boundingbox } = suggestions[n]
 
-    setSearchText(display_name)
-    setSelectedSuggestions([s])
+      setSearchText(name)
+      setSelectedSuggestions([s])
 
-    // setSearchResultPosition(position[0], position[1] );
-    setBoundingBox({ lat: viewport[0][0], lon: viewport[0][1] }, { lat: viewport[1][0], lon: viewport[1][1] })
-  }
+      if (!map) return
+      const tl = fromLonLat([Number(boundingbox[2]), Number(boundingbox[0])])
+      const br = fromLonLat([Number(boundingbox[3]), Number(boundingbox[1])])
+      let ext = new MultiPoint([tl, br])
+      map.getView().fit(ext)
+    },
+    [map, suggestions],
+  )
 
   return (
     <Flex
