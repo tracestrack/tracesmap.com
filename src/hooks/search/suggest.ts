@@ -5,7 +5,7 @@ import { variables, type SearchServiceKey } from '../../variables'
 import { useSuggestPlace } from './suggest-place'
 
 export function useSuggest() {
-  const [suggestions, setSuggestions] = useRecoilState(state.api.suggestion)
+  const [suggestions, setSuggestions] = useRecoilState(state.api.suggestions)
 
   const { setSuggestionPlaces, reset: resetSuggestionPlaces } = useSuggestPlace()
 
