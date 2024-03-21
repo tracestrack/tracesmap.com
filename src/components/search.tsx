@@ -64,7 +64,7 @@ export function Search() {
       const [n] = s.values() as number[]
       if (n === undefined) return
 
-      const { name, lat, lon, boundingbox } = suggestions[n]
+      const { name, boundingbox } = suggestions[n]
 
       setSearchText(name)
       setSelectedSuggestions([s])
