@@ -32,10 +32,10 @@ const suggestion = z.object({
       state: z.string().optional(),
     })
     .optional(),
-  boundingbox: z.array(z.string()).optional(),
+  boundingbox: z.array(z.number()).optional(),
   name: z.string(),
-  lat: z.string(),
-  lon: z.string(),
+  lat: z.number(),
+  lon: z.number(),
   type: suggestionType,
 })
 
@@ -65,14 +65,15 @@ export async function search(o: SearchParams, s: SearchServiceKey = 'openstreetm
       r = d?.map(
         ({ display_name, boundingbox, lat, lon, osm_id }) =>
           ({
-            boundingbox: boundingbox?.map(v => String(v)),
+            boundingbox: boundingbox?.map(v => parseFloat(v)),
             name: display_name,
-            lat: String(lat),
-            lon: String(lon),
+            lat: parseFloat(lat),
+            lon: parseFloat(lon),
             id: String(osm_id),
             type: 'openstreetmap',
           }) as Suggestions[number],
       )
+      console.log(r)
     }
 
     if (s === suggestionType.enum.tomtom) {
@@ -80,18 +81,19 @@ export async function search(o: SearchParams, s: SearchServiceKey = 'openstreetm
         ({ address, position, id, viewport }) =>
           ({
             boundingbox: [
-              String(viewport.btmRightPoint.lat),
-              String(viewport.topLeftPoint.lat),
-              String(viewport.btmRightPoint.lon),
-              String(viewport.topLeftPoint.lat),
+              viewport.btmRightPoint.lat,
+              viewport.topLeftPoint.lat,
+              viewport.btmRightPoint.lon,
+              viewport.topLeftPoint.lon,
             ],
             name: address?.freeformAddress,
-            lat: String(position?.lat),
-            lon: String(position.lon),
+            lat: position.lat,
+            lon: position.lon,
             id: String(id),
             type: 'tomtom',
           }) as Suggestions[number],
       )
+      console.log(r)
     }
 
     suggestions.parse(r)
