@@ -14,3 +14,4 @@
 !tsconfig.json
 !vite.config.js
 !README.md
+!build.sh
