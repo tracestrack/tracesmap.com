@@ -78,10 +78,6 @@ function getBaseLayerSourceUrl(s: MapBaseLayer) {
 function getOverlayLayerSourceUrl(s: MapOverlayLayer) {
   const o: Record<typeof s, string> = {
     none: '',
-    bicycle: constants.BICYCLE_SOURCE_URL,
-    subway: constants.SUBWAY_SOURCE_URL,
-    bus: constants.BUS_SOURCE_URL,
-    train: constants.TRAIN_SOURCE_URL,
     traffic: constants.TRAFFIC_SOURCE_URL,
     'orm-infra': constants.ORM_INFRA_SOURCE_URL,
     'orm-speed': constants.ORM_SPEED_SOURCE_URL,

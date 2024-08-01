@@ -10,18 +10,6 @@ export const SATELLITE_SOURCE_URL =
 export const TOPO_SOURCE_URL =
   import.meta.env.VITE_TOPO_SOURCE_URL ||
   'https://tile.tracestrack.com/topo/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'
-export const BUS_SOURCE_URL =
-  import.meta.env.VITE_BUS_SOURCE_URL ||
-  'https://tile.tracestrack.com/bus-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'
-export const BICYCLE_SOURCE_URL =
-  import.meta.env.VITE_BICYCLE_SOURCE_URL ||
-  'https://tile.tracestrack.com/bicycle-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'
-export const SUBWAY_SOURCE_URL =
-  import.meta.env.VITE_SUBWAY_SOURCE_URL ||
-  'https://tile.tracestrack.com/subway-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'
-export const TRAIN_SOURCE_URL =
-  import.meta.env.VITE_TRAIN_SOURCE_URL ||
-  'https://tile.tracestrack.com/train-route/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'
 export const ORM_INFRA_SOURCE_URL =
   import.meta.env.VITE_ORM_INFRA_SOURCE_URL || 'https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png'
 export const ORM_SPEED_SOURCE_URL =
@@ -45,10 +33,6 @@ export const PLACE_API_URL = 'https://lz4.overpass-api.de/api/interpreter'
 export const POI_API_URL = ''
 
 export const constants = {
-  BUS_SOURCE_URL,
-  BICYCLE_SOURCE_URL,
-  SUBWAY_SOURCE_URL,
-  TRAIN_SOURCE_URL,
   ORM_INFRA_SOURCE_URL,
   ORM_SPEED_SOURCE_URL,
   TRAFFIC_SOURCE_URL,

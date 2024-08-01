@@ -28,17 +28,7 @@ export const mapLanguages = [
   'zh-hant-name',
 ] as const
 
-export const mapOverlayLayers = [
-  'none',
-  'bicycle',
-  'subway',
-  'bus',
-  'train',
-  'traffic',
-  'orm-infra',
-  'orm-speed',
-  'gps',
-] as const
+export const mapOverlayLayers = ['none', 'traffic', 'orm-infra', 'orm-speed', 'gps'] as const
 export const mapBaseLayers = ['base', 'street', 'satellite', 'topo'] as const
 
 export const mapStyles = ['normal', 'grayscale', 'vivid', 'dark'] as const
