@@ -106,7 +106,7 @@ export function useMap(arg?: UseMapArg) {
       target: arg.target,
       maxTilesLoading: 40,
       view,
-      controls: [new Attribution({ collapsible: true }), new Zoom({ className: 'zoomControl' })],
+      controls: [new Attribution({ collapsible: true })],
     })
 
     setMapRef(map)
@@ -152,7 +152,7 @@ export function useBaseLayer() {
     })
 
     if (baseLayer) mapRef.removeLayer(baseLayer)
-    if (mapSettings.baseLayer === 'satellite') {
+    if (mapSettings.baseLayer === 'satellite' || mapSettings.baseLayer === 'transport') {
       mapRef.addLayer(newBaseLayer)
     }
 
@@ -223,6 +223,8 @@ export function useLanguageLayer() {
       mapLanguageLayerSourceUrl = mapLanguageLayerSourceUrl.replace('-name', '')
     } else if (mapSettings.baseLayer === 'topo') {
       mapLanguageLayerSourceUrl = mapLanguageLayerSourceUrl.replace('-name', '').replace('.com/', '.com/topo_')
+    } else if (mapSettings.baseLayer === 'transport') {
+      mapLanguageLayerSourceUrl = ''
     }
 
     const langLayerSourceOptions = {
@@ -243,7 +245,9 @@ export function useLanguageLayer() {
     })
 
     mapRef.removeLayer(languageLayer)
-    mapRef.addLayer(newLanguageLayer)
+    if (mapLanguageLayerSourceUrl !== '') {
+      mapRef.addLayer(newLanguageLayer)
+    }
 
     setLanguageLayer(newLanguageLayer)
   }, [mapSettings.baseLayer, mapSettings.language, mapSettings.style, mapRef])

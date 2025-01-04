@@ -89,4 +89,5 @@ const mapBaseLayer: Partial<Record<MapBaseLayer, string>> = {
   street: 'Street',
   satellite: 'Satellite',
   topo: 'Topo',
+  transport: 'Transport',
 }

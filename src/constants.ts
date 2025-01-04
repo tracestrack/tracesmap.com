@@ -10,6 +10,9 @@ export const SATELLITE_SOURCE_URL =
 export const TOPO_SOURCE_URL =
   import.meta.env.VITE_TOPO_SOURCE_URL ||
   'https://tile.tracestrack.com/topo/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'
+export const TRANSPORT_SOURCE_URL =
+  import.meta.env.VITE_TRANSPORTS_SOURCE_URL ||
+  'https://tile.tracestrack.com/transport/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'
 export const ORM_INFRA_SOURCE_URL =
   import.meta.env.VITE_ORM_INFRA_SOURCE_URL || 'https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png'
 export const ORM_SPEED_SOURCE_URL =
@@ -41,6 +44,7 @@ export const constants = {
   STREET_SOURCE_URL,
   SATELLITE_SOURCE_URL,
   TOPO_SOURCE_URL,
+  TRANSPORT_SOURCE_URL,
   LANGUAGE_SOURCE_URL,
 
   SEARCH_API_URL_OPENSTREETMAP,

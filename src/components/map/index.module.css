@@ -7,15 +7,6 @@
   width: 100%;
 }
 
-.control-zoom {
-  display: none;
-}
-
-.zoomControl {
-  right: 8px;
-  bottom: 86px;
-}
-
 .ol-control button {
   background: #ffffffcc;
   color: black;
