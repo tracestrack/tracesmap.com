@@ -70,7 +70,6 @@ function getBaseLayerSourceUrl(s: MapBaseLayer) {
     street: constants.STREET_SOURCE_URL,
     satellite: constants.SATELLITE_SOURCE_URL,
     topo: constants.TOPO_SOURCE_URL,
-    transport: constants.TRANSPORT_SOURCE_URL,
   }
 
   return o[s]

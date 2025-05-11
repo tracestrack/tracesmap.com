@@ -114,7 +114,7 @@ export function Search() {
               width="100%"
               isHidden={suggestionHidden}
               position="absolute"
-              backgroundColor="gray-100"
+              backgroundColor="static-white"
               borderRadius="regular"
               marginTop="size-50"
             >
