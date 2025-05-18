@@ -1,15 +1,15 @@
 export const BASE_SOURCE_URL =
   import.meta.env.VITE_BASE_SOURCE_URL ||
-  'https://tile.tracestrack.com/base/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'
+  'https://tile.tracestrack.com/base/{z}/{x}/{y}.webp?key=710cc921fda7d757cc9b0aecd40ad3be'
 export const STREET_SOURCE_URL =
   import.meta.env.VITE_STREET_SOURCE_URL ||
-  'https://tile.tracestrack.com/base/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'
+  'https://tile.tracestrack.com/base/{z}/{x}/{y}.webp?key=710cc921fda7d757cc9b0aecd40ad3be'
 export const SATELLITE_SOURCE_URL =
   import.meta.env.VITE_SATELLITE_SOURCE_URL ||
   'https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.jpg90?access_token=pk.eyJ1Ijoic3Ryb25nd2lsbG93IiwiYSI6ImxKa2R1SEkifQ.iZ_vj1lvuvrAcUIl0ZE5XA'
 export const TOPO_SOURCE_URL =
   import.meta.env.VITE_TOPO_SOURCE_URL ||
-  'https://tile.tracestrack.com/topo/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be'
+  'https://tile.tracestrack.com/topo/{z}/{x}/{y}.webp?key=710cc921fda7d757cc9b0aecd40ad3be'
 export const ORM_INFRA_SOURCE_URL =
   import.meta.env.VITE_ORM_INFRA_SOURCE_URL || 'https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png'
 export const ORM_SPEED_SOURCE_URL =
@@ -21,7 +21,7 @@ export const GPS_SOURCE_URL =
   import.meta.env.VITE_GPS_SOURCE_URL || 'https://gps.tile.openstreetmap.org/lines/{z}/{x}/{y}.png'
 export const LANGUAGE_SOURCE_URL =
   import.meta.env.VITE_LANGUAGE_SOURCE_URL ||
-  'https://tile.tracestrack.com/{language}/{z}/{x}/{y}.png?key=710cc921fda7d757cc9b0aecd40ad3be&style'
+  'https://tile.tracestrack.com/{language}/{z}/{x}/{y}.webp?key=710cc921fda7d757cc9b0aecd40ad3be&style'
 
 export const SEARCH_API_URL_OPENSTREETMAP =
   import.meta.env.VITE_SEARCH_API_URL_OPENSTREETMAP || 'https://nominatim.openstreetmap.org/search?q={q}&format=json'
